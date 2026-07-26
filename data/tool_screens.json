@@ -1,0 +1,102 @@
+{
+  "TOOL_ACT1_SCENE03B_PESTLE": {
+    "toolId": "TOOL_ACT1_SCENE03B_PESTLE",
+    "sourceScene": "ACT1_SCENE03B",
+    "type": "sort_into_buckets",
+    "instructions": "Sort each factor into the category it belongs to.",
+    "buckets": [
+      "Political",
+      "Economic",
+      "Social",
+      "Technological",
+      "Legal",
+      "Environmental"
+    ],
+    "cards": [
+      {
+        "id": "card_funding_incentives",
+        "text": "Government funding incentives for UK pharmaceutical manufacturing",
+        "correctBucket": "Political"
+      },
+      {
+        "id": "card_steel_shortage",
+        "text": "Global shortages of specialist stainless steel",
+        "correctBucket": "Economic"
+      },
+      {
+        "id": "card_ageing_population",
+        "text": "Growing UK demand for the medicine due to an ageing population",
+        "correctBucket": "Social"
+      },
+      {
+        "id": "card_cleanroom_automation",
+        "text": "New cleanroom automation technology now available from UK suppliers",
+        "correctBucket": "Technological"
+      },
+      {
+        "id": "card_mhra_licensing",
+        "text": "MHRA introducing stricter licensing requirements for new facilities",
+        "correctBucket": "Legal"
+      },
+      {
+        "id": "card_env_regulation",
+        "text": "New environmental regulations affecting construction",
+        "correctBucket": "Environmental"
+      }
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Card gently bounces back to the pool. No trust or score penalty — player can pick it up and try again immediately."
+    },
+    "selectionBehavior": "tap_to_select_then_tap_bucket",
+    "selectedCardStyle": "Card visibly recolors/highlights while selected, reverts once placed or deselected.",
+    "completionCondition": "All 6 cards placed in their correctBucket",
+    "onComplete": {
+      "nextScene": "ACT1_SCENE04"
+    }
+  },
+  "TOOL_ACT1_SCENE04_SWOT": {
+    "toolId": "TOOL_ACT1_SCENE04_SWOT",
+    "sourceScene": "ACT1_SCENE04",
+    "type": "sort_into_buckets",
+    "instructions": "Sort each factor into the category it belongs to.",
+    "buckets": [
+      "Strength",
+      "Weakness",
+      "Opportunity",
+      "Threat"
+    ],
+    "cards": [
+      {
+        "id": "card_provisional_approval",
+        "text": "Helix already holds provisional regulatory approval for the medicine",
+        "correctBucket": "Strength"
+      },
+      {
+        "id": "card_team_unfamiliar",
+        "text": "The delivery team hasn't worked together before this week",
+        "correctBucket": "Weakness"
+      },
+      {
+        "id": "card_further_contracts",
+        "text": "Securing the NHS contract would open the door to further government contracts",
+        "correctBucket": "Opportunity"
+      },
+      {
+        "id": "card_competitor_race",
+        "text": "A competitor is racing to build similar capacity first",
+        "correctBucket": "Threat"
+      }
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Card gently bounces back to the pool. No trust or score penalty — player can pick it up and try again immediately."
+    },
+    "selectionBehavior": "tap_to_select_then_tap_bucket",
+    "selectedCardStyle": "Card visibly recolors/highlights while selected, reverts once placed or deselected.",
+    "completionCondition": "All 4 cards placed in their correctBucket",
+    "onComplete": {
+      "nextScene": "ACT1_SCENE05"
+    }
+  }
+}

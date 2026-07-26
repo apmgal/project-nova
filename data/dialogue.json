@@ -6,7 +6,8 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Reception. The lobby smells like new carpet over an old building. A wall of awards, none dated later than eighteen months ago."
+        "text": "Reception. The lobby smells like new carpet over an old building. A wall of awards, none dated later than eighteen months ago.",
+        "background": "reception"
       },
       {
         "speaker": "joan",
@@ -36,7 +37,8 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Marcus is waiting, door open. He doesn't get up."
+        "text": "Marcus is waiting, door open. He doesn't get up.",
+        "background": "marcus_office"
       },
       {
         "speaker": "marcus",
@@ -78,7 +80,8 @@
       {
         "speaker": "marcus",
         "emotion": "frustrated",
-        "text": "That's not important right now."
+        "text": "That's not important right now.",
+        "background": "marcus_office"
       },
       {
         "speaker": "narrator",
@@ -100,7 +103,8 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Good. Start wherever you like. Emails, Teams, the shared drive — it's all a mess, take your pick."
+        "text": "Good. Start wherever you like. Emails, Teams, the shared drive — it's all a mess, take your pick.",
+        "background": "marcus_office"
       },
       {
         "speaker": "narrator",
@@ -127,7 +131,8 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Fine. That's the external picture. What about us?"
+        "text": "Fine. That's the external picture. What about us?",
+        "background": "marcus_office"
       },
       {
         "speaker": "narrator",
@@ -138,11 +143,6 @@
         "speaker": "marcus",
         "emotion": "concerned",
         "text": "Strengths, weaknesses, opportunities, threats. Yours to fill in. Don't flatter us."
-      },
-      {
-        "speaker": "narrator",
-        "emotion": null,
-        "text": "[Player builds the SWOT.]"
       },
       {
         "speaker": "narrator",
@@ -164,7 +164,8 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You go looking for the original Business Case to check it against what you've found. The main document opens fine. The appendices don't exist."
+        "text": "You go looking for the original Business Case to check it against what you've found. The main document opens fine. The appendices don't exist.",
+        "background": "player_desk"
       },
       {
         "speaker": "narrator",
@@ -201,7 +202,8 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "So. What's your diagnosis?"
+        "text": "So. What's your diagnosis?",
+        "background": "marcus_office"
       }
     ],
     "needsWriting": false
@@ -1525,7 +1527,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "Three hundred and forty-one unread. Ellis stopped answering two weeks before he left.",
-        "condition": "investigated_emails"
+        "condition": "investigated_emails",
+        "background": "player_desk"
       },
       {
         "speaker": "narrator",
@@ -1542,7 +1545,8 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Well? What have you found?"
+        "text": "Well? What have you found?",
+        "background": "marcus_office"
       }
     ],
     "needsWriting": false
@@ -1554,7 +1558,8 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "Tomorrow's Board meeting isn't routine. They want to know if anything's changed outside these walls since the business case was approved."
+        "text": "Tomorrow's Board meeting isn't routine. They want to know if anything's changed outside these walls since the business case was approved.",
+        "background": "marcus_office"
       },
       {
         "speaker": "narrator",
@@ -1579,11 +1584,6 @@
     "sourceScene": "ACT1_SCENE03B",
     "lines": [
       {
-        "speaker": "narrator",
-        "emotion": null,
-        "text": "[Player tags PESTLE factors: new environmental regulations affecting construction, global shortages of specialist stainless steel, government funding incentives for UK pharmaceutical manufacturing, and demographic-driven demand growth.]"
-      },
-      {
         "speaker": "marcus",
         "emotion": "neutral",
         "text": "...That's more than I expected you to find in a day."
@@ -1598,7 +1598,8 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Good enough to start with."
+        "text": "Good enough to start with.",
+        "background": "marcus_office"
       },
       {
         "speaker": "narrator",

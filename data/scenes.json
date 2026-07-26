@@ -98,7 +98,8 @@
     "nextScenes": [
       "ACT1_SCENE05"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT1_SCENE04_SWOT"
   },
   "ACT1_SCENE05": {
     "sceneId": "ACT1_SCENE05",
@@ -878,7 +879,8 @@
       "ACT1_SCENE04"
     ],
     "needsWriting": false,
-    "note": "Non-canonical bridge scene — the interactive tool screen for the PESTLE beat."
+    "note": "Non-canonical bridge scene — the interactive tool screen for the PESTLE beat.",
+    "toolId": "TOOL_ACT1_SCENE03B_PESTLE"
   },
   "ACT1_SCENE06B": {
     "sceneId": "ACT1_SCENE06B",
@@ -988,5 +990,30 @@
     ],
     "needsWriting": false,
     "note": "Non-canonical bridge scene — second/third monthly status report in the x3 sequence."
+  },
+  "ACT1_SCENE02B": {
+    "sceneId": "ACT1_SCENE02B",
+    "title": "Deflection (bridge scene)",
+    "act": "Act 1",
+    "screenRange": "bridge",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "N/A — narrative branch, not a PM tool beat",
+    "contentSummary": "Marcus deflects the direct question about Ellis and redirects the player back to the investigation.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02B",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE01"
+    },
+    "nextScenes": [
+      "ACT1_SCENE02"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — reached only via ACT1_SCENE01's 'Just tell me what happened to Ellis' choice, then rejoins the main path at ACT1_SCENE02."
   }
 }

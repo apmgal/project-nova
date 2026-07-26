@@ -66,7 +66,10 @@
     "main_menu": "main_menu_theme.mp3"
   },
   "backgrounds": {
-    "note": "Placeholder — pair with Facility Progress shots in world_memory.json",
+    "note": "reception and marcus_office are real art; the rest below are still placeholder names — assign real files when available. Engine carries forward the last background shown; only lines that CHANGE the background need this field set.",
+    "reception": "bg_reception.jpg",
+    "marcus_office": "bg_marcus_office.jpg",
+    "player_desk": "bg_player_desk.png",
     "warehouse_week1": "warehouse_week1_empty.png",
     "warehouse_week5": "warehouse_week5_steel_frame.png",
     "warehouse_week9": "warehouse_week9_cleanrooms.png",
