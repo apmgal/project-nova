@@ -1,0 +1,92 @@
+{
+  "deliveryStructure": [
+    {
+      "beat": "Inspection Ends",
+      "whatHappens": "Inspector Whitfield concludes the audit and leaves without a verdict",
+      "withheld": "No immediate score, no immediate reaction from any character"
+    },
+    {
+      "beat": "The Waiting",
+      "whatHappens": "The office sits in silence — a scripted cinematic with no interaction, deliberately uncomfortable in its stillness",
+      "withheld": "No dialogue options, no way to speed it up or ask what happened"
+    },
+    {
+      "beat": "The Phone Call",
+      "whatHappens": "The phone rings. Marcus answers. He doesn't speak. He slowly smiles.",
+      "withheld": "No confirmation of what the smile means — batch release and contract outcome are still withheld"
+    },
+    {
+      "beat": "\"Three Weeks Later\"",
+      "whatHappens": "Hard cut forward. The facility is now shown fully operational (Facility Progress final reel). Consequences of the inspection finally play out.",
+      "withheld": "This is the first point any outcome is confirmed"
+    },
+    {
+      "beat": "Personalised Ending",
+      "whatHappens": "One of the 8 endings below plays, using the same composite scoring model as v1 (Tab 3 in v1 / carried forward unchanged)",
+      "withheld": "—"
+    },
+    {
+      "beat": "Ellis Grant Epilogue (END-8, if unlocked)",
+      "whatHappens": "Full reveal of Ellis's final notebook entry / unsent status report, layered onto whichever primary ending played",
+      "withheld": "—"
+    }
+  ],
+  "endings": {
+    "END-1": {
+      "endingId": "END-1",
+      "name": "Triumphant Launch",
+      "triggerCondition": "Overall Verdict 80–100, Regulatory Readiness ≥ 80",
+      "narrativeSummary": "The batch (or both batches, if BIG-01 was handled well) is released cleanly and the NHS contract is confirmed. Marcus privately admits the project nearly broke Ellis in the same seat — an offer of succession, not just closure.",
+      "tone": "Earned, warm, quietly bittersweet about Ellis"
+    },
+    "END-2": {
+      "endingId": "END-2",
+      "name": "Pyrrhic Victory",
+      "triggerCondition": "Overall Verdict 60–79, Budget Remaining < 10%",
+      "narrativeSummary": "Contract secured, but the cost is visible — Daniel notes the margin is thinner than promised, and the team is visibly depleted in the control-room scene.",
+      "tone": "Success shadowed by cost"
+    },
+    "END-3": {
+      "endingId": "END-3",
+      "name": "Contract Lost, Lesson Learned",
+      "triggerCondition": "Overall Verdict 40–59, Schedule Health < 40",
+      "narrativeSummary": "The batch is fine but arrives too late — a competitor wins the contract. Marcus is disappointed but respects the player's honesty, leaving the door open for a future project.",
+      "tone": "Sober, not punishing"
+    },
+    "END-4": {
+      "endingId": "END-4",
+      "name": "Batch Rejected — Redemption Arc",
+      "triggerCondition": "Overall Verdict 40–59, Regulatory Readiness ≥ 60",
+      "narrativeSummary": "The first batch is rejected on a quality technicality, but the strong documentation trail means the root cause is found fast and a second batch succeeds within weeks.",
+      "tone": "Setback overcome through good governance"
+    },
+    "END-5": {
+      "endingId": "END-5",
+      "name": "Batch Rejected — Project Paused",
+      "triggerCondition": "Overall Verdict 20–39, Regulatory Readiness < 40",
+      "narrativeSummary": "The batch is rejected and the evidence trail is too thin to diagnose quickly. The Board pauses the programme pending external review. The player is reassigned — an explicit mirror of Ellis's fate.",
+      "tone": "Consequential, not villainised"
+    },
+    "END-6": {
+      "endingId": "END-6",
+      "name": "Politically Undermined",
+      "triggerCondition": "Marcus Trust OR Camille Trust at Cold band by Act 6, regardless of Delivery Score",
+      "narrativeSummary": "The physical build succeeds but the political battle is lost — a rival executive uses the friction to have the player quietly moved off the project just before launch, exactly as happened to Ellis.",
+      "tone": "The game's core thesis made explicit"
+    },
+    "END-7": {
+      "endingId": "END-7",
+      "name": "The Whistleblower Ending",
+      "triggerCondition": "Stakeholder Goodwill falls to its lowest band at any point in Act 4",
+      "narrativeSummary": "Unresolved external concerns (e.g. an unanswered social media safety claim) escalate into a formal external investigation that overtakes the project's own timeline.",
+      "tone": "Tense, cautionary"
+    },
+    "END-8": {
+      "endingId": "END-8",
+      "name": "Ellis Grant's Understanding",
+      "triggerCondition": "Epilogue — unlocked whenever all 6 notebook fragments are found; layers onto whichever primary ending played",
+      "narrativeSummary": "The player reads Ellis's final, unsent status report. Ellis wasn't a bad PM — they carried the exact same pressures the player just survived, alone, for far longer. The core lesson lands explicitly: PM isn't about perfect answers, it's about informed decisions under uncertainty, made by people who don't always agree with you.",
+      "tone": "Reflective, empathetic — the emotional capstone"
+    }
+  }
+}

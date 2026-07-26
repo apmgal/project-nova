@@ -1,0 +1,77 @@
+{
+  "characters": {
+    "marcus": {
+      "neutral": "marcus_neutral.jpg",
+      "concerned": "marcus_displeased.jpg",
+      "frustrated": "marcus_displeased.jpg",
+      "warm": "marcus_pleased.jpg"
+    },
+    "camille": {
+      "neutral": "camille.jpg",
+      "concerned": "camille.jpg",
+      "serious": "camille.jpg",
+      "warm": "camille.jpg"
+    },
+    "vaughn": {
+      "neutral": "vaughn.jpg",
+      "warm": "vaughn.jpg",
+      "frustrated": "vaughn.jpg"
+    },
+    "daniel": {
+      "neutral": "daniel_neutral.png",
+      "concerned": "daniel_concerned.png",
+      "warm": "daniel_warm.png"
+    },
+    "priya": {
+      "neutral": "priya.jpg",
+      "worried": "priya.jpg",
+      "frustrated": "priya.jpg",
+      "warm": "priya.jpg"
+    },
+    "tomasz": {
+      "neutral": "tomasz_neutral.png",
+      "concerned": "tomasz_concerned.png"
+    },
+    "aisha": {
+      "neutral": "aisha_neutral.png",
+      "serious": "aisha_serious.png",
+      "warm": "aisha_warm.png"
+    },
+    "joan": {
+      "neutral": "joan_neutral.png"
+    },
+    "whitfield": {
+      "neutral": "whitfield_neutral.png"
+    },
+    "steritech_rep": {
+      "neutral": "steritech_rep_neutral.png"
+    },
+    "rapidform_rep": {
+      "neutral": "rapidform_rep_neutral.png"
+    },
+    "pharmacraft_rep": {
+      "neutral": "pharmacraft_rep_neutral.png"
+    }
+  },
+  "music": {
+    "note": "main_menu_theme.mp3 is real; all other tracks below are still placeholder names — assign real files when available.",
+    "act1_investigation": "act1_investigation.mp3",
+    "act2_political": "act2_political.mp3",
+    "act3_build": "act3_build.mp3",
+    "act4_crisis": "act4_crisis.mp3",
+    "act4_big_curveball_sting": "big_curveball_sting.mp3",
+    "act5_inspection": "act5_inspection.mp3",
+    "act5_the_waiting": "the_waiting_silence.mp3",
+    "act6_resolution": "act6_resolution.mp3",
+    "main_menu": "main_menu_theme.mp3"
+  },
+  "backgrounds": {
+    "note": "Placeholder — pair with Facility Progress shots in world_memory.json",
+    "warehouse_week1": "warehouse_week1_empty.png",
+    "warehouse_week5": "warehouse_week5_steel_frame.png",
+    "warehouse_week9": "warehouse_week9_cleanrooms.png",
+    "warehouse_week14": "warehouse_week14_equipment.png",
+    "warehouse_week20": "warehouse_week20_operators.png",
+    "warehouse_week24": "warehouse_week24_medicine.png"
+  }
+}

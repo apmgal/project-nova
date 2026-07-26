@@ -1,0 +1,224 @@
+[
+  {
+    "id": "recurring_monday_coffee_machine",
+    "category": "recurring_moment",
+    "description": "Five lines of throwaway dialogue with whichever character is around — usually Priya",
+    "frequency": "Weekly beat, roughly once per act",
+    "conditionalVariation": "Tone shifts with relationship band; can disappear entirely if a character's trust is Cold",
+    "mechanicalWeight": "None — purely emotional",
+    "triggered": false
+  },
+  {
+    "id": "recurring_site_walk_through_waves",
+    "category": "recurring_moment",
+    "description": "Workers wave and greet the player by name",
+    "frequency": "Every time the player crosses the construction floor",
+    "conditionalVariation": "Stop waving if overall Reputation is poor or Vaughn's trust is Cold/Cool",
+    "mechanicalWeight": "None — visual/audio only",
+    "triggered": false
+  },
+  {
+    "id": "recurring_random_office_events",
+    "category": "recurring_moment",
+    "description": "Marcus brings breakfast; Camille wins an industry award; Priya's lunch is stolen and she's irrationally annoyed about it",
+    "frequency": "Scattered, roughly one per act, non-scheduled",
+    "conditionalVariation": "Some variants require a minimum trust band to appear at all (e.g. Marcus won't bring breakfast to a Cold relationship)",
+    "mechanicalWeight": "None — pure world-building",
+    "triggered": false
+  },
+  {
+    "id": "recurring_joans_greeting",
+    "category": "recurring_moment",
+    "description": "One line, tonally variable",
+    "frequency": "Every visit to the building",
+    "conditionalVariation": "Directly reflects the player's current Reputation tag without any dialogue tree",
+    "mechanicalWeight": "None — cheapest, clearest signal of standing",
+    "triggered": false
+  },
+  {
+    "id": "recurring_ellis_grant_notebook_fragments",
+    "category": "recurring_moment",
+    "description": "Handwritten notes revealing PM judgement calls Ellis made",
+    "frequency": "One per act (6 total), plus the full epilogue in Act 6",
+    "conditionalVariation": "At least one fragment is later proven wrong by events — deliberate, reinforces 'no perfect PM'",
+    "mechanicalWeight": "Unlocks END-8 epilogue if all 6 are found",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_1",
+    "category": "ellis_fragment",
+    "actFound": "Act 1",
+    "notebookLine": "\"They want a plan. What they need is someone who'll tell them the truth before it's too late.\"",
+    "laterProven": "Right — foreshadows the whole game",
+    "narrativeFunction": "Plants \"why did Ellis really leave?\"",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_2",
+    "category": "ellis_fragment",
+    "actFound": "Act 2",
+    "notebookLine": "\"Marcus doesn't want certainty. He wants confidence.\"",
+    "laterProven": "Right — pays off across Act 2–4 status reporting",
+    "narrativeFunction": "Reframes what 'good' governance communication looks like",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_3",
+    "category": "ellis_fragment",
+    "actFound": "Act 3",
+    "notebookLine": "\"If Vaughn says a name's gone quiet, that name is already gone.\"",
+    "laterProven": "Right — foreshadows EV-06",
+    "narrativeFunction": "Rewards players who log the Act 2 contractor risk formally",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_4",
+    "category": "ellis_fragment",
+    "actFound": "Act 4 (pre-BIG-01)",
+    "notebookLine": "\"Scope only ever grows. Budget for that, not for the plan you were given.\"",
+    "laterProven": "Right, dramatically — validated hardest by BIG-01",
+    "narrativeFunction": "Retroactively reframes EV-R2 as something Ellis half-predicted",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_5",
+    "category": "ellis_fragment",
+    "actFound": "Act 4 (post-BIG-01)",
+    "notebookLine": "\"Camille will never be the problem. She'll be the only one still standing when there is one.\"",
+    "laterProven": "Right, but only if the player actually built trust with her",
+    "narrativeFunction": "Foreshadows EV-R3 without guaranteeing it",
+    "triggered": false
+  },
+  {
+    "id": "ellis_fragment_6",
+    "category": "ellis_fragment",
+    "actFound": "Act 5",
+    "notebookLine": "\"I thought if I just held the line long enough, it would hold itself. It didn't.\"",
+    "laterProven": "Wrong, or at least incomplete — Ellis's own downfall in his words",
+    "narrativeFunction": "Humanises Ellis right before the inspection; sets up the Act 6 full reveal",
+    "triggered": false
+  },
+  {
+    "id": "callback_marcus_never_surprise_me",
+    "category": "callback",
+    "character": "Marcus",
+    "plantedLine": "\"Never surprise me.\"",
+    "plantedAt": "Act 1, screen 16–18",
+    "payoffLine": "\"I asked for one thing.\"",
+    "payoffTrigger": "Fires if the player hides a known problem from Marcus in a status report",
+    "triggered": false
+  },
+  {
+    "id": "callback_marcus_youre_the_pm_who_always_wants_",
+    "category": "callback",
+    "character": "Marcus",
+    "plantedLine": "\"You're the PM who always wants another meeting.\"",
+    "plantedAt": "Emerges from repeated behaviour, not a single planted line",
+    "payoffLine": "Same line, said with warmth once the player starts deciding faster",
+    "payoffTrigger": "Reputation tag shift from \"always asks for another meeting\" to a different tag",
+    "triggered": false
+  },
+  {
+    "id": "callback_vaughn_vaughn_mentions_his_daughter_h",
+    "category": "callback",
+    "character": "Vaughn",
+    "plantedLine": "Vaughn mentions his daughter has just joined Helix",
+    "plantedAt": "Act 3, WBS scene",
+    "payoffLine": "His daughter appears in the Act 6 control-room crowd",
+    "payoffTrigger": "Vaughn Trust Warm+ by Act 6",
+    "triggered": false
+  },
+  {
+    "id": "callback_camille_camilles_redacted_reference_in",
+    "category": "callback",
+    "character": "Camille",
+    "plantedLine": "Camille's redacted reference in an old email thread",
+    "plantedAt": "Act 1–2, background document",
+    "payoffLine": "Camille tells the GMP warning-letter story herself",
+    "payoffTrigger": "Camille Trust reaches Warm+ and the player treats a quality concern with respect at least twice",
+    "triggered": false
+  },
+  {
+    "id": "callback_inspector_whitfield_players_own_act_2_stakeholder_",
+    "category": "callback",
+    "character": "Inspector Whitfield",
+    "plantedLine": "Player's own Act 2 stakeholder power/interest map",
+    "plantedAt": "Act 2, screen 28–29",
+    "payoffLine": "Inspector Whitfield quotes it back almost verbatim",
+    "payoffTrigger": "Always fires in Act 5 — regardless of trust state, the artefact itself persists",
+    "triggered": false
+  },
+  {
+    "id": "callback_inspector_whitfield_a_specific_status_report_claim",
+    "category": "callback",
+    "character": "Inspector Whitfield",
+    "plantedLine": "A specific status report claim (true or false)",
+    "plantedAt": "Any Act 4 status report",
+    "payoffLine": "Directly referenced as evidence (or its absence) during the MHRA inspection",
+    "payoffTrigger": "Always fires — the inspection mechanic is built entirely from the player's own history",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_1",
+    "category": "facility_progress",
+    "shotNumber": "1",
+    "week": "Week 1",
+    "visualState": "Empty warehouse",
+    "storyBeat": "Act 1 opening (screens 1–2)",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_2",
+    "category": "facility_progress",
+    "shotNumber": "2",
+    "week": "Week 5",
+    "visualState": "Steel frame going up",
+    "storyBeat": "Act 3 — WBS warehouse walk with Vaughn",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_3",
+    "category": "facility_progress",
+    "shotNumber": "3",
+    "week": "Week 9",
+    "visualState": "Cleanrooms taking shape",
+    "storyBeat": "Act 3 — Milestone Timeline scene",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_4",
+    "category": "facility_progress",
+    "shotNumber": "4",
+    "week": "Week 14",
+    "visualState": "Equipment arriving",
+    "storyBeat": "Act 3 — Procurement Pitch close",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_5",
+    "category": "facility_progress",
+    "shotNumber": "5",
+    "week": "Week 20",
+    "visualState": "Operators training on the line",
+    "storyBeat": "Act 4 — immediately undercut by BIG-01 landing",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_6",
+    "category": "facility_progress",
+    "shotNumber": "6",
+    "week": "Week 24",
+    "visualState": "Medicine on the line",
+    "storyBeat": "Act 5 — Commissioning & Training",
+    "triggered": false
+  },
+  {
+    "id": "facility_shot_final_reel",
+    "category": "facility_progress",
+    "shotNumber": "Final reel",
+    "week": "\"Three weeks later\"",
+    "visualState": "Automatic side-by-side comparison of all 6 shots",
+    "storyBeat": "Act 6 opening, screen 125",
+    "triggered": false
+  }
+]

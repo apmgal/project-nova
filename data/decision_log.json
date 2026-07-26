@@ -1,0 +1,10 @@
+{
+  "note": "This file is not populated from Excel — it's a runtime log the engine appends to during play.",
+  "schema": {
+    "decision": "string — what the player chose",
+    "chapter": "string — act/scene reference",
+    "impact": "string — narrative consequence",
+    "stakeholdersAffected": "array of character ids"
+  },
+  "log": []
+}

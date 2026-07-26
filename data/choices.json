@@ -1,0 +1,1072 @@
+{
+  "CHOICE_ACT1_SCENE01": {
+    "choiceId": "CHOICE_ACT1_SCENE01",
+    "sourceScene": "ACT1_SCENE01",
+    "options": [
+      {
+        "text": "Give me a few days to look through the documents.",
+        "effects": {
+          "marcusTrust": 5
+        },
+        "nextScene": "ACT1_SCENE02"
+      },
+      {
+        "text": "Just tell me what happened to Ellis.",
+        "effects": {
+          "marcusTrust": -5
+        },
+        "flags": {
+          "asked_about_ellis_directly": true
+        },
+        "nextScene": "ACT1_SCENE02B"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE02": {
+    "choiceId": "CHOICE_ACT1_SCENE02",
+    "sourceScene": "ACT1_SCENE02",
+    "options": [
+      {
+        "text": "Check his emails first.",
+        "effects": {
+          "regulatoryReadiness": 5
+        },
+        "flags": {
+          "investigated_emails": true
+        },
+        "nextScene": "ACT1_SCENE02R"
+      },
+      {
+        "text": "Check the Teams messages.",
+        "effects": {
+          "stakeholderGoodwill": 5
+        },
+        "flags": {
+          "investigated_teams": true
+        },
+        "nextScene": "ACT1_SCENE02R"
+      },
+      {
+        "text": "Check the shared drive.",
+        "effects": {
+          "regulatoryReadiness": 5
+        },
+        "flags": {
+          "investigated_drive": true,
+          "found_draft_folder": true
+        },
+        "nextScene": "ACT1_SCENE02R"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE03": {
+    "choiceId": "CHOICE_ACT1_SCENE03",
+    "sourceScene": "ACT1_SCENE03",
+    "options": [
+      {
+        "text": "A SWOT — let's see where we stand internally first.",
+        "reaction": "That's how we look at ourselves. This is about what's changed out there. Try again.",
+        "effects": {},
+        "nextScene": null
+      },
+      {
+        "text": "PESTLE — political, economic, social, technological, legal, environmental factors.",
+        "effects": {
+          "marcusTrust": 5
+        },
+        "nextScene": "ACT1_SCENE03B"
+      },
+      {
+        "text": "RAID — risks, assumptions, issues, dependencies.",
+        "reaction": "That's how we track problems once we have them. We don't have them mapped yet.",
+        "effects": {},
+        "nextScene": null
+      },
+      {
+        "text": "Lessons Learned — what did we take from similar projects before?",
+        "reaction": "From what? We don't have a completed project to learn from. This one hasn't finished falling apart.",
+        "effects": {},
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Wrong options show `reaction` inline and re-present the same choice list (nextScene: null = stay). Correct option (PESTLE) advances. No trust penalty for wrong answers — by design, this is a no-fail teaching moment."
+  },
+  "CHOICE_ACT1_SCENE04": {
+    "choiceId": "CHOICE_ACT1_SCENE04",
+    "sourceScene": "ACT1_SCENE04",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT1_SCENE05": {
+    "choiceId": "CHOICE_ACT1_SCENE05",
+    "sourceScene": "ACT1_SCENE05",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT1_SCENE06": {
+    "choiceId": "CHOICE_ACT1_SCENE06",
+    "sourceScene": "ACT1_SCENE06",
+    "options": [
+      {
+        "text": "The business case was never finished. Nobody signed off the benefits plan, and nobody's checked if the assumptions still hold.",
+        "effects": {
+          "marcusTrust": 10,
+          "boardConfidence": 5
+        },
+        "nextScene": "ACT1_SCENE06B"
+      },
+      {
+        "text": "Honestly, I think the team's stretched and the timeline was optimistic from day one.",
+        "effects": {
+          "marcusTrust": 5
+        },
+        "nextScene": "ACT1_SCENE06B"
+      },
+      {
+        "text": "I don't have a full picture yet, but I'll have one before the Board meeting.",
+        "effects": {
+          "marcusTrust": -5
+        },
+        "flags": {
+          "reputation_seed_more_meetings": true
+        },
+        "nextScene": "ACT1_SCENE06B"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT2_SCENE01": {
+    "choiceId": "CHOICE_ACT2_SCENE01",
+    "sourceScene": "ACT2_SCENE01",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT2_SCENE02": {
+    "choiceId": "CHOICE_ACT2_SCENE02",
+    "sourceScene": "ACT2_SCENE02",
+    "options": [
+      {
+        "text": "The board stands. We build what we can validate properly, first.",
+        "effects": {
+          "camilleTrust": 10,
+          "priyaTrust": -5
+        },
+        "nextScene": "ACT2_SCENE03"
+      },
+      {
+        "text": "Let's find room for one more automation Must — Priya's right about the retrofit cost.",
+        "effects": {
+          "priyaTrust": 10,
+          "camilleTrust": -5,
+          "budgetRemaining": -500000
+        },
+        "nextScene": "ACT2_SCENE03"
+      },
+      {
+        "text": "I need another day to look at the numbers properly.",
+        "effects": {
+          "marcusTrust": -5
+        },
+        "flags": {
+          "reputation_seed_more_meetings": true
+        },
+        "nextScene": "ACT2_SCENE03"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT2_SCENE03": {
+    "choiceId": "CHOICE_ACT2_SCENE03",
+    "sourceScene": "ACT2_SCENE03",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT2_SCENE04": {
+    "choiceId": "CHOICE_ACT2_SCENE04",
+    "sourceScene": "ACT2_SCENE04",
+    "options": [
+      {
+        "text": "Log this formally — treat it as a real risk, not just an update.",
+        "effects": {
+          "riskExposure": -5
+        },
+        "flags": {
+          "contractor_risk_logged": true
+        },
+        "nextScene": "ACT2_SCENE05"
+      },
+      {
+        "text": "I'll ping Tomasz informally, see if he's heard anything.",
+        "effects": {
+          "stakeholderGoodwill": 5
+        },
+        "nextScene": "ACT2_SCENE05"
+      },
+      {
+        "text": "Let's keep an eye on it for now.",
+        "effects": {
+          "riskExposure": 5
+        },
+        "nextScene": "ACT2_SCENE05"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "contractor_risk_logged is read by EV-06 (Act 4, electrical contractor bankruptcy) — if true, EV-06's impact is softened; if the risk was never formally logged, EV-06 hits at full severity."
+  },
+  "CHOICE_ACT2_SCENE05": {
+    "choiceId": "CHOICE_ACT2_SCENE05",
+    "sourceScene": "ACT2_SCENE05",
+    "options": [
+      {
+        "text": "Traditional — staged gates, sign-off at each phase. This is pharma; I'd rather be slow and defensible.",
+        "effects": {
+          "riskExposure": -5,
+          "scheduleHealth": -5
+        },
+        "nextScene": "ACT2_SCENE06"
+      },
+      {
+        "text": "Something more flexible — iterate where we can, lock down only what regulation actually requires.",
+        "effects": {
+          "scheduleHealth": 5,
+          "riskExposure": 5
+        },
+        "nextScene": "ACT2_SCENE06"
+      },
+      {
+        "text": "Hybrid — traditional for construction and validation, flexible for anything automation-related.",
+        "effects": {
+          "aishaTrust": 5
+        },
+        "nextScene": "ACT2_SCENE06"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT2_SCENE06": {
+    "choiceId": "CHOICE_ACT2_SCENE06",
+    "sourceScene": "ACT2_SCENE06",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE01": {
+    "choiceId": "CHOICE_ACT3_SCENE01",
+    "sourceScene": "ACT3_SCENE01",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE02": {
+    "choiceId": "CHOICE_ACT3_SCENE02",
+    "sourceScene": "ACT3_SCENE02",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE03": {
+    "choiceId": "CHOICE_ACT3_SCENE03",
+    "sourceScene": "ACT3_SCENE03",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE04": {
+    "choiceId": "CHOICE_ACT3_SCENE04",
+    "sourceScene": "ACT3_SCENE04",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE05": {
+    "choiceId": "CHOICE_ACT3_SCENE05",
+    "sourceScene": "ACT3_SCENE05",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE06": {
+    "choiceId": "CHOICE_ACT3_SCENE06",
+    "sourceScene": "ACT3_SCENE06",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT3_SCENE07": {
+    "choiceId": "CHOICE_ACT3_SCENE07",
+    "sourceScene": "ACT3_SCENE07",
+    "options": [
+      {
+        "text": "SteriTech — proven, and it protects the budget.",
+        "effects": {
+          "budgetRemaining": 300000,
+          "riskExposure": 5
+        },
+        "flags": {
+          "supplier_chosen": "steritech"
+        },
+        "nextScene": "ACT4_SCENE01"
+      },
+      {
+        "text": "RapidForm — we need the schedule more than we need to save money.",
+        "effects": {
+          "scheduleHealth": 10,
+          "budgetRemaining": -400000
+        },
+        "flags": {
+          "supplier_chosen": "rapidform"
+        },
+        "nextScene": "ACT4_SCENE01"
+      },
+      {
+        "text": "PharmaCraft — a validation record like that is worth paying for.",
+        "effects": {
+          "regulatoryReadiness": 10,
+          "riskExposure": -10,
+          "budgetRemaining": -600000
+        },
+        "flags": {
+          "supplier_chosen": "pharmacraft"
+        },
+        "nextScene": "ACT4_SCENE01"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "supplier_chosen is read by EV-R1 (Act 4 Supplier Reversal) to determine which of the two UNCHOSEN suppliers gets the reversal beat."
+  },
+  "CHOICE_ACT4_SCENE01": {
+    "choiceId": "CHOICE_ACT4_SCENE01",
+    "sourceScene": "ACT4_SCENE01",
+    "options": [
+      {
+        "text": "Pay to expedite it. We protect the schedule.",
+        "effects": {
+          "scheduleHealth": 10,
+          "budgetRemaining": -400000
+        },
+        "nextScene": "ACT4_SCENE01B",
+        "flags": {
+          "isolator_expedited": true
+        }
+      },
+      {
+        "text": "We absorb the delay. Budget stays intact.",
+        "effects": {
+          "budgetRemaining": 0,
+          "scheduleHealth": -10
+        },
+        "nextScene": "ACT4_SCENE01B",
+        "flags": {
+          "isolator_absorbed": true
+        }
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Implements EV-NP1 — genuinely no dominant option, by design."
+  },
+  "CHOICE_ACT4_SCENE02": {
+    "choiceId": "CHOICE_ACT4_SCENE02",
+    "sourceScene": "ACT4_SCENE02",
+    "options": [
+      {
+        "text": "Approve it — Marcus wants this, and Priya's done her homework.",
+        "effects": {
+          "priyaTrust": 10,
+          "marcusTrust": 5,
+          "camilleTrust": -10,
+          "budgetRemaining": -500000,
+          "riskExposure": 5
+        },
+        "nextScene": "ACT4_SCENE03",
+        "flags": {
+          "filling_line_approved": true
+        }
+      },
+      {
+        "text": "Defer it — good idea, wrong time. Revisit after commissioning.",
+        "effects": {
+          "priyaTrust": -5,
+          "camilleTrust": 5
+        },
+        "nextScene": "ACT4_SCENE03",
+        "flags": {
+          "filling_line_deferred": true
+        }
+      },
+      {
+        "text": "Reject it — the revalidation risk isn't worth it this late.",
+        "effects": {
+          "camilleTrust": 10,
+          "priyaTrust": -10,
+          "marcusTrust": -5
+        },
+        "nextScene": "ACT4_SCENE03",
+        "flags": {
+          "filling_line_rejected": true
+        }
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT4_SCENE03": {
+    "choiceId": "CHOICE_ACT4_SCENE03",
+    "sourceScene": "ACT4_SCENE03",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT4_SCENE04": {
+    "choiceId": "CHOICE_ACT4_SCENE04",
+    "sourceScene": "ACT4_SCENE04",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT4_SCENE05": {
+    "choiceId": "CHOICE_ACT4_SCENE05",
+    "sourceScene": "ACT4_SCENE05",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT4_SCENE06": {
+    "choiceId": "CHOICE_ACT4_SCENE06",
+    "sourceScene": "ACT4_SCENE06",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT5_SCENE01": {
+    "choiceId": "CHOICE_ACT5_SCENE01",
+    "sourceScene": "ACT5_SCENE01",
+    "options": [
+      {
+        "text": "Take the extra two days to get training right.",
+        "effects": {
+          "scheduleHealth": -5,
+          "regulatoryReadiness": 10
+        },
+        "nextScene": "ACT5_SCENE02"
+      },
+      {
+        "text": "Stick to the compressed schedule — we're out of runway.",
+        "effects": {
+          "regulatoryReadiness": -10
+        },
+        "nextScene": "ACT5_SCENE02"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT5_SCENE02": {
+    "choiceId": "CHOICE_ACT5_SCENE02",
+    "sourceScene": "ACT5_SCENE02",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT5_SCENE03": {
+    "choiceId": "CHOICE_ACT5_SCENE03",
+    "sourceScene": "ACT5_SCENE03",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT5_SCENE04": {
+    "choiceId": "CHOICE_ACT5_SCENE04",
+    "sourceScene": "ACT5_SCENE04",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT6_SCENE01": {
+    "choiceId": "CHOICE_ACT6_SCENE01",
+    "sourceScene": "ACT6_SCENE01",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT6_SCENE02": {
+    "choiceId": "CHOICE_ACT6_SCENE02",
+    "sourceScene": "ACT6_SCENE02",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_ACT6_SCENE03": {
+    "choiceId": "CHOICE_ACT6_SCENE03",
+    "sourceScene": "ACT6_SCENE03",
+    "options": [],
+    "sourceSummary": null,
+    "needsWriting": true
+  },
+  "CHOICE_BIG-01": {
+    "choiceId": "CHOICE_BIG-01",
+    "sourceScene": "BIG-01",
+    "options": [
+      {
+        "text": "I need to renegotiate the timeline before I touch anything else.",
+        "effects": {
+          "scheduleHealth": 10,
+          "boardConfidence": -10
+        },
+        "nextScene": "ACT4_SCENE04"
+      },
+      {
+        "text": "We take it head-on — full re-plan this week, both lines.",
+        "effects": {
+          "marcusTrust": 10,
+          "budgetRemaining": -1000000,
+          "scheduleHealth": -10
+        },
+        "nextScene": "ACT4_SCENE04"
+      },
+      {
+        "text": "We protect Product A fully and phase Product B in quietly.",
+        "effects": {
+          "riskExposure": 10,
+          "benefitsRealisationScore": -5
+        },
+        "nextScene": "ACT4_SCENE04"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT4_SCENE05_M1": {
+    "choiceId": "CHOICE_ACT4_SCENE05_M1",
+    "sourceScene": "ACT4_SCENE05",
+    "options": [
+      {
+        "text": "Everything's on track.",
+        "effects": {
+          "honestyTone": "optimistic"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      },
+      {
+        "text": "There are risks, but nothing critical yet.",
+        "effects": {
+          "honestyTone": "measured"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      },
+      {
+        "text": "I need to flag something serious.",
+        "effects": {
+          "honestyTone": "transparent"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "marcusTrust delta is NOT fixed per option — compare honestyTone against the ACTUAL riskExposure/scheduleHealth/budgetRemaining state at report time. If 'optimistic' or 'measured' is chosen while true state is bad (e.g. riskExposure > 60 or scheduleHealth < 40), set flag hid_problem_from_marcus=true and apply the marcusTrust penalty at the NEXT report, not this one (delayed feedback, by design). If the report accurately reflects trouble, apply a small immediate marcusTrust gain instead and do not set the flag."
+  },
+  "CHOICE_ACT4_SCENE05_M2": {
+    "choiceId": "CHOICE_ACT4_SCENE05_M2",
+    "sourceScene": "ACT4_SCENE05B",
+    "options": [
+      {
+        "text": "Everything's on track.",
+        "effects": {
+          "honestyTone": "optimistic"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      },
+      {
+        "text": "There are risks, but nothing critical yet.",
+        "effects": {
+          "honestyTone": "measured"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      },
+      {
+        "text": "I need to flag something serious.",
+        "effects": {
+          "honestyTone": "transparent"
+        },
+        "nextScene": "ACT4_SCENE05C"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "marcusTrust delta is NOT fixed per option — compare honestyTone against the ACTUAL riskExposure/scheduleHealth/budgetRemaining state at report time. If 'optimistic' or 'measured' is chosen while true state is bad (e.g. riskExposure > 60 or scheduleHealth < 40), set flag hid_problem_from_marcus=true and apply the marcusTrust penalty at the NEXT report, not this one (delayed feedback, by design). If the report accurately reflects trouble, apply a small immediate marcusTrust gain instead and do not set the flag."
+  },
+  "CHOICE_EV-02": {
+    "choiceId": "CHOICE_EV-02",
+    "sourceScene": "EV-02",
+    "options": [
+      {
+        "text": "Fund the rework now.",
+        "effects": {
+          "budgetRemaining": -400000,
+          "regulatoryReadiness": 15,
+          "camilleTrust": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Appeal the finding.",
+        "effects": {
+          "riskExposure": 10,
+          "camilleTrust": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Phase the fix around commissioning.",
+        "effects": {
+          "scheduleHealth": 5,
+          "regulatoryReadiness": -10,
+          "camilleTrust": -10
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-03": {
+    "choiceId": "CHOICE_EV-03",
+    "sourceScene": "EV-03",
+    "options": [
+      {
+        "text": "Set up a community liaison meeting.",
+        "effects": {
+          "stakeholderGoodwill": 10,
+          "scheduleHealth": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Adjust delivery hours.",
+        "effects": {
+          "stakeholderGoodwill": 5,
+          "scheduleHealth": -3
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Note it and move on — we don't have time.",
+        "effects": {
+          "stakeholderGoodwill": -10
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-04": {
+    "choiceId": "CHOICE_EV-04",
+    "sourceScene": "EV-04",
+    "options": [
+      {
+        "text": "Reprioritise the most visible workstreams.",
+        "effects": {
+          "boardConfidence": 10,
+          "scheduleHealth": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Brief them candidly on where we actually are.",
+        "effects": {
+          "marcusTrust": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Delay other work to stage the visit properly.",
+        "effects": {
+          "scheduleHealth": -10,
+          "boardConfidence": 15
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-05": {
+    "choiceId": "CHOICE_EV-05",
+    "sourceScene": "EV-05",
+    "options": [
+      {
+        "text": "Halt the line for investigation.",
+        "effects": {
+          "scheduleHealth": -15,
+          "regulatoryReadiness": 10,
+          "camilleTrust": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Contain and continue in parallel.",
+        "effects": {
+          "riskExposure": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Escalate immediately to Camille — her call, full stop.",
+        "effects": {
+          "camilleTrust": 15,
+          "marcusTrust": -5
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-06": {
+    "choiceId": "CHOICE_EV-06",
+    "sourceScene": "EV-06",
+    "options": [
+      {
+        "text": "Emergency re-tender.",
+        "effects": {
+          "scheduleHealth": -10,
+          "budgetRemaining": -300000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Absorb via the secondary supplier already on the Risk Register.",
+        "effects": {
+          "scheduleHealth": -3,
+          "budgetRemaining": -100000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Delay dependent work packages.",
+        "effects": {
+          "scheduleHealth": -15
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Option 2's impact should be substantially softened (or this option disabled entirely) if contractor_risk_logged is false — that secondary supplier only exists because the Act 2 risk was logged formally."
+  },
+  "CHOICE_EV-08": {
+    "choiceId": "CHOICE_EV-08",
+    "sourceScene": "EV-08",
+    "options": [
+      {
+        "text": "Emergency remediation spend.",
+        "effects": {
+          "budgetRemaining": -250000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Claim on insurance, accept the delay.",
+        "effects": {
+          "scheduleHealth": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Reroute logistics temporarily.",
+        "effects": {
+          "scheduleHealth": -5,
+          "budgetRemaining": -100000
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-11": {
+    "choiceId": "CHOICE_EV-11",
+    "sourceScene": "EV-11",
+    "options": [
+      {
+        "text": "Full design review now.",
+        "effects": {
+          "regulatoryReadiness": 15,
+          "scheduleHealth": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Defer with documented risk acceptance.",
+        "effects": {
+          "riskExposure": 5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Partial review — highest-risk areas only.",
+        "effects": {
+          "regulatoryReadiness": 5,
+          "scheduleHealth": -3
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-13": {
+    "choiceId": "CHOICE_EV-13",
+    "sourceScene": "EV-13",
+    "options": [
+      {
+        "text": "Reject and re-order.",
+        "effects": {
+          "scheduleHealth": -15
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Attempt an on-site conversion.",
+        "effects": {
+          "riskExposure": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Escalate for expedited replacement.",
+        "effects": {
+          "budgetRemaining": -200000,
+          "scheduleHealth": -5
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-R1": {
+    "choiceId": "CHOICE_EV-R1",
+    "sourceScene": "EV-R1",
+    "options": [
+      {
+        "text": "Renegotiate emergency terms with {chosenSupplier} directly.",
+        "effects": {
+          "stakeholderGoodwill": 5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Go back to {alternateSupplier} — see if they can step in.",
+        "effects": {
+          "budgetRemaining": -300000,
+          "riskExposure": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Absorb the impact, adjust the schedule.",
+        "effects": {
+          "scheduleHealth": -10
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "{chosenSupplier} = supplier_chosen flag from Act 3. {alternateSupplier} = whichever of the other two was NOT the one that later goes bankrupt in EV-R4 (i.e. if supplier_chosen=steritech, alternateSupplier=pharmacraft, since rapidform is EV-R4's failure case; if supplier_chosen=rapidform or pharmacraft, alternateSupplier=whichever remains). Substitute names at render time."
+  },
+  "CHOICE_EV-R3": {
+    "choiceId": "CHOICE_EV-R3",
+    "sourceScene": "EV-R3",
+    "options": [
+      {
+        "text": "Accept her support and adjust the plan accordingly.",
+        "effects": {
+          "camilleTrust": 15,
+          "stakeholderGoodwill": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Thank her, but proceed alone.",
+        "effects": {
+          "camilleTrust": -5
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Only fires if camilleTrust was Cold/Cool through Acts 2–3 — the reversal is that she backs you despite that history, not because of it."
+  },
+  "CHOICE_EV-NP2": {
+    "choiceId": "CHOICE_EV-NP2",
+    "sourceScene": "EV-NP2",
+    "options": [
+      {
+        "text": "Fully validate Product A on time, delay Product B.",
+        "effects": {
+          "scheduleHealth": -5,
+          "benefitsRealisationScore": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Split resource thinly across both — accept slippage on both.",
+        "effects": {
+          "scheduleHealth": -10,
+          "regulatoryReadiness": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Bring in premium contract resource.",
+        "effects": {
+          "budgetRemaining": -600000,
+          "scheduleHealth": -3
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-07": {
+    "choiceId": "CHOICE_EV-07",
+    "sourceScene": "EV-07",
+    "options": [
+      {
+        "text": "Emergency contractor hire.",
+        "effects": {
+          "budgetRemaining": -350000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Redistribute the workload internally.",
+        "effects": {
+          "teamMorale": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Renegotiate the Act 5 timeline with Marcus.",
+        "effects": {
+          "marcusTrust": -5,
+          "scheduleHealth": -5
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-09": {
+    "choiceId": "CHOICE_EV-09",
+    "sourceScene": "EV-09",
+    "options": [
+      {
+        "text": "Isolate and rebuild.",
+        "effects": {
+          "scheduleHealth": -10,
+          "riskExposure": -10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Pay for emergency vendor support.",
+        "effects": {
+          "budgetRemaining": -300000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Run manual environmental controls temporarily.",
+        "effects": {
+          "regulatoryReadiness": -5,
+          "scheduleHealth": -2
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-10": {
+    "choiceId": "CHOICE_EV-10",
+    "sourceScene": "EV-10",
+    "options": [
+      {
+        "text": "Build the case to unfreeze funds with the Benefits Register.",
+        "effects": {
+          "marcusTrust": 5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Descope a 'Should' requirement.",
+        "effects": {
+          "stakeholderGoodwill": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Absorb the freeze and re-plan.",
+        "effects": {
+          "scheduleHealth": -10
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-14": {
+    "choiceId": "CHOICE_EV-14",
+    "sourceScene": "EV-14",
+    "options": [
+      {
+        "text": "Emergency contract hire at premium cost.",
+        "effects": {
+          "budgetRemaining": -400000
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Redistribute with Camille's support.",
+        "effects": {
+          "camilleTrust": 5,
+          "teamMorale": -5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Delay commissioning to re-recruit properly.",
+        "effects": {
+          "scheduleHealth": -15
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_EV-15": {
+    "choiceId": "CHOICE_EV-15",
+    "sourceScene": "EV-15",
+    "options": [
+      {
+        "text": "Public factual rebuttal.",
+        "effects": {
+          "stakeholderGoodwill": 5
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Proactive community briefing.",
+        "effects": {
+          "stakeholderGoodwill": 10
+        },
+        "nextScene": null
+      },
+      {
+        "text": "Board-only briefing, no public response.",
+        "effects": {
+          "boardConfidence": 5,
+          "stakeholderGoodwill": -10
+        },
+        "nextScene": null
+      }
+    ],
+    "needsWriting": false
+  }
+}

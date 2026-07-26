@@ -1,0 +1,226 @@
+{
+  "marcus": {
+    "id": "marcus",
+    "name": "Marcus Reid",
+    "role": "Programme Sponsor / MD",
+    "professionalFunction": "Sets stakes, gatekeeps Board access and budget",
+    "personalArc": "His own reputation is riding on Project NOVA — if it fails, early retirement becomes the likely outcome. He never says this.",
+    "discoveredVia": "Overheard phone call fragment in Act 3; a HR/pension letter glimpsed on his desk in Act 4; confirmed obliquely by Daniel if Marcus Trust is high",
+    "visualDescription": "Late 50s, greying, sharp but slightly rumpled suit, tired eyes that miss nothing",
+    "voiceStyle": "Short, direct; dry humour under pressure; deflects personal questions with a task",
+    "recurringBeats": "Coffee machine small talk (Mondays); \"Never surprise me\" callback (planted Act 1, paid off Act 4); interruption target in Board Meeting when Camille cuts in",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "marcus_neutral.jpg",
+      "concerned": "marcus_displeased.jpg",
+      "frustrated": "marcus_displeased.jpg",
+      "warm": "marcus_pleased.jpg"
+    },
+    "portraitStatus": "real art"
+  },
+  "camille": {
+    "id": "camille",
+    "name": "Camille Okafor",
+    "role": "Head of Quality & Validation",
+    "professionalFunction": "Voice of patient safety and regulatory rigour",
+    "personalArc": "Years earlier she was involved in a GMP warning letter at a previous employer. She refuses shortcuts because she has personally seen what a shortcut costs.",
+    "discoveredVia": "A redacted reference in an old email thread (Act 2); fully surfaces only if the player treats her position with respect rather than as an obstacle (conditional scene, Act 4)",
+    "visualDescription": "Early 40s, composed, lab coat over business clothes, glasses, always carries an SOP folder",
+    "voiceStyle": "Measured, technical, unflinchingly honest; noticeably warms once her arc surfaces",
+    "recurringBeats": "Industry award mention (random office event); the interrupting \"Actually...\" line in Board Meeting; potential opposition-to-ally reversal (Tab 5, EV-R3)",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "camille.jpg",
+      "concerned": "camille.jpg",
+      "serious": "camille.jpg",
+      "warm": "camille.jpg"
+    },
+    "portraitStatus": "real art"
+  },
+  "vaughn": {
+    "id": "vaughn",
+    "name": "Vaughn Kessler",
+    "role": "Construction & Engineering Lead",
+    "professionalFunction": "Grounds the plan in physical reality; WBS partner",
+    "personalArc": "His daughter has just started working at Helix BioPharma. He's quietly afraid she'll inherit a facility the player got wrong.",
+    "discoveredVia": "Mentioned in passing during the WBS warehouse walk (Act 3); pays off visually in Act 6 if she appears among the control-room team",
+    "visualDescription": "Late 40s, hi-vis vest, hard hat, weathered hands, permanent site dust on his boots",
+    "voiceStyle": "Blunt, practical, impatient with abstraction",
+    "recurringBeats": "Site walk-through waves — workers stop waving if morale/reputation falls; his daughter easter egg in the Act 6 crowd",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "vaughn.jpg",
+      "warm": "vaughn.jpg",
+      "frustrated": "vaughn.jpg"
+    },
+    "portraitStatus": "real art"
+  },
+  "daniel": {
+    "id": "daniel",
+    "name": "Daniel Atwell",
+    "role": "Finance Director",
+    "professionalFunction": "Owns CBS, contingency, benefits justification",
+    "personalArc": "His own team is being quietly downsized elsewhere in the business; proving disciplined cost control on NOVA is how he protects the headcount he has left.",
+    "discoveredVia": "A budget-meeting aside in Act 3; confirmed in a Slack-style message the player can find in Act 4 if they're looking",
+    "visualDescription": "Early 50s, precise dresser, glasses on a chain, laptop permanently open on a spreadsheet",
+    "voiceStyle": "Speaks in costs and percentages; noticeably relaxes once he trusts the numbers are real",
+    "recurringBeats": "Either becomes the player's most reliable ally or their harshest critic depending on early transparency — no visible score, just tone",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "daniel_neutral.png",
+      "concerned": "daniel_concerned.png",
+      "warm": "daniel_warm.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "priya": {
+    "id": "priya",
+    "name": "Priya Anand",
+    "role": "Manufacturing & Operations Lead",
+    "professionalFunction": "Champions throughput/automation; source of scope-creep requests",
+    "personalArc": "Procurement/Ops are constantly blamed when things go wrong — she quietly enjoys proving people wrong when a bold call pays off.",
+    "discoveredVia": "Revealed through her own reaction lines if the player backs one of her riskier proposals and it succeeds",
+    "visualDescription": "Late 30s, practical workwear, tablet in hand",
+    "voiceStyle": "Enthusiastic, persuasive, quick to say \"while we're at it...\"",
+    "recurringBeats": "Monday coffee-machine regular; \"someone stole her lunch\" random office event; central to BIG-01 (the two-product curveball)",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "priya.jpg",
+      "worried": "priya.jpg",
+      "frustrated": "priya.jpg",
+      "warm": "priya.jpg"
+    },
+    "portraitStatus": "real art"
+  },
+  "tomasz": {
+    "id": "tomasz",
+    "name": "Tomasz Nowak",
+    "role": "Supply Chain & Procurement Lead",
+    "professionalFunction": "Surfaces supplier risk; runs the three-supplier pitch",
+    "personalArc": "A new father, trying to hold a stretched personal life together while chasing suppliers at all hours.",
+    "discoveredVia": "A brief, easy-to-miss line about a sleepless night in Act 2 or 3",
+    "visualDescription": "40s, always mid-call, battered contacts notebook",
+    "voiceStyle": "Understated, flags problems early and often",
+    "recurringBeats": "Central to the supplier reversal event (Tab 5, EV-R1)",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "tomasz_neutral.png",
+      "concerned": "tomasz_concerned.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "aisha": {
+    "id": "aisha",
+    "name": "Aisha Bello",
+    "role": "IT & Automation Lead",
+    "professionalFunction": "Owns the Building Management System and automation/cyber risk",
+    "personalArc": "Building a case internally that automation-first careers deserve the same seniority track as engineering — NOVA is her proof point.",
+    "discoveredVia": "A throwaway comment during the cyberattack response if handled well",
+    "visualDescription": "30s, headset around neck, laptop stickers from past incident call-outs",
+    "voiceStyle": "Calm, precise, explains systems in plain English",
+    "recurringBeats": "Small, non-mechanical scene where she demos an automation win unprompted if trust is high",
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "aisha_neutral.png",
+      "serious": "aisha_serious.png",
+      "warm": "aisha_warm.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "ellis": {
+    "id": "ellis",
+    "name": "Ellis Grant",
+    "role": "Former PM — never appears in person",
+    "professionalFunction": "The game's mystery and, increasingly, its conscience",
+    "personalArc": "Was not incompetent — was carrying the exact same pressures the player now carries, alone, for far longer",
+    "discoveredVia": "Handwritten notebook fragments scattered across all 6 acts (see Tab 6) — some prove right, some prove wrong",
+    "visualDescription": "Never seen. Represented by handwriting, a desk photo, a voicemail waveform icon",
+    "voiceStyle": "Notebook entries are terse, occasionally self-doubting, always specific",
+    "recurringBeats": "Full reveal in Act 6 epilogue (Tab 7, END-8); notebook lines occasionally contradict each other on purpose",
+    "startingRelationship": null,
+    "portraits": null,
+    "asset": "ellis_notebook_icon.png",
+    "note": "Never appears on screen — represented via handwriting/voicemail icon, not a portrait",
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "joan": {
+    "id": "joan",
+    "name": "Joan",
+    "role": "Front-of-house, Helix BioPharma",
+    "professionalFunction": "First and last face the player sees each visit",
+    "personalArc": "None scripted — deliberately a low-cost, high-signal reputation mirror",
+    "discoveredVia": "Her greeting tone shifts with the player's overall Reputation tag (Tab 3), no dialogue tree required",
+    "visualDescription": "50s, warm by default, sharp when the building is stressed",
+    "voiceStyle": "One line, every visit, tonally variable",
+    "recurringBeats": "The clearest, cheapest instance of \"the world remembers\" — the player will notice her tone changing before they notice anything else has",
+    "startingRelationship": null,
+    "portraits": {
+      "neutral": "joan_neutral.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "whitfield": {
+    "id": "whitfield",
+    "name": "Inspector Whitfield",
+    "role": "MHRA Inspector",
+    "professionalFunction": "Final Boss of Act 5 — open-question audit",
+    "personalArc": "None scripted — deliberately kept procedural and impartial",
+    "discoveredVia": "N/A",
+    "visualDescription": "50s, unremarkable formal dress, clipboard, methodical",
+    "voiceStyle": "Plain procedural questions, entirely evidence-based",
+    "recurringBeats": "Now explicitly references the player's own old emails/decisions if they exist — 'the world remembers' made literal at the highest-stakes moment",
+    "startingRelationship": null,
+    "portraits": {
+      "neutral": "whitfield_neutral.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "steritech_rep": {
+    "id": "steritech_rep",
+    "name": "SteriTech Representative",
+    "role": "Supplier — budget option",
+    "professionalFunction": "Isolator/equipment vendor, procurement pitch (Act 3)",
+    "personalArc": null,
+    "discoveredVia": null,
+    "visualDescription": "Plain jacket, no branding theatrics, carries a spec sheet not a slide deck",
+    "voiceStyle": "Brisk, unembellished, leads with proof not charm",
+    "recurringBeats": "One-off appearance, Act 3 Procurement Pitch",
+    "startingRelationship": null,
+    "portraits": {
+      "neutral": "steritech_rep_neutral.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "rapidform_rep": {
+    "id": "rapidform_rep",
+    "name": "RapidForm Representative",
+    "role": "Supplier — speed option",
+    "professionalFunction": "Isolator/equipment vendor, procurement pitch (Act 3)",
+    "personalArc": null,
+    "discoveredVia": null,
+    "visualDescription": "Energetic, delivery-tracker app open before she's finished sitting down",
+    "voiceStyle": "Fast, confident, sells on time saved",
+    "recurringBeats": "One-off appearance, Act 3 Procurement Pitch",
+    "startingRelationship": null,
+    "portraits": {
+      "neutral": "rapidform_rep_neutral.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  },
+  "pharmacraft_rep": {
+    "id": "pharmacraft_rep",
+    "name": "PharmaCraft Precision Representative",
+    "role": "Supplier — quality option",
+    "professionalFunction": "Isolator/equipment vendor, procurement pitch (Act 3)",
+    "personalArc": null,
+    "discoveredVia": null,
+    "visualDescription": "Senior engineer, portfolio of validation certificates instead of a brochure",
+    "voiceStyle": "Measured, proud, sells on track record",
+    "recurringBeats": "One-off appearance, Act 3 Procurement Pitch",
+    "startingRelationship": null,
+    "portraits": {
+      "neutral": "pharmacraft_rep_neutral.png"
+    },
+    "portraitStatus": "placeholder — no real art yet"
+  }
+}

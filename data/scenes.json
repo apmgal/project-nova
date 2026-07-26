@@ -1,0 +1,992 @@
+{
+  "ACT1_SCENE01": {
+    "sceneId": "ACT1_SCENE01",
+    "title": "Arrival & Handover",
+    "act": "Act 1",
+    "screenRange": "1–2",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "ellis",
+      "marcus"
+    ],
+    "pmConcept": "Project initiation",
+    "contentSummary": "Player arrives; Marcus greets them coolly; no handover notes from Ellis.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE01",
+    "choicesId": "CHOICE_ACT1_SCENE01",
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT1_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02": {
+    "sceneId": "ACT1_SCENE02",
+    "title": "\"Tell Me What's Wrong\"",
+    "act": "Act 1",
+    "screenRange": "3–5",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Evidence-based diagnostics",
+    "contentSummary": "Marcus withholds a briefing until the player diagnoses the project themselves.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02",
+    "choicesId": "CHOICE_ACT1_SCENE02",
+    "trigger": {
+      "previousScene": "ACT1_SCENE01"
+    },
+    "nextScenes": [
+      "ACT1_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE03": {
+    "sceneId": "ACT1_SCENE03",
+    "title": "External Environment Briefing",
+    "act": "Act 1",
+    "screenRange": "6–9",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "PESTLE analysis",
+    "contentSummary": "Player selects PESTLE and tags real external factors.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE03",
+    "choicesId": "CHOICE_ACT1_SCENE03",
+    "trigger": {
+      "previousScene": "ACT1_SCENE02R"
+    },
+    "nextScenes": [
+      "ACT1_SCENE03B"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE04": {
+    "sceneId": "ACT1_SCENE04",
+    "title": "\"What About Us?\"",
+    "act": "Act 1",
+    "screenRange": "10–12",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "SWOT analysis",
+    "contentSummary": "Player builds SWOT for internal readiness.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE04",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE03B"
+    },
+    "nextScenes": [
+      "ACT1_SCENE05"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE05": {
+    "sceneId": "ACT1_SCENE05",
+    "title": "The Missing Appendices",
+    "act": "Act 1",
+    "screenRange": "13–15",
+    "screenType": "Investigation / Curveball",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Business case completeness",
+    "contentSummary": "Search reveals Ellis never finished the Benefits Plan.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE05",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE04"
+    },
+    "nextScenes": [
+      "ACT1_SCENE06"
+    ],
+    "needsWriting": false,
+    "flagsSet": [
+      "ellis_fragment_1_found"
+    ]
+  },
+  "ACT1_SCENE06": {
+    "sceneId": "ACT1_SCENE06",
+    "title": "Act 1 Close — First Diagnosis",
+    "act": "Act 1",
+    "screenRange": "16–18",
+    "screenType": "Dialogue / Report",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Structured problem framing",
+    "contentSummary": "Player delivers a diagnosis synthesising findings; still no confirmed reason for Ellis leaving.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT1_SCENE06",
+    "choicesId": "CHOICE_ACT1_SCENE06",
+    "trigger": {
+      "previousScene": "ACT1_SCENE05"
+    },
+    "nextScenes": [
+      "ACT1_SCENE06B"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE01": {
+    "sceneId": "ACT2_SCENE01",
+    "title": "\"This Isn't a Technical Project\"",
+    "act": "Act 2",
+    "screenRange": "19–21",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Political awareness in delivery",
+    "contentSummary": "Transition beat — the political dimension surfaces.",
+    "worldMemoryBeat": "recurring_monday_coffee_machine",
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT2_SCENE01",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE06B"
+    },
+    "nextScenes": [
+      "ACT2_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE02": {
+    "sceneId": "ACT2_SCENE02",
+    "title": "Board Meeting — MoSCoW (with interruption)",
+    "act": "Act 2",
+    "screenRange": "22–27",
+    "screenType": "Drag-and-Drop + Scripted Interruption",
+    "location": null,
+    "charactersInvolved": [
+      "camille",
+      "marcus"
+    ],
+    "pmConcept": "MoSCoW prioritisation",
+    "contentSummary": "Executives argue priorities; player drags requirements into Must/Should/Could/Won't. Midway, Camille cuts across Marcus unprompted — \"Actually...\" — visibly reshaping the room.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Budget Remaining",
+      "Marcus Trust",
+      "Stakeholder Goodwill"
+    ],
+    "dialogueId": "DIALOGUE_ACT2_SCENE02",
+    "choicesId": "CHOICE_ACT2_SCENE02",
+    "trigger": {
+      "previousScene": "ACT2_SCENE01"
+    },
+    "nextScenes": [
+      "ACT2_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE03": {
+    "sceneId": "ACT2_SCENE03",
+    "title": "\"Who's Going to Stop This Project?\"",
+    "act": "Act 2",
+    "screenRange": "28–29",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Stakeholder mapping",
+    "contentSummary": "Player maps stakeholders by power/interest.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Stakeholder Goodwill"
+    ],
+    "dialogueId": "DIALOGUE_ACT2_SCENE03",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT2_SCENE02"
+    },
+    "nextScenes": [
+      "ACT2_SCENE04"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE04": {
+    "sceneId": "ACT2_SCENE04",
+    "title": "Risk Workshop",
+    "act": "Act 2",
+    "screenRange": "30–34",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [
+      "camille",
+      "daniel",
+      "vaughn"
+    ],
+    "pmConcept": "Risk identification",
+    "contentSummary": "Vaughn, Camille and Daniel raise risks organically; player builds the Risk Register.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Risk Exposure"
+    ],
+    "dialogueId": "DIALOGUE_ACT2_SCENE04",
+    "choicesId": "CHOICE_ACT2_SCENE04",
+    "trigger": {
+      "previousScene": "ACT2_SCENE03"
+    },
+    "nextScenes": [
+      "ACT2_SCENE05"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE05": {
+    "sceneId": "ACT2_SCENE05",
+    "title": "Traditional or Flexible?",
+    "act": "Act 2",
+    "screenRange": "35–37",
+    "screenType": "Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Delivery lifecycle selection",
+    "contentSummary": "Sets the delivery lifecycle.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Schedule Health baseline"
+    ],
+    "dialogueId": "DIALOGUE_ACT2_SCENE05",
+    "choicesId": "CHOICE_ACT2_SCENE05",
+    "trigger": {
+      "previousScene": "ACT2_SCENE04"
+    },
+    "nextScenes": [
+      "ACT2_SCENE06"
+    ],
+    "needsWriting": false
+  },
+  "ACT2_SCENE06": {
+    "sceneId": "ACT2_SCENE06",
+    "title": "Second Ellis Fragment + Act 2 Close",
+    "act": "Act 2",
+    "screenRange": "38–40",
+    "screenType": "Investigation / Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Organisational learning",
+    "contentSummary": "A half-finished risk register hints Ellis saw the contractor risk months earlier and was overruled — a notebook line that will later prove right.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Camille Trust (small +)"
+    ],
+    "dialogueId": "DIALOGUE_ACT2_SCENE06",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT2_SCENE05"
+    },
+    "nextScenes": [
+      "ACT3_SCENE01"
+    ],
+    "needsWriting": false,
+    "flagsSet": [
+      "ellis_fragment_2_found"
+    ]
+  },
+  "ACT3_SCENE01": {
+    "sceneId": "ACT3_SCENE01",
+    "title": "WBS in the Warehouse",
+    "act": "Act 3",
+    "screenRange": "41–45",
+    "screenType": "Drag-and-Drop Planning",
+    "location": null,
+    "charactersInvolved": [
+      "vaughn"
+    ],
+    "pmConcept": "Work Breakdown Structure",
+    "contentSummary": "Vaughn walks the player through the WBS; mentions his daughter has just started at Helix.",
+    "worldMemoryBeat": "facility_shot_2",
+    "variablesTouched": [
+      "Schedule Health",
+      "Regulatory Readiness"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE01",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT3_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT3_SCENE02": {
+    "sceneId": "ACT3_SCENE02",
+    "title": "Cost Breakdown with Daniel",
+    "act": "Act 3",
+    "screenRange": "46–48",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Cost Breakdown Structure",
+    "contentSummary": "Player builds the CBS from the WBS.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Budget Remaining"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE02",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE01"
+    },
+    "nextScenes": [
+      "ACT3_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT3_SCENE03": {
+    "sceneId": "ACT3_SCENE03",
+    "title": "Team Selection",
+    "act": "Act 3",
+    "screenRange": "49–52",
+    "screenType": "Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Resource management",
+    "contentSummary": "Player picks 6 of a wider candidate pool.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Team Morale",
+      "Budget Remaining"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE03",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE02"
+    },
+    "nextScenes": [
+      "ACT3_SCENE04"
+    ],
+    "needsWriting": false
+  },
+  "ACT3_SCENE04": {
+    "sceneId": "ACT3_SCENE04",
+    "title": "Milestone Timeline",
+    "act": "Act 3",
+    "screenRange": "53–55",
+    "screenType": "Drag-and-Drop Scheduling",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Scheduling",
+    "contentSummary": "Player arranges milestones that become the formal schedule.",
+    "worldMemoryBeat": "facility_shot_3",
+    "variablesTouched": [
+      "Schedule Health"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE04",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE03"
+    },
+    "nextScenes": [
+      "ACT3_SCENE05"
+    ],
+    "needsWriting": false,
+    "flagsSet": [
+      "ellis_fragment_3_found (conditional on contractor_risk_logged)"
+    ]
+  },
+  "ACT3_SCENE05": {
+    "sceneId": "ACT3_SCENE05",
+    "title": "Communications Plan",
+    "act": "Act 3",
+    "screenRange": "56–59",
+    "screenType": "Dialogue-Driven Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Communications planning",
+    "contentSummary": "Each stakeholder states their preferred cadence/format.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Stakeholder Goodwill",
+      "Marcus Trust"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE05",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE04"
+    },
+    "nextScenes": [
+      "ACT3_SCENE06"
+    ],
+    "needsWriting": false
+  },
+  "ACT3_SCENE06": {
+    "sceneId": "ACT3_SCENE06",
+    "title": "Benefits Tracker",
+    "act": "Act 3",
+    "screenRange": "60–62",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [
+      "daniel"
+    ],
+    "pmConcept": "Benefits management",
+    "contentSummary": "Player builds the Benefits Register with Daniel.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Benefits Realisation Score"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE06",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE05"
+    },
+    "nextScenes": [
+      "ACT3_SCENE07"
+    ],
+    "needsWriting": false
+  },
+  "ACT3_SCENE07": {
+    "sceneId": "ACT3_SCENE07",
+    "title": "Procurement Pitch (with reversal seed)",
+    "act": "Act 3",
+    "screenRange": "63–68",
+    "screenType": "Choice / Character Scene",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Procurement & supplier selection",
+    "contentSummary": "Three suppliers pitch. Whichever is NOT chosen is quietly seeded for the Act 4 reversal event (EV-R1).",
+    "worldMemoryBeat": "facility_shot_4",
+    "variablesTouched": [
+      "Budget Remaining",
+      "Schedule Health",
+      "Risk Exposure"
+    ],
+    "dialogueId": "DIALOGUE_ACT3_SCENE07",
+    "choicesId": "CHOICE_ACT3_SCENE07",
+    "trigger": {
+      "previousScene": "ACT3_SCENE06"
+    },
+    "nextScenes": [
+      "ACT4_SCENE01"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE01": {
+    "sceneId": "ACT4_SCENE01",
+    "title": "Opening Curveball Wave",
+    "act": "Act 4",
+    "screenRange": "69–74",
+    "screenType": "Curveball / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Risk response / issue management",
+    "contentSummary": "First unscheduled events test the Act 3 plan.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Risk Exposure",
+      "Schedule Health",
+      "Budget Remaining"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE01",
+    "choicesId": "CHOICE_ACT4_SCENE01",
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT4_SCENE01B"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE02": {
+    "sceneId": "ACT4_SCENE02",
+    "title": "Change Control — The Extra Filling Line (interruption beat)",
+    "act": "Act 4",
+    "screenRange": "75–80",
+    "screenType": "Analysis Tool / Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "camille",
+      "marcus",
+      "priya"
+    ],
+    "pmConcept": "Change control",
+    "contentSummary": "Priya requests scope Marcus loves and Camille opposes; Camille interrupts Marcus mid-sentence if her trust is high.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Budget Remaining",
+      "Camille Trust",
+      "Marcus Trust"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE02",
+    "choicesId": "CHOICE_ACT4_SCENE02",
+    "trigger": {
+      "previousScene": "ACT4_SCENE01"
+    },
+    "nextScenes": [
+      "ACT4_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE03": {
+    "sceneId": "ACT4_SCENE03",
+    "title": "THE BIG CURVEBALL — Two Products",
+    "act": "Act 4",
+    "screenRange": "81",
+    "screenType": "Scripted Cinematic + Choice",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Full re-planning under forced scope change — the deliberate 'holy crap' moment",
+    "contentSummary": "Week 18. Everything is going well. Marcus walks in: the Board has bought a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits, risk, timeline and politics all move at once.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Budget Remaining",
+      "Schedule Health",
+      "Risk Exposure",
+      "Benefits Realisation Score",
+      "Board Confidence — all shift simultaneously"
+    ],
+    "dialogueId": "DIALOGUE_BIG-01",
+    "choicesId": "CHOICE_BIG-01",
+    "trigger": {
+      "previousScene": "ACT4_SCENE02"
+    },
+    "nextScenes": [
+      "ACT4_SCENE04"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE04": {
+    "sceneId": "ACT4_SCENE04",
+    "title": "Curveball Library — Main Wave incl. Reversal & No-Perfect-Answer Events",
+    "act": "Act 4",
+    "screenRange": "82–92",
+    "screenType": "Curveball / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Applied risk, stakeholder, procurement & communications management",
+    "contentSummary": "Full spread of Act 4 events (Tab 5), now including at least one genuinely no-win trade-off and the supplier reversal payoff.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Multiple — see Tab 5"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE04",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT4_SCENE03"
+    },
+    "nextScenes": [
+      "ACT4_SCENE05"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE05": {
+    "sceneId": "ACT4_SCENE05",
+    "title": "Monthly Status Reports (x3, now covering the re-scoped project)",
+    "act": "Act 4",
+    "screenRange": "93–98",
+    "screenType": "Report-Writing Tool",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Status reporting / governance",
+    "contentSummary": "Status reports now must account for the two-product reality.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE05",
+    "choicesId": "CHOICE_ACT4_SCENE05_M1",
+    "trigger": {
+      "previousScene": "ACT4_SCENE04"
+    },
+    "nextScenes": [
+      "ACT4_SCENE05B"
+    ],
+    "needsWriting": false
+  },
+  "ACT4_SCENE06": {
+    "sceneId": "ACT4_SCENE06",
+    "title": "Late Curveball Wave & Act Close",
+    "act": "Act 4",
+    "screenRange": "99–106",
+    "screenType": "Curveball / Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Crisis decision-making under constraint",
+    "contentSummary": "Final pressure events before commissioning; third Ellis Grant fragment.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Risk Exposure",
+      "Team Morale"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE06",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT4_SCENE05"
+    },
+    "nextScenes": [
+      "ACT5_SCENE01"
+    ],
+    "needsWriting": false,
+    "flagsSet": [
+      "ellis_fragment_5_found (conditional on camilleTrust_high)"
+    ]
+  },
+  "ACT5_SCENE01": {
+    "sceneId": "ACT5_SCENE01",
+    "title": "Commissioning & Training",
+    "act": "Act 5",
+    "screenRange": "107–109",
+    "screenType": "Checklist / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Commissioning / handover readiness",
+    "contentSummary": "Equipment commissioning and training for both product lines.",
+    "worldMemoryBeat": "facility_shot_6",
+    "variablesTouched": [
+      "Regulatory Readiness",
+      "Schedule Health"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE01",
+    "choicesId": "CHOICE_ACT5_SCENE01",
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT5_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE02": {
+    "sceneId": "ACT5_SCENE02",
+    "title": "Validation & Documentation Sweep",
+    "act": "Act 5",
+    "screenRange": "110–112",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Documentation & audit trail",
+    "contentSummary": "Player assembles the audit trail across both product lines.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE02",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT5_SCENE01"
+    },
+    "nextScenes": [
+      "ACT5_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE03": {
+    "sceneId": "ACT5_SCENE03",
+    "title": "MHRA Inspection (Final Boss)",
+    "act": "Act 5",
+    "screenRange": "113–121",
+    "screenType": "Open-Question Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "whitfield"
+    ],
+    "pmConcept": "Regulatory inspection / governance evidence",
+    "contentSummary": "Inspector Whitfield asks direct questions answered only with evidence the player actually generated — now explicitly referencing the player's own historical decisions and Reputation tag.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE03",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT5_SCENE02"
+    },
+    "nextScenes": [
+      "ACT5_SCENE04"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE04": {
+    "sceneId": "ACT5_SCENE04",
+    "title": "The Waiting",
+    "act": "Act 5",
+    "screenRange": "122–124",
+    "screenType": "Scripted Cinematic (no interaction)",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Delayed consequence — deliberate structural change from v1",
+    "contentSummary": "Inspectors leave. Nobody knows the result. The office waits in silence. The phone rings. Marcus answers, doesn't speak, slowly smiles. Fade to black.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "None — this scene deliberately withholds all variables from the player"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE04",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT5_SCENE03"
+    },
+    "nextScenes": [
+      "ACT6_SCENE01"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE01": {
+    "sceneId": "ACT6_SCENE01",
+    "title": "\"Three Weeks Later\"",
+    "act": "Act 6",
+    "screenRange": "125",
+    "screenType": "Title Card + Cinematic",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Project closure framing",
+    "contentSummary": "Hard cut forward. Consequences of the inspection are now shown for the first time.",
+    "worldMemoryBeat": "facility_shot_final_reel",
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT6_SCENE01",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT6_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE02": {
+    "sceneId": "ACT6_SCENE02",
+    "title": "The Control Room / Batch Result",
+    "act": "Act 6",
+    "screenRange": "126–128",
+    "screenType": "Cinematic / Branching",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Quality outcome / closure",
+    "contentSummary": "Team gathers; batch released or rejected across one or both product lines depending on Regulatory Readiness/Risk Exposure.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Benefits Realisation Score",
+      "Team Morale"
+    ],
+    "dialogueId": "DIALOGUE_ACT6_SCENE02",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT6_SCENE01"
+    },
+    "nextScenes": [
+      "ACT6_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE03": {
+    "sceneId": "ACT6_SCENE03",
+    "title": "Personalised Ending + Ellis Grant Epilogue",
+    "act": "Act 6",
+    "screenRange": "129–132",
+    "screenType": "Ending Scene",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Project evaluation & reflective practice",
+    "contentSummary": "One of 8 endings (Tab 7) plays, followed by the Ellis Grant reveal if all fragments were found.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "All — read-only"
+    ],
+    "dialogueId": "DIALOGUE_ACT6_SCENE03",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT6_SCENE02"
+    },
+    "nextScenes": [],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02R": {
+    "sceneId": "ACT1_SCENE02R",
+    "title": "What You Found (bridge scene)",
+    "act": "Act 1",
+    "screenRange": "5 (bridge)",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Synthesising investigation findings",
+    "contentSummary": "Engine-only bridge scene connecting the investigation choice to the PESTLE briefing — not a distinct Excel beat.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02R",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE02"
+    },
+    "nextScenes": [
+      "ACT1_SCENE03"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene, added during dialogue authoring — not one of the original 32 Excel beats."
+  },
+  "ACT1_SCENE03B": {
+    "sceneId": "ACT1_SCENE03B",
+    "title": "PESTLE Tagging (tool screen)",
+    "act": "Act 1",
+    "screenRange": "7–9 (bridge)",
+    "screenType": "Analysis Tool",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "PESTLE analysis",
+    "contentSummary": "The drag-and-drop PESTLE tagging interaction itself.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE03B",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE03"
+    },
+    "nextScenes": [
+      "ACT1_SCENE04"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — the interactive tool screen for the PESTLE beat."
+  },
+  "ACT1_SCENE06B": {
+    "sceneId": "ACT1_SCENE06B",
+    "title": "‘Never Surprise Me’ (bridge scene)",
+    "act": "Act 1",
+    "screenRange": "18 (bridge)",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Governance expectation-setting",
+    "contentSummary": "Plants the 'Never surprise me' callback (paid off in Act 4 if the player hides a problem).",
+    "worldMemoryBeat": "callback_marcus_never_surprise_me",
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE06B",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT1_SCENE06"
+    },
+    "nextScenes": [
+      "ACT2_SCENE01"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — closes Act 1 and hands off to Act 2."
+  },
+  "ACT4_SCENE01B": {
+    "sceneId": "ACT4_SCENE01B",
+    "title": "Ellis Fragment #4 (bridge scene)",
+    "act": "Act 4",
+    "screenRange": "bridge",
+    "screenType": "Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Reflective practice",
+    "contentSummary": "Ellis Fragment #4 discovery, connecting EV-NP1's resolution to Act 4's opening.",
+    "worldMemoryBeat": "ellis_fragment_4",
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT4_SCENE01B",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT4_SCENE01"
+    },
+    "nextScenes": [
+      "ACT4_SCENE02"
+    ],
+    "needsWriting": false,
+    "flagsSet": [
+      "ellis_fragment_4_found"
+    ],
+    "note": "Non-canonical bridge scene."
+  },
+  "ACT4_SCENE05B": {
+    "sceneId": "ACT4_SCENE05B",
+    "title": "Status Report — Month 2 (bridge)",
+    "act": "Act 4",
+    "screenRange": "bridge",
+    "screenType": "Report-Writing Tool",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Status reporting / governance",
+    "contentSummary": "Status Report — Month 2 (bridge)",
+    "worldMemoryBeat": "callback_marcus_never_surprise_me",
+    "variablesTouched": [
+      "Marcus Trust",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE05B",
+    "choicesId": "CHOICE_ACT4_SCENE05_M2",
+    "trigger": {
+      "previousScene": "ACT4_SCENE05"
+    },
+    "nextScenes": [
+      "ACT4_SCENE05C"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — second/third monthly status report in the x3 sequence."
+  },
+  "ACT4_SCENE05C": {
+    "sceneId": "ACT4_SCENE05C",
+    "title": "Status Report — Month 3 close (bridge)",
+    "act": "Act 4",
+    "screenRange": "bridge",
+    "screenType": "Report-Writing Tool",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Status reporting / governance",
+    "contentSummary": "Status Report — Month 3 close (bridge)",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Marcus Trust",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE05C",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT4_SCENE05B"
+    },
+    "nextScenes": [
+      "ACT4_SCENE06"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — second/third monthly status report in the x3 sequence."
+  }
+}

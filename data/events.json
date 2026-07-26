@@ -1,0 +1,564 @@
+{
+  "BIG-01": {
+    "eventId": "BIG-01",
+    "title": "The Board Bought Another Company",
+    "act": "Act 4",
+    "trigger": "Scheduled — fixed narrative beat, Week 18",
+    "description": "Marcus walks in mid-project: the Board has acquired a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits case, risk profile, timeline and internal politics all move simultaneously.",
+    "pmConcept": "Emergency re-planning / scope change at portfolio level",
+    "impact": [
+      "Budget Remaining",
+      "Schedule Health",
+      "Risk Exposure",
+      "Benefits Realisation Score",
+      "Board Confidence — the only event in the game to move five variables in one beat"
+    ],
+    "participants": [
+      "marcus"
+    ],
+    "possibleChoices": [
+      "Push back and negotiate a phased approach",
+      "accept fully and re-plan WBS+CBS live",
+      "accept partially and quietly protect the riskiest workstream"
+    ],
+    "designTag": "THE BIG CURVEBALL — the single 'holy crap' moment",
+    "section": "Event / Curveball Library (v2)",
+    "dialogueId": "DIALOGUE_BIG-01",
+    "choicesId": "CHOICE_BIG-01"
+  },
+  "EV-R1": {
+    "eventId": "EV-R1",
+    "title": "Supplier Reversal",
+    "act": "Act 4",
+    "trigger": "Conditional — fires against whichever supplier was NOT chosen in Act 3",
+    "description": "The unchosen supplier from the Act 3 Procurement Pitch either disappoints badly or turns out to have been the safer bet all along, recontextualising that earlier decision.",
+    "pmConcept": "Retrospective risk judgement — teaches that a decision can only be evaluated against the information available at the time",
+    "impact": [
+      "Budget Remaining",
+      "Schedule Health",
+      "Risk Exposure"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Renegotiate emergency terms with the chosen supplier",
+      "fall back to the unchosen supplier at a premium",
+      "absorb the impact and adjust the schedule"
+    ],
+    "designTag": "AMBIGUITY / REVERSAL — no dominant 'correct' Act 3 choice exists once this fires",
+    "section": "AMBIGUITY & REVERSAL EVENTS",
+    "choicesId": "CHOICE_EV-R1",
+    "dialogueId": "DIALOGUE_EV-R1"
+  },
+  "EV-R2": {
+    "eventId": "EV-R2",
+    "title": "The Deferred Decision Pays Off",
+    "act": "Act 3→4",
+    "trigger": "Conditional — fires if the player deferred or rejected the automated inspection camera change request",
+    "description": "Budget the player protected by declining an earlier scope addition turns out to be exactly what's needed to absorb BIG-01's re-scoping.",
+    "pmConcept": "Delayed-value trade-offs / opportunity cost",
+    "impact": [
+      "Budget Remaining (revealed",
+      "not spent)"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "No choice — a recontextualising narrative beat that shows the consequence of the earlier decision"
+    ],
+    "designTag": "AMBIGUITY / REVERSAL — a decision that felt over-cautious in the moment pays off months later",
+    "section": "AMBIGUITY & REVERSAL EVENTS",
+    "dialogueId": "DIALOGUE_EV-R2"
+  },
+  "EV-R3": {
+    "eventId": "EV-R3",
+    "title": "The Ally You Didn't Expect",
+    "act": "Act 4",
+    "trigger": "Conditional — fires if Camille's trust band is Cold/Cool through Act 2–3",
+    "description": "A stakeholder who spent Acts 1–3 opposing the player (Camille, if under-trusted early) becomes an unexpectedly strong advocate at a critical moment — recontextualising her as an ally rather than an obstacle.",
+    "pmConcept": "Stakeholder relationship management over time",
+    "impact": [
+      "Camille Trust",
+      "Stakeholder Goodwill"
+    ],
+    "participants": [
+      "camille"
+    ],
+    "possibleChoices": [
+      "Accept her support and adjust the plan accordingly",
+      "remain guarded and proceed alone"
+    ],
+    "designTag": "AMBIGUITY / REVERSAL — an opponent becomes an ally without a single explicit 'trust' choice causing it",
+    "section": "AMBIGUITY & REVERSAL EVENTS",
+    "choicesId": "CHOICE_EV-R3",
+    "dialogueId": "DIALOGUE_EV-R3"
+  },
+  "EV-R4": {
+    "eventId": "EV-R4",
+    "title": "The 'Bad' Decision That Wasn't",
+    "act": "Act 4",
+    "trigger": "Conditional — fires if the player chose the cheapest supplier (SteriTech) in Act 3",
+    "description": "An unexpected external event (a competitor supplier's insolvency) means the player's earlier budget-driven, seemingly risk-laden choice turns out to be the best-positioned option in hindsight.",
+    "pmConcept": "Judging decisions by process, not just outcome",
+    "impact": [
+      "Risk Exposure (revised down)",
+      "Board Confidence"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "No choice — a recontextualising beat"
+    ],
+    "designTag": "AMBIGUITY / REVERSAL — deliberately validates a decision that looked unwise at the time",
+    "section": "AMBIGUITY & REVERSAL EVENTS",
+    "dialogueId": "DIALOGUE_EV-R4"
+  },
+  "EV-NP1": {
+    "eventId": "EV-NP1",
+    "title": "Isolator Supplier Delay — No Perfect Answer",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "The isolator supplier confirms a delay. There is no option that protects both budget and schedule.",
+    "pmConcept": "Genuine trade-off decision-making",
+    "impact": [
+      "Schedule Health OR Budget Remaining",
+      "never both"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Pay to expedite (saves time, costs budget)",
+      "absorb the delay (saves budget, costs time) — no third option exists"
+    ],
+    "designTag": "NO PERFECT ANSWER — the trade-off is the design intent, not a puzzle to be solved",
+    "section": "NO-PERFECT-ANSWER EVENTS",
+    "dialogueId": "DIALOGUE_ACT4_SCENE01",
+    "choicesId": "CHOICE_ACT4_SCENE01"
+  },
+  "EV-NP2": {
+    "eventId": "EV-NP2",
+    "title": "Two Products, One Validation Engineer",
+    "act": "Act 4",
+    "trigger": "Conditional — fires only after BIG-01",
+    "description": "With two products now in scope, there are not enough validation resources to fully validate both lines on schedule.",
+    "pmConcept": "Resource prioritisation under irreducible constraint",
+    "impact": [
+      "Schedule Health",
+      "Regulatory Readiness",
+      "Budget Remaining"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Fully validate Product A on time, delay Product B",
+      "split resource thinly across both and accept schedule slip on both",
+      "bring in premium contract resource, straining Budget Remaining"
+    ],
+    "designTag": "NO PERFECT ANSWER — every option knowingly under-serves something",
+    "section": "NO-PERFECT-ANSWER EVENTS",
+    "choicesId": "CHOICE_EV-NP2",
+    "dialogueId": "DIALOGUE_EV-NP2"
+  },
+  "EV-01": {
+    "eventId": "EV-01",
+    "title": "Isolator Supplier Delay (superseded by EV-NP1 in v2)",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "Retained from v1 for continuity reference only — see EV-NP1 for the v2 no-perfect-answer version.",
+    "pmConcept": "Risk response / schedule recovery",
+    "impact": [
+      "See EV-NP1"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "See EV-NP1"
+    ],
+    "designTag": "Superseded — kept for traceability",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)"
+  },
+  "EV-02": {
+    "eventId": "EV-02",
+    "title": "Cleanroom GMP Review Failure",
+    "act": "Act 4",
+    "trigger": "Conditional (Regulatory Readiness < 60 at trigger)",
+    "description": "The cleanroom design fails a Good Manufacturing Practice review.",
+    "pmConcept": "Quality management / rework decision",
+    "impact": [
+      "Regulatory Readiness",
+      "Budget Remaining",
+      "Camille Trust"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Fund immediate rework",
+      "appeal the finding",
+      "phase the fix around commissioning"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-02",
+    "dialogueId": "DIALOGUE_EV-02"
+  },
+  "EV-03": {
+    "eventId": "EV-03",
+    "title": "Local Resident Traffic Complaints",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "Residents complain about construction traffic.",
+    "pmConcept": "Stakeholder management (external)",
+    "impact": [
+      "Stakeholder Goodwill",
+      "Schedule Health"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Community liaison meeting",
+      "adjust delivery hours",
+      "absorb reputational risk"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-03",
+    "dialogueId": "DIALOGUE_EV-03"
+  },
+  "EV-04": {
+    "eventId": "EV-04",
+    "title": "Investor Visit Brought Forward",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "An investor visit is moved up unexpectedly.",
+    "pmConcept": "Communications & stakeholder management",
+    "impact": [
+      "Board Confidence",
+      "Marcus Trust"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Reprioritise visible workstreams",
+      "brief investors candidly",
+      "delay other work to stage the visit"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-04",
+    "dialogueId": "DIALOGUE_EV-04"
+  },
+  "EV-05": {
+    "eventId": "EV-05",
+    "title": "Contamination Found During Commissioning",
+    "act": "Act 4",
+    "trigger": "Conditional (Risk Exposure > 50)",
+    "description": "Contamination is discovered during commissioning.",
+    "pmConcept": "Root cause & risk response",
+    "impact": [
+      "Regulatory Readiness",
+      "Camille Trust",
+      "Schedule Health"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Halt the line",
+      "contain and continue in parallel",
+      "escalate immediately to Camille"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-05",
+    "dialogueId": "DIALOGUE_EV-05"
+  },
+  "EV-06": {
+    "eventId": "EV-06",
+    "title": "Electrical Contractor Goes Bankrupt",
+    "act": "Act 4",
+    "trigger": "Conditional (contractor risk flagged in Act 2 unresolved)",
+    "description": "The electrical contractor collapses mid-build.",
+    "pmConcept": "Procurement risk / contingency planning",
+    "impact": [
+      "Schedule Health",
+      "Budget Remaining",
+      "Risk Exposure"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Emergency re-tender",
+      "absorb via secondary supplier already on the Risk Register",
+      "delay dependent work"
+    ],
+    "designTag": "Standard — foreshadowed since Act 2",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-06",
+    "dialogueId": "DIALOGUE_EV-06"
+  },
+  "EV-07": {
+    "eventId": "EV-07",
+    "title": "Key Automation Engineer Resigns",
+    "act": "Act 4",
+    "trigger": "Conditional (Team Morale < 40)",
+    "description": "An engineer resigns under sustained pressure.",
+    "pmConcept": "Team leadership / resourcing",
+    "impact": [
+      "Team Morale",
+      "Schedule Health",
+      "Budget Remaining"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Emergency contractor hire",
+      "redistribute workload",
+      "renegotiate the Act 5 timeline"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-07",
+    "dialogueId": "DIALOGUE_EV-07"
+  },
+  "EV-08": {
+    "eventId": "EV-08",
+    "title": "Extreme Weather Floods the Loading Bay",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "Severe weather damages partially-installed equipment.",
+    "pmConcept": "Risk response / business continuity",
+    "impact": [
+      "Budget Remaining",
+      "Schedule Health"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Emergency remediation spend",
+      "claim on insurance",
+      "reroute logistics temporarily"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-08",
+    "dialogueId": "DIALOGUE_EV-08"
+  },
+  "EV-09": {
+    "eventId": "EV-09",
+    "title": "Cyberattack Locks the Building Management System",
+    "act": "Act 4",
+    "trigger": "Conditional (BMS flagged as a dependency)",
+    "description": "A cyberattack halts environmental controls.",
+    "pmConcept": "Risk response / crisis communications",
+    "impact": [
+      "Risk Exposure",
+      "Regulatory Readiness",
+      "Marcus Trust"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Isolate and rebuild",
+      "pay for emergency vendor support",
+      "run manual controls temporarily"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-09",
+    "dialogueId": "DIALOGUE_EV-09"
+  },
+  "EV-10": {
+    "eventId": "EV-10",
+    "title": "Finance Freezes Part of the Contingency Budget",
+    "act": "Act 4",
+    "trigger": "Conditional (Budget Remaining < 15%)",
+    "description": "Daniel freezes remaining contingency.",
+    "pmConcept": "Cost control / negotiation",
+    "impact": [
+      "Budget Remaining",
+      "Marcus Trust",
+      "Benefits Realisation Score"
+    ],
+    "participants": [
+      "daniel"
+    ],
+    "possibleChoices": [
+      "Build the case with the Benefits Register",
+      "descope a 'Should'",
+      "absorb the freeze"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-10",
+    "dialogueId": "DIALOGUE_EV-10"
+  },
+  "EV-11": {
+    "eventId": "EV-11",
+    "title": "New MHRA Guidance Note Published",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "A new guidance note forces a design review.",
+    "pmConcept": "Change control / regulatory horizon-scanning",
+    "impact": [
+      "Regulatory Readiness",
+      "Risk Exposure"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Full review now",
+      "defer with documented risk acceptance",
+      "partial review on highest-risk areas only"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-11",
+    "dialogueId": "DIALOGUE_EV-11"
+  },
+  "EV-12": {
+    "eventId": "EV-12",
+    "title": "Operations Requests Extra Inspection Camera",
+    "act": "Act 4",
+    "trigger": "Conditional (fires after the Change Control scene)",
+    "description": "Priya asks for scope after equipment has already been ordered.",
+    "pmConcept": "Change control",
+    "impact": [
+      "Budget Remaining",
+      "Camille Trust",
+      "Marcus Trust"
+    ],
+    "participants": [
+      "priya"
+    ],
+    "possibleChoices": [
+      "Approve as a funded change",
+      "defer to a future phase",
+      "reject with rationale logged"
+    ],
+    "designTag": "Standard — also seeds EV-R2",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "dialogueId": "DIALOGUE_ACT4_SCENE02",
+    "choicesId": "CHOICE_ACT4_SCENE02"
+  },
+  "EV-13": {
+    "eventId": "EV-13",
+    "title": "Supplier Ships Wrong Voltage Equipment",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "A critical supplier ships the wrong voltage spec.",
+    "pmConcept": "Procurement / quality control at goods-in",
+    "impact": [
+      "Schedule Health",
+      "Risk Exposure",
+      "Budget Remaining"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Reject and re-order",
+      "attempt on-site conversion",
+      "escalate for expedited replacement"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-13",
+    "dialogueId": "DIALOGUE_EV-13"
+  },
+  "EV-14": {
+    "eventId": "EV-14",
+    "title": "Validation Engineer Poached by a Competitor",
+    "act": "Act 4",
+    "trigger": "Conditional (Team Morale < 50 OR Marcus Trust Cold/Cool)",
+    "description": "An engineer is poached a week before commissioning.",
+    "pmConcept": "Resourcing risk / succession planning",
+    "impact": [
+      "Team Morale",
+      "Regulatory Readiness",
+      "Budget Remaining"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Emergency contract hire",
+      "redistribute with Camille's support",
+      "delay commissioning to re-recruit"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-14",
+    "dialogueId": "DIALOGUE_EV-14"
+  },
+  "EV-15": {
+    "eventId": "EV-15",
+    "title": "Social Media Safety Claim",
+    "act": "Act 4",
+    "trigger": "Scheduled",
+    "description": "A social media post claims the project is unsafe.",
+    "pmConcept": "Crisis communications / stakeholder management",
+    "impact": [
+      "Stakeholder Goodwill",
+      "Board Confidence"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Public factual rebuttal",
+      "proactive community briefing",
+      "Board-only briefing"
+    ],
+    "designTag": "Standard",
+    "section": "RETAINED FROM v1 (Main Act 4 Wave)",
+    "choicesId": "CHOICE_EV-15",
+    "dialogueId": "DIALOGUE_EV-15"
+  },
+  "EV-E1": {
+    "eventId": "EV-E1",
+    "title": "Missing Business Case Appendices",
+    "act": "Act 1",
+    "trigger": "Scheduled",
+    "description": "The original Business Case is missing appendices.",
+    "pmConcept": "Business case governance / evidence gathering",
+    "impact": [
+      "Regulatory Readiness",
+      "unlocks Ellis Fragment #1"
+    ],
+    "participants": [],
+    "possibleChoices": [
+      "Search emails",
+      "search Teams",
+      "search shared drive (all lead to the same discovery)"
+    ],
+    "designTag": "Standard",
+    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "dialogueId": "DIALOGUE_ACT1_SCENE05",
+    "choicesId": null,
+    "note": "Content lives in ACT1_SCENE05 (Missing Appendices) rather than duplicated here."
+  },
+  "EV-E2": {
+    "eventId": "EV-E2",
+    "title": "Contractor \"Gone Quiet\"",
+    "act": "Act 2",
+    "trigger": "Scheduled",
+    "description": "Vaughn mentions the electrical contractor has gone quiet — the seed of EV-06.",
+    "pmConcept": "Early risk identification",
+    "impact": [
+      "Risk Exposure"
+    ],
+    "participants": [
+      "vaughn"
+    ],
+    "possibleChoices": [
+      "Log formally in the Risk Register",
+      "raise informally with Tomasz",
+      "wait and monitor"
+    ],
+    "designTag": "Standard",
+    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "dialogueId": "DIALOGUE_ACT2_SCENE04",
+    "choicesId": "CHOICE_ACT2_SCENE04",
+    "note": "Content lives in ACT2_SCENE04 (Risk Workshop) rather than duplicated here."
+  },
+  "EV-E3": {
+    "eventId": "EV-E3",
+    "title": "MoSCoW Over-commitment Trap",
+    "act": "Act 2",
+    "trigger": "Scheduled",
+    "description": "If the player marks everything 'Must', Marcus notes the budget has just doubled.",
+    "pmConcept": "Prioritisation discipline",
+    "impact": [
+      "Budget Remaining"
+    ],
+    "participants": [
+      "marcus"
+    ],
+    "possibleChoices": [
+      "Player self-corrects, or proceeds and carries the budget hit"
+    ],
+    "designTag": "Standard",
+    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "dialogueId": null,
+    "choicesId": null,
+    "note": "Runtime-triggered reaction inside ACT2_SCENE02's MoSCoW tool (fires if player marks everything Must) — not a standalone scripted scene, so no dedicated dialogue entry."
+  }
+}
