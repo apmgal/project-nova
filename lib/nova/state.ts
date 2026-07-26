@@ -1,4 +1,4 @@
-import type { GameState, Flags, Character, DialogueLine } from "./types";
+import type { GameState, Flags, Character, DialogueLine, ToolScreenBlock } from "./types";
 import { getCharacter, getDefaultGameState } from "./data";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
@@ -27,6 +27,7 @@ export function loadGame(): GameState | null {
     // older save doesn't crash a newer build of the engine.
     if (state.currentBackground === undefined) state.currentBackground = null;
     if (!state.toolProgress) state.toolProgress = {};
+    if (!state.toolPlacements) state.toolPlacements = {};
     return state;
   } catch {
     return null;
@@ -116,8 +117,24 @@ export function applySceneFlagsSet(
 // Dialogue line visibility
 // ---------------------------------------------------------------------------
 
+/**
+ * A condition named "..._not_X" (e.g. "automation_not_marked_must",
+ * "camilleTrust_not_high") is never a separately-stored flag — it means
+ * "the positive flag is false or absent", derived at render time by
+ * replacing the first "_not_" with "_" to get the positive flag's name
+ * and negating it. This lets content author mutually-exclusive dialogue
+ * pairs off a single stored flag instead of the engine (or the content
+ * team) having to keep two flags in sync.
+ */
 export function isLineVisible(condition: string | undefined, flags: Flags): boolean {
   if (!condition) return true;
+  const negationMarker = "_not_";
+  const markerIndex = condition.indexOf(negationMarker);
+  if (markerIndex !== -1) {
+    const positiveFlag =
+      condition.slice(0, markerIndex) + "_" + condition.slice(markerIndex + negationMarker.length);
+    return !flags[positiveFlag];
+  }
   return Boolean(flags[condition]);
 }
 
@@ -296,4 +313,85 @@ export function isToolComplete(
   totalCards: number
 ): boolean {
   return (state.toolProgress[toolId]?.length ?? 0) >= totalCards;
+}
+
+// ---------------------------------------------------------------------------
+// Priority-assignment tool progress — generic "assign every card to a
+// bucket at a real cost" persistence (e.g. MoSCoW). Every bucket is valid;
+// nothing here is specific to Must/Should/Could/Won't or to budget.
+// ---------------------------------------------------------------------------
+
+/** Re-checks a priority tool's overcommitRule (if it has one) against the
+ * current bucket distribution and sets/clears its reactionFlag to match —
+ * live off the FINAL distribution, not sticky from the first time the
+ * threshold was crossed, so moving cards back out of the bucket un-fires
+ * it again before the player finishes. */
+function applyOvercommitRule(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  placements: Record<string, string>
+): GameState {
+  const rule = toolScreen.overcommitRule;
+  if (!rule) return state;
+  const count = Object.values(placements).filter((bucket) => bucket === rule.bucket).length;
+  const shouldBeSet = count >= rule.minCount;
+  if (Boolean(state.flags[rule.reactionFlag]) === shouldBeSet) return state;
+  return { ...state, flags: { ...state.flags, [rule.reactionFlag]: shouldBeSet } };
+}
+
+/**
+ * Places (or re-places) a card into a bucket for a priority_assignment
+ * tool. Unlike placeToolCard, every bucket is a valid destination — there
+ * is no wrong-bucket rejection. Refunds the card's cost in its previous
+ * bucket (if any) before charging its cost in the new one, so re-placing
+ * a card doesn't stack both costs. Applies the new bucket's flagsByBucket
+ * (positive flags only), then re-evaluates the tool's overcommitRule
+ * against the resulting distribution.
+ */
+export function placePriorityCard(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  cardId: string,
+  bucket: string
+): GameState {
+  const card = toolScreen.cards.find((c) => c.id === cardId);
+  if (!card || !card.costByBucket) return state;
+
+  const toolId = toolScreen.toolId;
+  const currentPlacements = state.toolPlacements[toolId] ?? {};
+  const previousBucket = currentPlacements[cardId];
+  if (previousBucket === bucket) return state;
+
+  const budgetKey = toolScreen.budgetVariable ?? "budgetRemaining";
+  let budget = state.projectMetrics[budgetKey] ?? 0;
+  if (previousBucket) budget += card.costByBucket[previousBucket] ?? 0;
+  budget -= card.costByBucket[bucket] ?? 0;
+
+  const nextFlags = { ...state.flags };
+  const flagsForBucket = card.flagsByBucket?.[bucket];
+  if (flagsForBucket) {
+    for (const [key, value] of Object.entries(flagsForBucket)) {
+      if (value) nextFlags[key] = true; // only positive flags are ever set
+    }
+  }
+
+  const nextPlacements = { ...currentPlacements, [cardId]: bucket };
+
+  let next: GameState = {
+    ...state,
+    projectMetrics: { ...state.projectMetrics, [budgetKey]: budget },
+    flags: nextFlags,
+    toolPlacements: { ...state.toolPlacements, [toolId]: nextPlacements },
+  };
+
+  next = applyOvercommitRule(next, toolScreen, nextPlacements);
+  return next;
+}
+
+export function isPriorityToolComplete(
+  state: GameState,
+  toolId: string,
+  totalCards: number
+): boolean {
+  return Object.keys(state.toolPlacements[toolId] ?? {}).length >= totalCards;
 }

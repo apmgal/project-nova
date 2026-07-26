@@ -66,7 +66,10 @@
     "ending_END-4": false,
     "ending_END-5": false,
     "ending_END-6": false,
-    "ending_END-7": false
+    "ending_END-7": false,
+    "filling_line_committed_act2": false,
+    "automation_marked_must": false,
+    "moscow_overcommitted": false
   },
   "choiceHistory": []
 }

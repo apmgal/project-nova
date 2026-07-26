@@ -99,7 +99,8 @@
       "ACT1_SCENE05"
     ],
     "needsWriting": false,
-    "toolId": "TOOL_ACT1_SCENE04_SWOT"
+    "toolId": "TOOL_ACT1_SCENE04_SWOT",
+    "postToolDialogueId": "DIALOGUE_ACT1_SCENE04_POST"
   },
   "ACT1_SCENE05": {
     "sceneId": "ACT1_SCENE05",
@@ -206,7 +207,9 @@
     "nextScenes": [
       "ACT2_SCENE03"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT2_SCENE02_MOSCOW",
+    "postToolDialogueId": "DIALOGUE_ACT2_SCENE02_POST"
   },
   "ACT2_SCENE03": {
     "sceneId": "ACT2_SCENE03",
@@ -870,7 +873,7 @@
     "contentSummary": "The drag-and-drop PESTLE tagging interaction itself.",
     "worldMemoryBeat": null,
     "variablesTouched": [],
-    "dialogueId": "DIALOGUE_ACT1_SCENE03B",
+    "dialogueId": null,
     "choicesId": null,
     "trigger": {
       "previousScene": "ACT1_SCENE03"
@@ -880,7 +883,8 @@
     ],
     "needsWriting": false,
     "note": "Non-canonical bridge scene — the interactive tool screen for the PESTLE beat.",
-    "toolId": "TOOL_ACT1_SCENE03B_PESTLE"
+    "toolId": "TOOL_ACT1_SCENE03B_PESTLE",
+    "postToolDialogueId": "DIALOGUE_ACT1_SCENE03B"
   },
   "ACT1_SCENE06B": {
     "sceneId": "ACT1_SCENE06B",

@@ -143,7 +143,14 @@
         "speaker": "marcus",
         "emotion": "concerned",
         "text": "Strengths, weaknesses, opportunities, threats. Yours to fill in. Don't flatter us."
-      },
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT1_SCENE04_POST": {
+    "dialogueId": "DIALOGUE_ACT1_SCENE04_POST",
+    "sourceScene": "ACT1_SCENE04",
+    "lines": [
       {
         "speaker": "narrator",
         "emotion": null,
@@ -283,16 +290,31 @@
         "speaker": "marcus",
         "emotion": "neutral",
         "text": "One thing at a time. You're chairing this — talk us through it."
-      },
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT2_SCENE02_POST": {
+    "dialogueId": "DIALOGUE_ACT2_SCENE02_POST",
+    "sourceScene": "ACT2_SCENE02",
+    "lines": [
       {
-        "speaker": "narrator",
-        "emotion": null,
-        "text": "[Player drags requirements into Must / Should / Could / Won't. The room watches the board fill in. Nobody says anything until it's done.]"
+        "speaker": "marcus",
+        "emotion": "concerned",
+        "text": "You've just doubled the budget.",
+        "condition": "moscow_overcommitted"
       },
       {
         "speaker": "priya",
         "emotion": "frustrated",
-        "text": "So automation's a \"Should\" now? That's going to hit us in commissioning, not now — when it's expensive to fix."
+        "text": "So automation's a \"Should\" now? That's going to hit us in commissioning, not now — when it's expensive to fix.",
+        "condition": "automation_not_marked_must"
+      },
+      {
+        "speaker": "priya",
+        "emotion": "warm",
+        "text": "Automation as a Must. Thank you — that's going to save us weeks in commissioning.",
+        "condition": "automation_marked_must"
       },
       {
         "speaker": "narrator",
@@ -315,7 +337,8 @@
         "text": "...Noted, Camille. Final call. Does the board stand as it is, or are you changing it?"
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Line 1 (moscow_overcommitted) only fires if 6+ of 8 MoSCoW cards ended up in Must (EV-E3). Lines 2/3 are mutually exclusive on automation_marked_must (set by the MoSCoW tool screen, first card). Exactly one of 2/3 should render before Camille's interruption."
   },
   "DIALOGUE_ACT2_SCENE03": {
     "dialogueId": "DIALOGUE_ACT2_SCENE03",
@@ -791,7 +814,20 @@
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "Small ask. We squeeze one more filling line into the room — same footprint, better throughput. I've already checked it fits."
+        "text": "Remember the filling line we put through the Board back in week two? I'd like the actual go-ahead now — the room's ready.",
+        "condition": "filling_line_committed_act2"
+      },
+      {
+        "speaker": "marcus",
+        "emotion": "neutral",
+        "text": "We already agreed to that one, didn't we?",
+        "condition": "filling_line_committed_act2"
+      },
+      {
+        "speaker": "priya",
+        "emotion": "neutral",
+        "text": "Small ask. We squeeze one more filling line into the room — same footprint, better throughput. I've already checked it fits.",
+        "condition": "filling_line_not_committed_act2"
       },
       {
         "speaker": "marcus",
@@ -827,7 +863,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render."
+    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render. ADDITIONALLY: the scene now opens with one of two mutually exclusive framings based on filling_line_committed_act2 (set in the Act 2 MoSCoW tool) — a 'confirming a prior commitment' framing vs. a 'brand new ask' framing. Marcus's 'I like it' line and everything from Camille's revalidation concern onward is UNCHANGED and follows either opener."
   },
   "DIALOGUE_ACT4_SCENE03": {
     "dialogueId": "DIALOGUE_ACT4_SCENE03",

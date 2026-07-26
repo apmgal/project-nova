@@ -15,22 +15,26 @@ import type {
 } from "./types";
 
 // ---------------------------------------------------------------------------
-// Scope: this build only loads Act 1 content. Per project instructions we
-// filter scenes.json down to act === "Act 1" — currently the six canonical
-// beats (ACT1_SCENE01-06) plus whatever bridge scenes the data defines
-// (e.g. ACT1_SCENE02R, ACT1_SCENE02B, ACT1_SCENE03B, ACT1_SCENE06B). This
-// filter is dynamic, so any scene added to the data with act: "Act 1" is
-// picked up automatically without an engine change. Acts 2-6 are present in
-// the underlying JSON files but are never read past this filter.
+// Scope: this build only loads Act 1 + Act 2 content. Per project
+// instructions we filter scenes.json down to act === "Act 1" or "Act 2" —
+// currently Act 1's six canonical beats (ACT1_SCENE01-06) plus whatever
+// bridge scenes the data defines (e.g. ACT1_SCENE02R, ACT1_SCENE02B,
+// ACT1_SCENE03B, ACT1_SCENE06B), and Act 2's six canonical beats
+// (ACT2_SCENE01-06). This filter is dynamic, so any scene added to the data
+// with act: "Act 1" or "Act 2" is picked up automatically without an engine
+// change. Acts 3-6 are present in the underlying JSON files but are never
+// read past this filter.
 // ---------------------------------------------------------------------------
+
+const BUILT_ACTS = new Set(["Act 1", "Act 2"]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
 
-export const ACT1_SCENES: Record<string, Scene> = Object.fromEntries(
-  Object.entries(allScenes).filter(([, scene]) => scene.act === "Act 1")
+export const BUILT_SCENES: Record<string, Scene> = Object.fromEntries(
+  Object.entries(allScenes).filter(([, scene]) => BUILT_ACTS.has(scene.act))
 );
 
-export const ACT1_SCENE_IDS = new Set(Object.keys(ACT1_SCENES));
+export const BUILT_SCENE_IDS = new Set(Object.keys(BUILT_SCENES));
 
 const dialogueBlocks = dialogueRaw as unknown as Record<string, DialogueBlock>;
 const choiceBlocks = choicesRaw as unknown as Record<string, ChoiceBlock>;
@@ -40,12 +44,12 @@ const backgroundAssets = (assetsRaw as { backgrounds?: Record<string, string> })
   .backgrounds ?? {};
 
 export function getScene(sceneId: string): Scene | null {
-  return ACT1_SCENES[sceneId] ?? null;
+  return BUILT_SCENES[sceneId] ?? null;
 }
 
-/** True if a scene id is part of the Act 1 content this build ships. */
+/** True if a scene id is part of the Act 1/Act 2 content this build ships. */
 export function isSceneAvailable(sceneId: string): boolean {
-  return ACT1_SCENE_IDS.has(sceneId);
+  return BUILT_SCENE_IDS.has(sceneId);
 }
 
 export function getDialogue(dialogueId: string | null): DialogueBlock | null {
@@ -81,5 +85,6 @@ export function getDefaultGameState(): GameState {
   // than requiring the content team to edit the schema file by hand.
   if (state.currentBackground === undefined) state.currentBackground = null;
   if (!state.toolProgress) state.toolProgress = {};
+  if (!state.toolPlacements) state.toolPlacements = {};
   return state;
 }

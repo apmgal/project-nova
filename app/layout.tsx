@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Project NOVA — Act 1",
-  description: "Project NOVA narrative simulation — Act 1 playable build",
+  title: "Project NOVA — Act 1–2",
+  description: "Project NOVA narrative simulation — Act 1–2 playable build",
 };
 
 export default function RootLayout({

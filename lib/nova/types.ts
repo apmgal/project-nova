@@ -36,6 +36,13 @@ export interface GameState {
    * so far, keyed by toolId. An entry existing (even empty) means the
    * player has reached that tool screen's action phase. */
   toolProgress: Record<string, string[]>;
+  /** Per-tool-screen record of which bucket each card currently sits in,
+   * keyed by toolId then cardId. Used by "priority_assignment" tools
+   * (e.g. MoSCoW) where every bucket is a valid placement and a card can
+   * be moved between buckets — unlike toolProgress's simple placed/not
+   * list for "sort_into_buckets" tools, this needs to remember WHICH
+   * bucket, so a re-placement can refund the old bucket's cost. */
+  toolPlacements: Record<string, Record<string, string>>;
 }
 
 export interface ChoiceHistoryEntry {
@@ -60,9 +67,15 @@ export interface Scene {
   dialogueId: string | null;
   choicesId: string | null;
   /** References a tool_screens.json entry (e.g. PESTLE/SWOT sort screens).
-   * When set, this scene's action phase (after dialogue finishes) is an
-   * interactive ToolScreen instead of choices or a plain Continue button. */
+   * When set, dialogueId's lines play first, then this interactive
+   * ToolScreen, then (if postToolDialogueId is set) more dialogue, then
+   * choices or a plain Continue button. */
   toolId?: string | null;
+  /** Dialogue block shown after the tool screen completes, before this
+   * scene's final action (choices/Continue). Only meaningful alongside
+   * toolId — lets a reaction line follow the interactive tool instead of
+   * every line being forced to play before it. */
+  postToolDialogueId?: string | null;
   trigger?: { previousScene: string | null };
   nextScenes: string[];
   needsWriting?: boolean;
@@ -112,15 +125,31 @@ export interface Character {
 }
 
 // ---------------------------------------------------------------------------
-// Tool screens (tool_screens.json) — generic "sort cards into buckets"
-// interactions. Reused across PESTLE/SWOT now and other boards later; the
-// engine never branches on toolId or bucket/card names.
+// Tool screens (tool_screens.json) — generic bucket-assignment interactions.
+// Two `type`s share this shape:
+//   - "sort_into_buckets" (PESTLE/SWOT): each card has exactly one
+//     correctBucket; wrong placements bounce back with no penalty.
+//   - "priority_assignment" (MoSCoW): every bucket is a valid placement —
+//     each card has a costByBucket instead, and an optional flagsByBucket.
+// The engine never branches on toolId or bucket/card names, only on which
+// of these optional fields a card/block happens to have.
 // ---------------------------------------------------------------------------
 
 export interface ToolCard {
   id: string;
   text: string;
-  correctBucket: string;
+  /** sort_into_buckets only: the one bucket this card is correct in. */
+  correctBucket?: string;
+  /** priority_assignment only: cost (usually deducted from budgetVariable)
+   * for placing this card in each bucket. Re-placing into a different
+   * bucket refunds the old bucket's cost before charging the new one. */
+  costByBucket?: Record<string, number>;
+  /** priority_assignment only: flags to set (true only — never false) when
+   * this card lands in a given bucket. Re-evaluated on every placement, so
+   * moving a card out of a bucket doesn't retroactively unset flags it
+   * already caused — only overcommitRule's flag is live/reactive. */
+  flagsByBucket?: Record<string, Flags>;
+  championedBy?: string;
 }
 
 export interface ToolScreenBlock {
@@ -137,6 +166,22 @@ export interface ToolScreenBlock {
   selectionBehavior?: string;
   selectedCardStyle?: string;
   completionCondition?: string;
+  /** priority_assignment only: which ProjectMetrics key placements deduct
+   * from/refund to. Defaults to "budgetRemaining" if unset. */
+  budgetVariable?: string;
+  /** priority_assignment only: a rule the engine checks after every
+   * placement — if `bucket` ends up holding `minCount` or more cards, it
+   * sets `reactionFlag` true (and clears it again if the player moves
+   * cards back out below the threshold), for dialogue to key a reaction
+   * line off. `trigger`/`condition`/`note` are documentation only. */
+  overcommitRule?: {
+    condition?: string;
+    bucket: string;
+    minCount: number;
+    trigger?: string;
+    reactionFlag: string;
+    note?: string;
+  };
   onComplete: {
     nextScene: string;
   };

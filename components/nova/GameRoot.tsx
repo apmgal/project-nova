@@ -22,17 +22,20 @@ import {
   markToolScreenReached,
   placeToolCard,
   isToolComplete,
+  placePriorityCard,
+  isPriorityToolComplete,
 } from "@/lib/nova/state";
 import type { ChoiceOption, GameState } from "@/lib/nova/types";
 import TitleScreen from "./TitleScreen";
 import DialogueTranscript from "./DialogueTranscript";
 import ChoiceButtons from "./ChoiceButtons";
 import ToolScreen from "./ToolScreen";
+import PriorityBoard from "./PriorityBoard";
 import DebugDrawer from "./DebugDrawer";
 import EndOfContent from "./EndOfContent";
 
 interface EndInfo {
-  reason: "act1-complete" | "unbuilt-branch";
+  reason: "act2-complete" | "unbuilt-branch";
   targetScene: string;
 }
 
@@ -114,7 +117,7 @@ export default function GameRoot() {
       saveGame(baseState);
       setGameState(baseState);
       setEndInfo({
-        reason: nextSceneId?.startsWith("ACT2") ? "act1-complete" : "unbuilt-branch",
+        reason: nextSceneId?.startsWith("ACT3") ? "act2-complete" : "unbuilt-branch",
         targetScene: nextSceneId ?? "(none)",
       });
       return;
@@ -193,26 +196,48 @@ export default function GameRoot() {
     );
   }
 
-  const dialogue = getDialogue(scene.dialogueId);
-  const visibleLines = (dialogue?.lines ?? []).filter((line) =>
+  // A scene with a toolId plays out in up to three phases: dialogueId's
+  // lines, then the tool screen, then (if postToolDialogueId is set) more
+  // dialogue, then the final action. lineIndex is a single running index
+  // over the pre-tool + post-tool lines combined; the tool screen is an
+  // interstitial that blocks advancing past the boundary between them
+  // until it's complete.
+  const preLines = (getDialogue(scene.dialogueId)?.lines ?? []).filter((line) =>
     isLineVisible(line.condition, gameState.flags)
   );
-  const inDialogue = lineIndex < visibleLines.length;
-  // Lines revealed so far in this scene's transcript: up to and including
-  // the currently displayed line while in dialogue, or all of them once
-  // the action phase (choices/tool/continue) has been reached.
-  const revealedCount = inDialogue ? lineIndex + 1 : visibleLines.length;
+  const postLines = (getDialogue(scene.postToolDialogueId ?? null)?.lines ?? []).filter(
+    (line) => isLineVisible(line.condition, gameState.flags)
+  );
+  const combinedLines = [...preLines, ...postLines];
+  const toolBreakIndex = preLines.length;
 
-  const toolScreen = !inDialogue ? getToolScreen(scene.toolId) : null;
-  const choiceBlock = !inDialogue && !toolScreen ? getChoiceBlock(scene.choicesId) : null;
+  const toolScreen = scene.toolId ? getToolScreen(scene.toolId) : null;
+  const toolIsPriority = toolScreen?.type === "priority_assignment";
+  const toolComplete = scene.toolId
+    ? toolIsPriority
+      ? isPriorityToolComplete(gameState, scene.toolId, toolScreen?.cards.length ?? 0)
+      : isToolComplete(gameState, scene.toolId, toolScreen?.cards.length ?? 0)
+    : true;
+
+  // Blocked at the tool interstitial: pre-tool dialogue is done, but the
+  // tool itself isn't complete yet.
+  const atToolBreak = Boolean(scene.toolId) && !toolComplete && lineIndex >= toolBreakIndex;
+  const inDialogue = !atToolBreak && lineIndex < combinedLines.length;
+  // Lines revealed so far in this scene's transcript: up to and including
+  // the currently displayed line while in dialogue, up to (not including)
+  // the blocked line while waiting on the tool, or all of them once the
+  // final action (choices/continue) has been reached.
+  const revealedCount = atToolBreak ? lineIndex : inDialogue ? lineIndex + 1 : combinedLines.length;
+
+  const choiceBlock = !inDialogue && !atToolBreak ? getChoiceBlock(scene.choicesId) : null;
 
   function handleAdvanceLine() {
     if (!gameState || !scene) return;
-    const nextIndex = Math.min(lineIndex + 1, visibleLines.length);
+    const nextIndex = Math.min(lineIndex + 1, combinedLines.length);
     setLineIndex(nextIndex);
 
     if (
-      nextIndex >= visibleLines.length &&
+      nextIndex >= toolBreakIndex &&
       scene.toolId &&
       !hasReachedToolScreen(gameState, scene.toolId)
     ) {
@@ -234,7 +259,28 @@ export default function GameRoot() {
     setGameState(next);
     saveGame(next);
 
-    if (isToolComplete(next, toolId, toolScreen.cards.length)) {
+    if (isToolComplete(next, toolId, toolScreen.cards.length) && postLines.length === 0) {
+      // No dialogue follows the tool in this scene — transition straight
+      // away, same as before postToolDialogueId existed. When post-tool
+      // lines ARE present, we deliberately do nothing here: the next
+      // render sees toolComplete flip true, atToolBreak clears, and the
+      // transcript resumes revealing postLines from where lineIndex
+      // already sits (the tool-break boundary) — the eventual Continue/
+      // choice action carries the scene transition instead.
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
+  function handlePriorityCardPlaced(cardId: string, bucket: string) {
+    if (!gameState || !scene?.toolId || !toolScreen) return;
+    const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
+    setGameState(next);
+    saveGame(next);
+
+    if (
+      isPriorityToolComplete(next, scene.toolId, toolScreen.cards.length) &&
+      postLines.length === 0
+    ) {
       goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
     }
   }
@@ -260,13 +306,19 @@ export default function GameRoot() {
         <DialogueTranscript
           sceneAct={scene.act}
           sceneTitle={scene.title}
-          lines={visibleLines}
+          lines={combinedLines}
           revealedCount={revealedCount}
           relationships={gameState.relationships}
           inDialogue={inDialogue}
           onAdvance={handleAdvanceLine}
           actionContent={
-            toolScreen ? (
+            atToolBreak && toolScreen && toolIsPriority ? (
+              <PriorityBoard
+                toolScreen={toolScreen}
+                placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
+                onPlace={handlePriorityCardPlaced}
+              />
+            ) : atToolBreak && toolScreen ? (
               <ToolScreen
                 toolScreen={toolScreen}
                 placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}

@@ -98,5 +98,133 @@
     "onComplete": {
       "nextScene": "ACT1_SCENE05"
     }
+  },
+  "TOOL_ACT2_SCENE02_MOSCOW": {
+    "toolId": "TOOL_ACT2_SCENE02_MOSCOW",
+    "sourceScene": "ACT2_SCENE02",
+    "type": "priority_assignment",
+    "instructions": "Drag each requirement into Must, Should, Could, or Won't. Unlike PESTLE/SWOT, there is no single correct answer here — every placement is a real trade-off against budget.",
+    "buckets": [
+      "Must",
+      "Should",
+      "Could",
+      "Won't"
+    ],
+    "cards": [
+      {
+        "id": "card_automation_line",
+        "text": "Additional automated filling line capacity",
+        "championedBy": "priya",
+        "costByBucket": {
+          "Must": 2000000,
+          "Should": 1200000,
+          "Could": 500000,
+          "Won't": 0
+        },
+        "flagsByBucket": {
+          "Must": {
+            "filling_line_committed_act2": true,
+            "automation_marked_must": true
+          },
+          "Should": {
+            "filling_line_committed_act2": true
+          },
+          "Could": {},
+          "Won't": {}
+        },
+        "engineNote": "Only positive flags are ever set here. filling_line_committed_act2 and automation_marked_must default to false/absent in game_state.json until explicitly set true by a Must/Should placement. Dialogue conditions named 'automation_not_marked_must' and 'filling_line_not_committed_act2' are NOT separately-stored flags — they mean 'the positive flag is false or absent', evaluated at render time, same as the camilleTrust_high/_not_high pattern used elsewhere."
+      },
+      {
+        "id": "card_validation_protocol",
+        "text": "Full validation protocol ahead of commissioning",
+        "championedBy": "camille",
+        "costByBucket": {
+          "Must": 1500000,
+          "Should": 900000,
+          "Could": 400000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_backup_power",
+        "text": "Backup power and UPS system for the cleanroom",
+        "championedBy": "vaughn",
+        "costByBucket": {
+          "Must": 800000,
+          "Should": 500000,
+          "Could": 200000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_env_monitoring",
+        "text": "Real-time environmental monitoring system",
+        "championedBy": "camille",
+        "costByBucket": {
+          "Must": 600000,
+          "Should": 350000,
+          "Could": 150000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_secondary_supplier",
+        "text": "Secondary supplier qualification for critical components",
+        "championedBy": "tomasz",
+        "costByBucket": {
+          "Must": 400000,
+          "Should": 250000,
+          "Could": 100000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_operator_training",
+        "text": "Extended operator training programme",
+        "championedBy": "priya",
+        "costByBucket": {
+          "Must": 500000,
+          "Should": 300000,
+          "Could": 100000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_qc_lab",
+        "text": "On-site quality control lab",
+        "championedBy": "camille",
+        "costByBucket": {
+          "Must": 1000000,
+          "Should": 600000,
+          "Could": 250000,
+          "Won't": 0
+        }
+      },
+      {
+        "id": "card_viewing_gallery",
+        "text": "Executive viewing gallery overlooking the production floor",
+        "championedBy": "marcus",
+        "costByBucket": {
+          "Must": 300000,
+          "Should": 150000,
+          "Could": 50000,
+          "Won't": 0
+        }
+      }
+    ],
+    "budgetVariable": "budgetRemaining",
+    "effectApplication": "On placement (or scene completion, engine's choice), deduct the card's costByBucket[chosenBucket] from budgetRemaining. Re-placing a card into a different bucket should refund the old cost and apply the new one — not stack both.",
+    "overcommitRule": {
+      "condition": "6 or more of the 8 cards placed in Must",
+      "bucket": "Must",
+      "minCount": 6,
+      "trigger": "EV-E3",
+      "reactionFlag": "moscow_overcommitted",
+      "note": "EV-E3 already exists in events.json — fires as Marcus's dry reaction line ('You've just doubled the budget.'), authored as the first line of DIALOGUE_ACT2_SCENE02_POST, conditioned on this reactionFlag. Engine re-checks bucket/minCount live after every placement (not sticky), so moving cards back out of Must below the threshold clears the flag again before the player finishes."
+    },
+    "completionCondition": "All 8 cards placed in some bucket (Won't counts as placed)",
+    "onComplete": {
+      "nextScene": "ACT2_SCENE02_CONTINUE"
+    }
   }
 }
