@@ -41,8 +41,17 @@ export interface GameState {
    * (e.g. MoSCoW) where every bucket is a valid placement and a card can
    * be moved between buckets — unlike toolProgress's simple placed/not
    * list for "sort_into_buckets" tools, this needs to remember WHICH
-   * bucket, so a re-placement can refund the old bucket's cost. */
+   * bucket, so a re-placement can refund the old bucket's cost. Also
+   * doubles as "gantt_placement"'s milestoneId -> startWeek map (the
+   * week number stored as a string). */
   toolPlacements: Record<string, Record<string, string>>;
+  /** Per-tool-screen record of which card ids are currently "on", keyed
+   * by toolId. Unlike toolProgress (append-only, once-placed-always-
+   * placed) this is a live toggle set — used by "pick_n_of_m_swipeable"
+   * (Team Selection) where hiring is freely reversible up until the
+   * player moves on, so both the effects/flags AND this list need to be
+   * able to un-apply, not just accumulate. */
+  toolSelections: Record<string, string[]>;
 }
 
 export interface ChoiceHistoryEntry {
@@ -114,6 +123,51 @@ export interface ChoiceBlock {
   options: ChoiceOption[];
   needsWriting?: boolean;
   engineNote?: string;
+  /** Exact text of the dialogue line this choice fires immediately after,
+   * for scenes with more than one sequential choice (e.g. a risk workshop
+   * that raises three separate concerns in turn). Absent means "fires
+   * after all of this scene's dialogue" — the original, single-choice
+   * behavior every other scene in the game still uses unchanged. */
+  insertAfterLine?: string;
+  /** References a risk_investigation.json entry. When set, an
+   * investigation interstitial (pick maxQuestions of the bank's
+   * questions, see each answer, then continue) plays immediately before
+   * this choice's own options are presented — same anchor point, just an
+   * extra step in front. Null/absent skips straight to the choice,
+   * unchanged from before this mechanic existed. */
+  riskInvestigationId?: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Risk investigation (risk_investigation.json) — a "pick N of the bank's
+// questions, see each answer" interstitial that plays in front of a
+// ChoiceBlock referencing it via riskInvestigationId. Whichever questions
+// aren't picked simply leave their flagOnAsk flag unset — the engine never
+// branches on a specific dimension/question id, only on which flags ended
+// up true, so later content (e.g. Act 4's events) can key off "was the
+// Impact dimension investigated" without the engine knowing what that
+// means narratively.
+// ---------------------------------------------------------------------------
+
+export interface RiskInvestigationQuestion {
+  id: string;
+  dimension: string;
+  questionText: string;
+  answerText: string;
+  /** Flag set true the moment this question is asked. Never set false —
+   * an unasked question just leaves it absent. */
+  flagOnAsk: string;
+}
+
+export interface RiskInvestigationBank {
+  riskId: string;
+  sourceScene: string;
+  askTarget: string;
+  /** How many of `questions` the player may ask before the bank locks and
+   * a Continue action appears. */
+  maxQuestions: number;
+  instructions?: string;
+  questions: RiskInvestigationQuestion[];
 }
 
 export interface Character {
@@ -125,14 +179,24 @@ export interface Character {
 }
 
 // ---------------------------------------------------------------------------
-// Tool screens (tool_screens.json) — generic bucket-assignment interactions.
-// Two `type`s share this shape:
-//   - "sort_into_buckets" (PESTLE/SWOT): each card has exactly one
-//     correctBucket; wrong placements bounce back with no penalty.
+// Tool screens (tool_screens.json) — generic interactive-screen shapes. The
+// engine branches only on `type`, never on toolId/bucket/card names:
+//   - "sort_into_buckets" (PESTLE/SWOT/Comms/WBS): each card has exactly one
+//     correctBucket; wrong placements bounce back with no penalty. WBS adds
+//     an optional visualStyle for a background-image presentation instead
+//     of the plain card grid — same placement/completion logic underneath.
 //   - "priority_assignment" (MoSCoW): every bucket is a valid placement —
 //     each card has a costByBucket instead, and an optional flagsByBucket.
-// The engine never branches on toolId or bucket/card names, only on which
-// of these optional fields a card/block happens to have.
+//   - "power_interest_grid" (Stakeholder Grid): a free-placement variant of
+//     priority_assignment with no cost.
+//   - "cost_review_with_descope" (CBS): auto-summed costs, cut one task if
+//     over threshold.
+//   - "pick_n_of_m_swipeable" (Team Selection): browse via swipe, toggle
+//     hire/un-hire independently, capped at maxHires.
+//   - "gantt_placement" (Milestone Timeline): place fixed-duration bars on
+//     a week axis, subject to hard dependency rules.
+//   - "proof_chain_builder" (Benefits Register): build Measure/Evidence
+//     per benefit; Owner/When Measurable are dialogue-revealed, not built.
 // ---------------------------------------------------------------------------
 
 export interface ToolCard {
@@ -152,13 +216,60 @@ export interface ToolCard {
   championedBy?: string;
 }
 
+/** pick_n_of_m_swipeable candidate (Team Selection). */
+export interface ToolCandidate {
+  id: string;
+  name: string;
+  role?: string;
+  description?: string;
+  budgetEffect?: number;
+  otherEffects?: Record<string, number>;
+  /** Set true while hired, unset the moment they're un-hired — this is
+   * the one place in the engine where a flag IS meant to flip back off,
+   * since hiring is a live, reversible choice within a single tool
+   * interaction rather than a past narrative decision. */
+  flagOnHire?: string;
+  portrait?: string;
+  portraitStatus?: string;
+}
+
+/** gantt_placement milestone (Milestone Timeline). */
+export interface ToolMilestone {
+  id: string;
+  text: string;
+  durationWeeks: number;
+  wbsCategory?: string;
+}
+
+/** proof_chain_builder's embedded no-penalty choice moment (e.g. Marcus vs
+ * Camille disagreeing on how "More Patients Treated" should be measured). */
+export interface BenefitTensionMoment {
+  marcusLine?: string;
+  camilleLine?: string;
+  wrongOption: string;
+  correctOption: string;
+  note?: string;
+}
+
+/** proof_chain_builder benefit entry (Benefits Register). */
+export interface ToolBenefit {
+  id: string;
+  text: string;
+  correctMeasure?: string;
+  correctEvidence?: string;
+  correctOwner?: string;
+  correctWhen?: string;
+  tensionMoment?: BenefitTensionMoment;
+}
+
 export interface ToolScreenBlock {
   toolId: string;
   sourceScene: string;
   type: string;
   instructions?: string;
-  buckets: string[];
-  cards: ToolCard[];
+  // sort_into_buckets / priority_assignment / power_interest_grid
+  buckets?: string[];
+  cards?: ToolCard[];
   wrongPlacementBehavior?: {
     penalty?: string;
     reaction?: string;
@@ -182,7 +293,41 @@ export interface ToolScreenBlock {
     reactionFlag: string;
     note?: string;
   };
+  /** sort_into_buckets only: an alternate presentation (e.g. a background
+   * image with clickable zone outlines instead of a plain card grid).
+   * Placement/completion logic is identical either way. */
+  visualStyle?: string;
+  /** sort_into_buckets + visualStyle only: filename hint for the
+   * background image to show behind the zones, following a "bg_<assets.
+   * json key>.<ext>" convention — see deriveBackgroundKeyFromAssetFilename. */
+  backgroundAsset?: string;
+
+  // cost_review_with_descope (CBS)
+  costsByTask?: Record<string, number>;
+  totalIfAllIncluded?: number;
+  descopeThreshold?: number;
+  descopeRule?: string;
+
+  // pick_n_of_m_swipeable (Team Selection)
+  maxHires?: number;
+  interactionNote?: string;
+  candidates?: ToolCandidate[];
+  onSkippedCandidateNote?: Record<string, string>;
+  closingLine?: string;
+
+  // gantt_placement (Milestone Timeline)
+  timelineWeeks?: number;
+  milestones?: ToolMilestone[];
+  dependencyRules?: { rule: string }[];
+
+  // proof_chain_builder (Benefits Register)
+  benefits?: ToolBenefit[];
+  fieldsPlayerBuilds?: string[];
+  fieldsRevealedByDialogue?: string[];
+
   onComplete: {
     nextScene: string;
   };
+  engineNote?: string;
+  note?: string;
 }

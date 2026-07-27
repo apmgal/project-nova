@@ -23,8 +23,10 @@ export default function ToolScreen({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shake, setShake] = useState<{ cardId: string; attempt: number } | null>(null);
 
+  const cards = toolScreen.cards ?? [];
+  const buckets = toolScreen.buckets ?? [];
   const placedSet = new Set(placedCardIds);
-  const poolCards = toolScreen.cards.filter((card) => !placedSet.has(card.id));
+  const poolCards = cards.filter((card) => !placedSet.has(card.id));
 
   function handleSelectCard(cardId: string) {
     setSelectedCardId((current) => (current === cardId ? null : cardId));
@@ -32,7 +34,7 @@ export default function ToolScreen({
 
   function handleDropOnBucket(bucket: string) {
     if (!selectedCardId) return;
-    const card = toolScreen.cards.find((c) => c.id === selectedCardId);
+    const card = cards.find((c) => c.id === selectedCardId);
     if (!card) return;
 
     if (card.correctBucket === bucket) {
@@ -58,8 +60,8 @@ export default function ToolScreen({
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {toolScreen.buckets.map((bucket) => {
-          const cardsHere = toolScreen.cards.filter(
+        {buckets.map((bucket) => {
+          const cardsHere = cards.filter(
             (card) => placedSet.has(card.id) && card.correctBucket === bucket
           );
           return (

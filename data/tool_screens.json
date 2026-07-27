@@ -220,11 +220,503 @@
       "minCount": 6,
       "trigger": "EV-E3",
       "reactionFlag": "moscow_overcommitted",
-      "note": "EV-E3 already exists in events.json — fires as Marcus's dry reaction line ('You've just doubled the budget.'), authored as the first line of DIALOGUE_ACT2_SCENE02_POST, conditioned on this reactionFlag. Engine re-checks bucket/minCount live after every placement (not sticky), so moving cards back out of Must below the threshold clears the flag again before the player finishes."
+      "note": "EV-E3 already exists in events.json — fire it as an interrupting reaction before the scene continues, per its existing design (Marcus's dry 'you've just doubled the budget' line)."
     },
     "completionCondition": "All 8 cards placed in some bucket (Won't counts as placed)",
     "onComplete": {
       "nextScene": "ACT2_SCENE02_CONTINUE"
+    }
+  },
+  "TOOL_ACT2_SCENE03_STAKEHOLDER_GRID": {
+    "toolId": "TOOL_ACT2_SCENE03_STAKEHOLDER_GRID",
+    "sourceScene": "ACT2_SCENE03",
+    "type": "power_interest_grid",
+    "instructions": "Place each stakeholder on the grid by power and interest. There is no correct placement — this is a judgement call, not a graded exercise.",
+    "quadrants": [
+      "Manage Closely",
+      "Keep Satisfied",
+      "Keep Informed",
+      "Monitor"
+    ],
+    "quadrantDefinitions": {
+      "Manage Closely": "High Power, High Interest",
+      "Keep Satisfied": "High Power, Low Interest",
+      "Keep Informed": "Low Power, High Interest",
+      "Monitor": "Low Power, Low Interest"
+    },
+    "stakeholders": [
+      "marcus",
+      "camille",
+      "vaughn",
+      "daniel",
+      "priya",
+      "tomasz",
+      "aisha"
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "None — every quadrant is a legitimate placement, no bounce-back."
+    },
+    "selectionBehavior": "tap_to_select_then_tap_quadrant",
+    "selectedCardStyle": "Card visibly recolors/highlights while selected, same as PESTLE/SWOT.",
+    "completionCondition": "All 7 stakeholders placed in some quadrant",
+    "buckets": ["Manage Closely", "Keep Satisfied", "Keep Informed", "Monitor"],
+    "cards": [
+      { "id": "marcus", "text": "Marcus Reid" },
+      {
+        "id": "camille",
+        "text": "Camille Okafor",
+        "flagsByBucket": {
+          "Manage Closely": { "camille_power_recognized": true },
+          "Keep Satisfied": { "camille_power_recognized": true },
+          "Keep Informed": {},
+          "Monitor": {}
+        }
+      },
+      { "id": "vaughn", "text": "Vaughn Kessler" },
+      {
+        "id": "daniel",
+        "text": "Daniel Atwell",
+        "flagsByBucket": {
+          "Manage Closely": { "daniel_power_recognized": true },
+          "Keep Satisfied": { "daniel_power_recognized": true },
+          "Keep Informed": {},
+          "Monitor": {}
+        }
+      },
+      { "id": "priya", "text": "Priya Anand" },
+      { "id": "tomasz", "text": "Tomasz Nowak" },
+      { "id": "aisha", "text": "Aisha Bello" }
+    ],
+    "buckets_note": "buckets/cards are engine-added aliases of quadrants/stakeholders, in the shape the priority_assignment/power_interest_grid engine reads (no cost — every quadrant is free). See cards[].flagsByBucket for how daniel_power_recognized/camille_power_recognized actually get set, matching onComplete.setFlags below.",
+    "onComplete": {
+      "setFlags": {
+        "daniel_power_recognized": "true if daniel placed in 'Manage Closely' or 'Keep Satisfied' (High Power quadrants), else false/absent",
+        "camille_power_recognized": "true if camille placed in 'Manage Closely' or 'Keep Satisfied' (High Power quadrants), else false/absent"
+      },
+      "nextScene": "ACT2_SCENE03"
+    },
+    "engineNote": "These two flags drive the reactive closing narration in DIALOGUE_ACT2_SCENE03 (lines 6a-6d) — see that scene's engineNote for the four-way combination."
+  },
+  "TOOL_ACT3_SCENE01_WBS": {
+    "toolId": "TOOL_ACT3_SCENE01_WBS",
+    "sourceScene": "ACT3_SCENE01",
+    "type": "sort_into_buckets",
+    "visualStyle": "warehouse_blueprint",
+    "instructions": "Sort each task into the correct zone of the warehouse.",
+    "backgroundAsset": "warehouse_week1_empty.png",
+    "note": "Reuses the SAME background image as ACT1_SCENE01's reception->office establishing shot and Facility Progress Shot #1 (Week 1, empty warehouse) — do not create a separate image. This scene overlays 6 clickable zone outlines on top of that existing background as an interactive layer. As each zone's tasks are correctly placed, that zone should visually fill in (outline -> solid), foreshadowing the Facility Progress payoff.",
+    "buckets": [
+      "Construction",
+      "Utilities",
+      "Equipment",
+      "Validation",
+      "Training",
+      "Documentation"
+    ],
+    "cards": [
+      {
+        "id": "wbs_foundations",
+        "text": "Pour foundations and erect the steel frame",
+        "correctBucket": "Construction"
+      },
+      {
+        "id": "wbs_cleanroom_panels",
+        "text": "Fit out cleanroom wall and ceiling panels",
+        "correctBucket": "Construction"
+      },
+      {
+        "id": "wbs_hvac",
+        "text": "Install HVAC and environmental control systems",
+        "correctBucket": "Utilities"
+      },
+      {
+        "id": "wbs_power_water",
+        "text": "Connect backup power and water treatment",
+        "correctBucket": "Utilities"
+      },
+      {
+        "id": "wbs_isolator",
+        "text": "Install and commission the isolator line",
+        "correctBucket": "Equipment"
+      },
+      {
+        "id": "wbs_filling_equipment",
+        "text": "Install automated filling equipment",
+        "correctBucket": "Equipment"
+      },
+      {
+        "id": "wbs_iqoq",
+        "text": "Run installation and operational qualification (IQ/OQ)",
+        "correctBucket": "Validation"
+      },
+      {
+        "id": "wbs_operator_training",
+        "text": "Train operators on the new equipment",
+        "correctBucket": "Training"
+      },
+      {
+        "id": "wbs_validation_master_file",
+        "text": "Compile the validation master file",
+        "correctBucket": "Documentation"
+      }
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Card bounces back to the pool. No penalty."
+    },
+    "selectionBehavior": "tap_to_select_then_tap_bucket",
+    "selectedCardStyle": "Card visibly recolors/highlights while selected.",
+    "completionCondition": "All 9 cards placed in their correctBucket",
+    "onComplete": {
+      "nextScene": "ACT3_SCENE02"
+    }
+  },
+  "TOOL_ACT3_SCENE02_CBS": {
+    "toolId": "TOOL_ACT3_SCENE02_CBS",
+    "sourceScene": "ACT3_SCENE02",
+    "type": "cost_review_with_descope",
+    "instructions": "Review the auto-summed cost of every task from the WBS. If the total exceeds the threshold, you must cut one task.",
+    "costsByTask": {
+      "wbs_foundations": 1800000,
+      "wbs_cleanroom_panels": 1200000,
+      "wbs_hvac": 900000,
+      "wbs_power_water": 400000,
+      "wbs_isolator": 1500000,
+      "wbs_filling_equipment": 1100000,
+      "wbs_iqoq": 600000,
+      "wbs_operator_training": 300000,
+      "wbs_validation_master_file": 200000
+    },
+    "totalIfAllIncluded": 8000000,
+    "descopeThreshold": 7500000,
+    "descopeRule": "If the sum of all included tasks (from WBS) exceeds descopeThreshold, the player must select exactly one task to cut before continuing. Cutting a task sets a flag: descoped_<taskId> = true, and removes its cost from the total. The cut task becomes a real, trackable gap (e.g. cutting wbs_operator_training should weaken team readiness later, same pattern as the risk-investigation skipped-dimension consequences).",
+    "completionCondition": "Total is at or below descopeThreshold (via descope if needed)",
+    "onComplete": {
+      "nextScene": "ACT3_SCENE03"
+    }
+  },
+  "TOOL_ACT3_SCENE03_TEAM": {
+    "toolId": "TOOL_ACT3_SCENE03_TEAM",
+    "sourceScene": "ACT3_SCENE03",
+    "type": "pick_n_of_m_swipeable",
+    "instructions": "Swipe through all 9 candidates. Tap Hire to select up to 6. You can swipe back and change your mind at any time.",
+    "maxHires": 6,
+    "interactionNote": "Swipe left/right navigates between cards WITHOUT committing anything. A separate 'Hire' toggle button on each card is the only thing that selects/deselects. Selection state persists regardless of navigation direction. A persistent 'Hired: X/6' counter is visible on every card. Once 6 are hired, the Hire button on all remaining un-hired cards greys out — player must explicitly un-hire someone first to free a slot (no silent auto-replacement).",
+    "candidates": [
+      {
+        "id": "ravi",
+        "name": "Ravi Chandra",
+        "role": "Automation Engineer",
+        "description": "Brilliant, technically the strongest candidate by a clear margin. Known to be a flight risk — he's interviewed elsewhere twice this year.",
+        "budgetEffect": -250000,
+        "otherEffects": {
+          "teamMorale": 5
+        },
+        "flagOnHire": "ravi_hired",
+        "portrait": "ravi_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "elin",
+        "name": "Elin Torvald",
+        "role": "Automation Engineer",
+        "description": "Steadier, less flashy, genuinely loyal. Lower technical ceiling, but she isn't going anywhere.",
+        "budgetEffect": -120000,
+        "otherEffects": {
+          "teamMorale": 5
+        },
+        "flagOnHire": "elin_hired",
+        "portrait": "elin_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "priti",
+        "name": "Priti Osei",
+        "role": "Validation Specialist",
+        "description": "Meticulous, thorough, slow. Strengthens the audit trail, costs time.",
+        "budgetEffect": -150000,
+        "otherEffects": {
+          "regulatoryReadiness": 10,
+          "scheduleHealth": -5
+        },
+        "flagOnHire": "priti_hired",
+        "portrait": "priti_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "jonas",
+        "name": "Jonas Webb",
+        "role": "Validation Specialist",
+        "description": "Fast, confident, occasionally cuts a corner he shouldn't.",
+        "budgetEffect": -150000,
+        "otherEffects": {
+          "scheduleHealth": 10,
+          "riskExposure": 5
+        },
+        "flagOnHire": "jonas_hired",
+        "portrait": "jonas_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "declan",
+        "name": "Declan Ford",
+        "role": "Construction/Site Lead",
+        "description": "Experienced, expensive, exactly what Vaughn wants standing next to him.",
+        "budgetEffect": -300000,
+        "otherEffects": {
+          "riskExposure": -10
+        },
+        "flagOnHire": "declan_hired",
+        "portrait": "declan_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "sam",
+        "name": "Sam Okoro",
+        "role": "Construction/Site Lead",
+        "description": "Cheap, capable, unproven at this scale.",
+        "budgetEffect": -100000,
+        "otherEffects": {
+          "riskExposure": 10
+        },
+        "flagOnHire": "sam_hired",
+        "portrait": "sam_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "naomi",
+        "name": "Naomi Krantz",
+        "role": "QA/Documentation",
+        "description": "Thorough almost to a fault. Occasional friction with faster-moving colleagues.",
+        "budgetEffect": -150000,
+        "otherEffects": {
+          "regulatoryReadiness": 10,
+          "teamMorale": -3
+        },
+        "flagOnHire": "naomi_hired",
+        "portrait": "naomi_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "ben",
+        "name": "Ben Ashworth",
+        "role": "Training Coordinator",
+        "description": "Excellent with people, technically a bit thin.",
+        "budgetEffect": -100000,
+        "otherEffects": {
+          "teamMorale": 10,
+          "regulatoryReadiness": 2
+        },
+        "flagOnHire": "ben_hired",
+        "portrait": "ben_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      },
+      {
+        "id": "yuki",
+        "name": "Yuki Tanaka",
+        "role": "Procurement/Logistics Support",
+        "description": "Deeply connected across the supply chain, modest cost.",
+        "budgetEffect": -120000,
+        "otherEffects": {
+          "riskExposure": -8
+        },
+        "flagOnHire": "yuki_hired",
+        "portrait": "yuki_neutral.png",
+        "portraitStatus": "placeholder — no real art yet"
+      }
+    ],
+    "onSkippedCandidateNote": {
+      "naomi": "If not hired: thinner audit trail heading into Act 5's inspection.",
+      "ben": "If not hired: quieter team morale baseline heading into Act 4.",
+      "yuki": "If not hired: weaker supplier relationships into Act 3's Procurement Pitch and Act 4's supplier curveballs."
+    },
+    "closingLine": "The other three don't hear back until Monday.",
+    "completionCondition": "Exactly 6 candidates hired",
+    "onComplete": {
+      "nextScene": "ACT3_SCENE04"
+    }
+  },
+  "TOOL_ACT3_SCENE04_MILESTONES": {
+    "toolId": "TOOL_ACT3_SCENE04_MILESTONES",
+    "sourceScene": "ACT3_SCENE04",
+    "type": "gantt_placement",
+    "instructions": "Tap a milestone, then tap a starting week on its row. Each milestone has a fixed duration.",
+    "timelineWeeks": 24,
+    "milestones": [
+      {
+        "id": "ms_construction",
+        "text": "Construction Complete",
+        "durationWeeks": 8,
+        "wbsCategory": "Construction"
+      },
+      {
+        "id": "ms_utilities",
+        "text": "Utilities Installed",
+        "durationWeeks": 5,
+        "wbsCategory": "Utilities"
+      },
+      {
+        "id": "ms_equipment",
+        "text": "Equipment Delivered & Installed",
+        "durationWeeks": 5,
+        "wbsCategory": "Equipment"
+      },
+      {
+        "id": "ms_validation",
+        "text": "Validation Complete",
+        "durationWeeks": 4,
+        "wbsCategory": "Validation"
+      },
+      {
+        "id": "ms_training",
+        "text": "Training Complete",
+        "durationWeeks": 4,
+        "wbsCategory": "Training"
+      },
+      {
+        "id": "ms_documentation",
+        "text": "Ready for Inspection (Documentation Audit-Ready)",
+        "durationWeeks": 3,
+        "wbsCategory": "Documentation"
+      }
+    ],
+    "dependencyRules": [
+      {
+        "rule": "ms_equipment cannot start before ms_construction ends"
+      },
+      {
+        "rule": "ms_validation cannot start before ms_equipment ends"
+      },
+      {
+        "rule": "ms_documentation cannot start before BOTH ms_validation and ms_training end"
+      }
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Bar bounces back. Show inline note: 'Error: Dependency'."
+    },
+    "note": "ms_utilities and ms_training have no hard prerequisite — free placement, can overlap other bars.",
+    "completionCondition": "All 6 milestones placed without an active dependency violation",
+    "onComplete": {
+      "note": "This scene's final Gantt layout becomes the data source for the HUD's 'Current Objective' line for the rest of the game — whichever milestone's bar the current week falls inside.",
+      "nextScene": "ACT3_SCENE05"
+    }
+  },
+  "TOOL_ACT3_SCENE05_COMMS": {
+    "toolId": "TOOL_ACT3_SCENE05_COMMS",
+    "sourceScene": "ACT3_SCENE05",
+    "type": "sort_into_buckets",
+    "instructions": "Match each stakeholder to how they want to be updated.",
+    "buckets": [
+      "Daily stand-up",
+      "Weekly meeting",
+      "Monthly written report",
+      "Decision-triggered briefing",
+      "Async dashboard"
+    ],
+    "cards": [
+      {
+        "id": "comms_vaughn",
+        "text": "Vaughn",
+        "correctBucket": "Daily stand-up"
+      },
+      {
+        "id": "comms_priya",
+        "text": "Priya",
+        "correctBucket": "Weekly meeting"
+      },
+      {
+        "id": "comms_camille",
+        "text": "Camille",
+        "correctBucket": "Decision-triggered briefing"
+      },
+      {
+        "id": "comms_marcus",
+        "text": "Marcus",
+        "correctBucket": "Monthly written report"
+      },
+      {
+        "id": "comms_daniel",
+        "text": "Daniel",
+        "correctBucket": "Monthly written report"
+      },
+      {
+        "id": "comms_tomasz",
+        "text": "Tomasz",
+        "correctBucket": "Decision-triggered briefing"
+      },
+      {
+        "id": "comms_aisha",
+        "text": "Aisha",
+        "correctBucket": "Async dashboard"
+      }
+    ],
+    "note": "Multiple stakeholders can share a bucket (Marcus+Daniel both Monthly report, Camille+Tomasz both Decision-triggered) — not one-to-one. Marcus's placement here is the setup for ACT4_SCENE05's monthly status report mechanic — same system, paid off later.",
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Card bounces back. No penalty."
+    },
+    "selectionBehavior": "tap_to_select_then_tap_bucket",
+    "completionCondition": "All 7 stakeholders placed in their correctBucket",
+    "onComplete": {
+      "nextScene": "ACT3_SCENE06"
+    }
+  },
+  "TOOL_ACT3_SCENE06_BENEFITS": {
+    "toolId": "TOOL_ACT3_SCENE06_BENEFITS",
+    "sourceScene": "ACT3_SCENE06",
+    "type": "proof_chain_builder",
+    "instructions": "For each benefit, build the full proof chain: Measure, Evidence, Owner, When Measurable.",
+    "benefits": [
+      {
+        "id": "benefit_nhs_contract",
+        "text": "NHS Contract Secured",
+        "correctMeasure": "Signed agreement",
+        "correctEvidence": "Procurement records",
+        "correctOwner": "tomasz",
+        "correctWhen": "Before launch (Week 24)"
+      },
+      {
+        "id": "benefit_patients_treated",
+        "text": "More Patients Treated",
+        "correctMeasure": "Monthly production output",
+        "correctEvidence": "Manufacturing dashboard",
+        "correctOwner": "priya",
+        "correctWhen": "After go-live",
+        "tensionMoment": {
+          "marcusLine": "Can't we just measure success by the facility being open?",
+          "camilleLine": "Opening a facility doesn't mean we've delivered anything. Nobody's been treated yet.",
+          "wrongOption": "Facility completion date",
+          "correctOption": "Monthly production output",
+          "note": "Player picks between the two, learning outputs (facility exists) vs. outcomes (patients actually treated). No penalty for picking wrong, but a correcting reaction line, same as the PESTLE tool-selection pattern."
+        }
+      },
+      {
+        "id": "benefit_roi",
+        "text": "£12M Investment Justified",
+        "correctMeasure": "ROI",
+        "correctEvidence": "Finance report",
+        "correctOwner": "daniel",
+        "correctWhen": "12 months after go-live"
+      }
+    ],
+    "fieldsPlayerBuilds": [
+      "Measure",
+      "Evidence"
+    ],
+    "fieldsRevealedByDialogue": [
+      "Owner",
+      "When Measurable"
+    ],
+    "wrongPlacementBehavior": {
+      "penalty": "none",
+      "reaction": "Bounces back, no penalty."
+    },
+    "note": "This becomes a living artifact, not a one-off puzzle: BIG-01 (Act 4) should surface a new HUD line 'Second Product Benefits: Undefined' once it resolves, and ACT6_SCENE03's world memory reel should be patched to show this Register's actual ✓/⚠/✗ status per benefit instead of generic callback lines — both are flagged as follow-up patches, not yet applied to those scenes' existing content.",
+    "completionCondition": "All 3 benefits' Measure and Evidence fields correctly built",
+    "onComplete": {
+      "nextScene": "ACT3_SCENE06B"
     }
   }
 }

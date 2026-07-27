@@ -1,0 +1,92 @@
+{
+  "RISK_INVESTIGATION_CONTRACTOR": {
+    "riskId": "contractor",
+    "sourceScene": "ACT2_SCENE04",
+    "askTarget": "vaughn",
+    "maxQuestions": 2,
+    "instructions": "Pick 2 of these 3 questions to ask Vaughn.",
+    "questions": [
+      {
+        "id": "q_contractor_likelihood",
+        "dimension": "Likelihood",
+        "questionText": "How reliable have they been so far?",
+        "answerText": "They've missed two calls in two weeks. That's not like them.",
+        "flagOnAsk": "asked_contractor_likelihood"
+      },
+      {
+        "id": "q_contractor_impact",
+        "dimension": "Impact",
+        "questionText": "What happens if they don't show up in time?",
+        "answerText": "We lose three weeks minimum, maybe more.",
+        "flagOnAsk": "asked_contractor_impact"
+      },
+      {
+        "id": "q_contractor_mitigation",
+        "dimension": "Mitigation",
+        "questionText": "Is there a backup option if this falls through?",
+        "answerText": "Not one we've qualified yet — but I know a firm that might work.",
+        "flagOnAsk": "asked_contractor_mitigation"
+      }
+    ]
+  },
+  "RISK_INVESTIGATION_VALIDATION": {
+    "riskId": "validation",
+    "sourceScene": "ACT2_SCENE04",
+    "askTarget": "camille",
+    "maxQuestions": 2,
+    "instructions": "Pick 2 of these 3 questions to ask Camille.",
+    "questions": [
+      {
+        "id": "q_validation_likelihood",
+        "dimension": "Likelihood",
+        "questionText": "How likely is this to actually slip?",
+        "answerText": "If nothing changes upstream, close to certain.",
+        "flagOnAsk": "asked_validation_likelihood"
+      },
+      {
+        "id": "q_validation_impact",
+        "dimension": "Impact",
+        "questionText": "What does a slip actually cost us?",
+        "answerText": "Every week here pushes the MHRA inspection back the same amount.",
+        "flagOnAsk": "asked_validation_impact"
+      },
+      {
+        "id": "q_validation_mitigation",
+        "dimension": "Mitigation",
+        "questionText": "Is there any way to buffer this without extending the whole schedule?",
+        "answerText": "We could run validation in parallel on the lower-risk steps. It's tight, but possible.",
+        "flagOnAsk": "asked_validation_mitigation"
+      }
+    ]
+  },
+  "RISK_INVESTIGATION_CONTINGENCY": {
+    "riskId": "contingency",
+    "sourceScene": "ACT2_SCENE04",
+    "askTarget": "daniel",
+    "maxQuestions": 2,
+    "instructions": "Pick 2 of these 3 questions to ask Daniel.",
+    "questions": [
+      {
+        "id": "q_contingency_likelihood",
+        "dimension": "Likelihood",
+        "questionText": "How likely are we to actually need more than what's budgeted?",
+        "answerText": "Given how this project's gone so far? I'd bet on it.",
+        "flagOnAsk": "asked_contingency_likelihood"
+      },
+      {
+        "id": "q_contingency_impact",
+        "dimension": "Impact",
+        "questionText": "What happens if the contingency runs out?",
+        "answerText": "I freeze spending. Everything stops, including things that shouldn't.",
+        "flagOnAsk": "asked_contingency_impact"
+      },
+      {
+        "id": "q_contingency_mitigation",
+        "dimension": "Mitigation",
+        "questionText": "Is there anywhere else in the budget we could pull from if it comes to that?",
+        "answerText": "There's slack in the training line. Not much. But some.",
+        "flagOnAsk": "asked_contingency_mitigation"
+      }
+    ]
+  }
+}

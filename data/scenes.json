@@ -99,8 +99,7 @@
       "ACT1_SCENE05"
     ],
     "needsWriting": false,
-    "toolId": "TOOL_ACT1_SCENE04_SWOT",
-    "postToolDialogueId": "DIALOGUE_ACT1_SCENE04_POST"
+    "toolId": "TOOL_ACT1_SCENE04_SWOT"
   },
   "ACT1_SCENE05": {
     "sceneId": "ACT1_SCENE05",
@@ -208,8 +207,7 @@
       "ACT2_SCENE03"
     ],
     "needsWriting": false,
-    "toolId": "TOOL_ACT2_SCENE02_MOSCOW",
-    "postToolDialogueId": "DIALOGUE_ACT2_SCENE02_POST"
+    "toolId": "TOOL_ACT2_SCENE02_MOSCOW"
   },
   "ACT2_SCENE03": {
     "sceneId": "ACT2_SCENE03",
@@ -233,7 +231,8 @@
     "nextScenes": [
       "ACT2_SCENE04"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT2_SCENE03_STAKEHOLDER_GRID"
   },
   "ACT2_SCENE04": {
     "sceneId": "ACT2_SCENE04",
@@ -341,7 +340,8 @@
     "nextScenes": [
       "ACT3_SCENE02"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT3_SCENE01_WBS"
   },
   "ACT3_SCENE02": {
     "sceneId": "ACT3_SCENE02",
@@ -365,7 +365,8 @@
     "nextScenes": [
       "ACT3_SCENE03"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT3_SCENE02_CBS"
   },
   "ACT3_SCENE03": {
     "sceneId": "ACT3_SCENE03",
@@ -390,7 +391,8 @@
     "nextScenes": [
       "ACT3_SCENE04"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT3_SCENE03_TEAM"
   },
   "ACT3_SCENE04": {
     "sceneId": "ACT3_SCENE04",
@@ -417,7 +419,8 @@
     "needsWriting": false,
     "flagsSet": [
       "ellis_fragment_3_found (conditional on contractor_risk_logged)"
-    ]
+    ],
+    "toolId": "TOOL_ACT3_SCENE04_MILESTONES"
   },
   "ACT3_SCENE05": {
     "sceneId": "ACT3_SCENE05",
@@ -442,7 +445,8 @@
     "nextScenes": [
       "ACT3_SCENE06"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT3_SCENE05_COMMS"
   },
   "ACT3_SCENE06": {
     "sceneId": "ACT3_SCENE06",
@@ -466,9 +470,10 @@
       "previousScene": "ACT3_SCENE05"
     },
     "nextScenes": [
-      "ACT3_SCENE07"
+      "ACT3_SCENE06B"
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "toolId": "TOOL_ACT3_SCENE06_BENEFITS"
   },
   "ACT3_SCENE07": {
     "sceneId": "ACT3_SCENE07",
@@ -873,7 +878,7 @@
     "contentSummary": "The drag-and-drop PESTLE tagging interaction itself.",
     "worldMemoryBeat": null,
     "variablesTouched": [],
-    "dialogueId": null,
+    "dialogueId": "DIALOGUE_ACT1_SCENE03B",
     "choicesId": null,
     "trigger": {
       "previousScene": "ACT1_SCENE03"
@@ -883,8 +888,7 @@
     ],
     "needsWriting": false,
     "note": "Non-canonical bridge scene — the interactive tool screen for the PESTLE beat.",
-    "toolId": "TOOL_ACT1_SCENE03B_PESTLE",
-    "postToolDialogueId": "DIALOGUE_ACT1_SCENE03B"
+    "toolId": "TOOL_ACT1_SCENE03B_PESTLE"
   },
   "ACT1_SCENE06B": {
     "sceneId": "ACT1_SCENE06B",
@@ -1019,5 +1023,28 @@
     ],
     "needsWriting": false,
     "note": "Non-canonical bridge scene — reached only via ACT1_SCENE01's 'Just tell me what happened to Ellis' choice, then rejoins the main path at ACT1_SCENE02."
+  },
+  "ACT3_SCENE06B": {
+    "sceneId": "ACT3_SCENE06B",
+    "title": "Baseline Approved (bridge scene)",
+    "act": "Act 3",
+    "screenRange": "bridge",
+    "screenType": "Title Card",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Baseline approval / transition to delivery",
+    "contentSummary": "Deployment countdown begins. Week 1 / 24.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT3_SCENE06B",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT3_SCENE06"
+    },
+    "nextScenes": [
+      "ACT3_SCENE07"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene. This is where the Week X/24 HUD countdown activates for the first time — a visual translation layer over scheduleHealth (weeksRemaining = round(scheduleHealth/100*24)), not a new stored variable."
   }
 }

@@ -1,4 +1,11 @@
-import type { GameState, Flags, Character, DialogueLine, ToolScreenBlock } from "./types";
+import type {
+  GameState,
+  Flags,
+  Character,
+  DialogueLine,
+  ToolScreenBlock,
+  RiskInvestigationBank,
+} from "./types";
 import { getCharacter, getDefaultGameState } from "./data";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
@@ -28,6 +35,7 @@ export function loadGame(): GameState | null {
     if (state.currentBackground === undefined) state.currentBackground = null;
     if (!state.toolProgress) state.toolProgress = {};
     if (!state.toolPlacements) state.toolPlacements = {};
+    if (!state.toolSelections) state.toolSelections = {};
     return state;
   } catch {
     return null;
@@ -118,24 +126,81 @@ export function applySceneFlagsSet(
 // ---------------------------------------------------------------------------
 
 /**
- * A condition named "..._not_X" (e.g. "automation_not_marked_must",
- * "camilleTrust_not_high") is never a separately-stored flag — it means
- * "the positive flag is false or absent", derived at render time by
- * replacing the first "_not_" with "_" to get the positive flag's name
- * and negating it. This lets content author mutually-exclusive dialogue
- * pairs off a single stored flag instead of the engine (or the content
- * team) having to keep two flags in sync.
+ * Evaluates a single condition term against flags. Two negation
+ * conventions show up in the content, both meaning "this flag is false or
+ * absent" rather than a separately-stored flag:
+ *  - infix "_not_" (e.g. "automation_not_marked_must", "camilleTrust_not_
+ *    high") — derived by replacing the first "_not_" with "_" to get the
+ *    positive flag's name.
+ *  - prefix "not_" on a term inside an "_and_" compound (see
+ *    isLineVisible) — e.g. "not_daniel_power_recognized".
+ * Neither is ever a real stored flag; both are evaluated at render time.
+ */
+function evaluateConditionTerm(term: string, flags: Flags): boolean {
+  if (term.startsWith("not_")) {
+    return !flags[term.slice(4)];
+  }
+  const negationMarker = "_not_";
+  const markerIndex = term.indexOf(negationMarker);
+  if (markerIndex !== -1) {
+    const positiveFlag =
+      term.slice(0, markerIndex) + "_" + term.slice(markerIndex + negationMarker.length);
+    return !flags[positiveFlag];
+  }
+  return Boolean(flags[term]);
+}
+
+/**
+ * A dialogue line's `condition` can be a single flag/negation term, or a
+ * compound of several joined with "_and_" (e.g. "daniel_power_recognized_
+ * and_camille_power_recognized", "not_daniel_power_recognized_and_camille_
+ * power_recognized") — every term must hold for the line to show. This
+ * lets content author N-way mutually-exclusive variants (covering every
+ * combination of a small set of flags) without the engine needing to know
+ * anything about which flags or how many.
  */
 export function isLineVisible(condition: string | undefined, flags: Flags): boolean {
   if (!condition) return true;
-  const negationMarker = "_not_";
-  const markerIndex = condition.indexOf(negationMarker);
-  if (markerIndex !== -1) {
-    const positiveFlag =
-      condition.slice(0, markerIndex) + "_" + condition.slice(markerIndex + negationMarker.length);
-    return !flags[positiveFlag];
-  }
-  return Boolean(flags[condition]);
+  return condition.split("_and_").every((term) => evaluateConditionTerm(term, flags));
+}
+
+// ---------------------------------------------------------------------------
+// Tool marker detection — derives where a tool sits in a scene's dialogue
+// ---------------------------------------------------------------------------
+
+/**
+ * Content convention (consistent across every tool scene in the data,
+ * built or not yet built): a scene with a toolId marks exactly where the
+ * tool belongs with a bracketed narrator line, e.g. "[Player builds the
+ * SWOT.]", "[Player tags PESTLE factors...]", "[Player builds the
+ * stakeholder power/interest grid.]". Detecting this line lets the engine
+ * split a scene's single dialogue block into pre-tool/post-tool halves
+ * automatically, instead of requiring content to also maintain a separate
+ * postToolDialogueId field in scenes.json — which is easy to lose (or
+ * simply never populate) on a content re-export, whereas the marker line
+ * is already part of the canonical script itself.
+ */
+export function isToolMarkerLine(line: DialogueLine): boolean {
+  return line.speaker === "narrator" && /^\[Player\b/.test(line.text.trim());
+}
+
+/**
+ * Splits an already-visibility-filtered line list around its tool marker
+ * line (dropped from both halves — it's a structural cue, never actually
+ * displayed). If no marker is found, everything is "pre-tool" and the
+ * tool is treated as an interstitial at the very end of dialogue, same as
+ * a scene with no dialogue at all before its tool.
+ */
+export function splitAroundToolMarker(lines: DialogueLine[]): {
+  preLines: DialogueLine[];
+  postLines: DialogueLine[];
+} {
+  const markerIndex = lines.findIndex(isToolMarkerLine);
+  if (markerIndex === -1) return { preLines: lines, postLines: [] };
+  return {
+    preLines: lines.slice(0, markerIndex),
+    postLines: lines.slice(markerIndex + 1),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -252,10 +317,32 @@ export function foldBackground(
   return background;
 }
 
-/** Background asset filenames (from assets.json) that are real art rather
- * than a placeholder name. Same pattern as portraits' KNOWN_REAL_ASSETS —
- * an unlisted filename falls back to a labeled placeholder rectangle. */
-const KNOWN_REAL_BACKGROUND_ASSETS = new Set(["bg_reception.jpg", "bg_marcus_office.jpg"]);
+/**
+ * Real background files that actually exist on disk under
+ * /public/assets/backgrounds, keyed by extension-agnostic stem. assets.json
+ * (content) and the real files (art) have drifted on file extension more
+ * than once — content says .png, disk has .jpg — so comparing by stem and
+ * always serving the file that's ACTUALLY on disk avoids ever constructing
+ * a broken <img> src, regardless of what extension the content export
+ * claims. An unlisted stem falls back to a labeled placeholder rectangle,
+ * same pattern as portraits' KNOWN_REAL_ASSETS.
+ */
+const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
+  bg_reception: "bg_reception.jpg",
+  bg_marcus_office: "bg_marcus_office.jpg",
+};
+
+function stripExtension(filename: string): string {
+  return filename.replace(/\.[^.]+$/, "");
+}
+
+/** Derives an assets.json backgrounds key from a tool screen's
+ * `backgroundAsset` filename hint, by convention "bg_<key>.<ext>" (e.g.
+ * "bg_warehouse_week1.png" -> "warehouse_week1"). Best-effort: if the
+ * filename doesn't start with "bg_", returns the stem as-is. */
+export function deriveBackgroundKeyFromAssetFilename(filename: string): string {
+  return stripExtension(filename).replace(/^bg_/, "");
+}
 
 export interface ResolvedBackground {
   src: string | null;
@@ -270,8 +357,9 @@ export function resolveBackground(
   file: string | null
 ): ResolvedBackground | null {
   if (!key) return null;
-  if (file && KNOWN_REAL_BACKGROUND_ASSETS.has(file)) {
-    return { src: `/assets/backgrounds/${file}`, key, file };
+  const realFile = file ? REAL_BACKGROUND_FILES_BY_STEM[stripExtension(file)] : undefined;
+  if (realFile) {
+    return { src: `/assets/backgrounds/${realFile}`, key, file };
   }
   return { src: null, key, file };
 }
@@ -354,18 +442,23 @@ export function placePriorityCard(
   cardId: string,
   bucket: string
 ): GameState {
-  const card = toolScreen.cards.find((c) => c.id === cardId);
-  if (!card || !card.costByBucket) return state;
+  const card = (toolScreen.cards ?? []).find((c) => c.id === cardId);
+  if (!card) return state;
 
   const toolId = toolScreen.toolId;
   const currentPlacements = state.toolPlacements[toolId] ?? {};
   const previousBucket = currentPlacements[cardId];
   if (previousBucket === bucket) return state;
 
+  // costByBucket is optional — a tool like the stakeholder power/interest
+  // grid has no cost at all (every quadrant is free), same shape as
+  // MoSCoW's cards otherwise.
   const budgetKey = toolScreen.budgetVariable ?? "budgetRemaining";
   let budget = state.projectMetrics[budgetKey] ?? 0;
-  if (previousBucket) budget += card.costByBucket[previousBucket] ?? 0;
-  budget -= card.costByBucket[bucket] ?? 0;
+  if (card.costByBucket) {
+    if (previousBucket) budget += card.costByBucket[previousBucket] ?? 0;
+    budget -= card.costByBucket[bucket] ?? 0;
+  }
 
   const nextFlags = { ...state.flags };
   const flagsForBucket = card.flagsByBucket?.[bucket];
@@ -394,4 +487,290 @@ export function isPriorityToolComplete(
   totalCards: number
 ): boolean {
   return Object.keys(state.toolPlacements[toolId] ?? {}).length >= totalCards;
+}
+
+// ---------------------------------------------------------------------------
+// Risk investigation — "pick maxQuestions of the bank's questions" progress.
+// Deliberately stateless beyond the flags themselves: whether a question
+// has been asked is just whether its flagOnAsk is true, so there's nothing
+// extra to persist or backfill on older saves.
+// ---------------------------------------------------------------------------
+
+/** How many of a risk investigation bank's questions have been asked so
+ * far, derived purely from which flagOnAsk flags are currently true. */
+export function countAskedQuestions(bank: RiskInvestigationBank, flags: Flags): number {
+  return bank.questions.filter((q) => Boolean(flags[q.flagOnAsk])).length;
+}
+
+/** True once the player has asked as many questions as the bank allows
+ * (or more, defensively, though the UI never lets that happen). */
+export function isRiskInvestigationComplete(bank: RiskInvestigationBank, flags: Flags): boolean {
+  return countAskedQuestions(bank, flags) >= bank.maxQuestions;
+}
+
+// ---------------------------------------------------------------------------
+// Template substitution — {token} placeholders in dialogue text, filled in
+// from live game state at render time (e.g. "Week {currentWeek}." or
+// EV-R1's "{chosenSupplier}"). Generic string-replace, no engine knowledge
+// of what any particular token means — callers build the values map.
+// ---------------------------------------------------------------------------
+
+export function substituteTemplate(text: string, values: Record<string, string>): string {
+  return text.replace(/\{(\w+)\}/g, (match, key: string) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match
+  );
+}
+
+// ---------------------------------------------------------------------------
+// cost_review_with_descope (CBS) — auto-summed cost review; cut exactly one
+// task if the total exceeds descopeThreshold. The cut choice lives in
+// toolProgress[toolId] as a single-entry array (reuses the same "list of
+// resolved ids" shape as sort_into_buckets, just capped at one), so
+// changing your mind before continuing swaps the entry rather than
+// stacking cuts. Only ONE descoped_<taskId> flag is ever true at a time —
+// switching the pick clears the old one, since this is a live in-progress
+// decision, not a past narrative choice.
+// ---------------------------------------------------------------------------
+
+/** The currently-chosen task to cut, if any. */
+export function getDescopedTaskId(state: GameState, toolId: string): string | undefined {
+  return state.toolProgress[toolId]?.[0];
+}
+
+/** Sum of every task's cost except the (optionally) cut one. */
+export function computeCbsTotal(toolScreen: ToolScreenBlock, cutTaskId: string | undefined): number {
+  const costs = toolScreen.costsByTask ?? {};
+  return Object.entries(costs).reduce(
+    (sum, [taskId, cost]) => (taskId === cutTaskId ? sum : sum + cost),
+    0
+  );
+}
+
+export function isCbsComplete(state: GameState, toolScreen: ToolScreenBlock): boolean {
+  const cutTaskId = getDescopedTaskId(state, toolScreen.toolId);
+  const threshold = toolScreen.descopeThreshold ?? Infinity;
+  return computeCbsTotal(toolScreen, cutTaskId) <= threshold;
+}
+
+/** Cuts a task (or changes an earlier cut to a different task). Clears any
+ * previously-set descoped_<taskId> flag for a task that's no longer the
+ * pick, and sets the new one — see module note above. */
+export function descopeTask(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  taskId: string
+): GameState {
+  const toolId = toolScreen.toolId;
+  const previous = getDescopedTaskId(state, toolId);
+  if (previous === taskId) return state;
+
+  const nextFlags = { ...state.flags };
+  if (previous) delete nextFlags[`descoped_${previous}`];
+  nextFlags[`descoped_${taskId}`] = true;
+
+  return {
+    ...state,
+    flags: nextFlags,
+    toolProgress: { ...state.toolProgress, [toolId]: [taskId] },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// pick_n_of_m_swipeable (Team Selection) — browse via swipe (no state
+// change), toggle hire/un-hire independently, capped at maxHires. Selection
+// lives in toolSelections (a live toggle set, unlike toolProgress's
+// append-only history) because un-hiring must be able to fully reverse a
+// candidate's effects/flags, not just leave them accumulated.
+// ---------------------------------------------------------------------------
+
+/**
+ * Toggles a candidate's hired state. Hiring applies budgetEffect/
+ * otherEffects and sets flagOnHire true; un-hiring reverses both. A no-op
+ * if trying to hire past maxHires (the UI already greys the button out,
+ * this is just the defensive backstop).
+ */
+export function toggleHire(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  candidateId: string
+): GameState {
+  const candidate = (toolScreen.candidates ?? []).find((c) => c.id === candidateId);
+  if (!candidate) return state;
+
+  const toolId = toolScreen.toolId;
+  const currentlyHired = state.toolSelections[toolId] ?? [];
+  const isHired = currentlyHired.includes(candidateId);
+  const maxHires = toolScreen.maxHires ?? Infinity;
+
+  if (!isHired && currentlyHired.length >= maxHires) return state;
+
+  const sign = isHired ? -1 : 1;
+  const effects: Record<string, number> = { ...(candidate.otherEffects ?? {}) };
+  if (candidate.budgetEffect) effects.budgetRemaining = candidate.budgetEffect;
+  const signedEffects = Object.fromEntries(
+    Object.entries(effects).map(([key, value]) => [key, value * sign])
+  );
+
+  let next = applyEffects(state, signedEffects);
+  if (candidate.flagOnHire) {
+    next = {
+      ...next,
+      flags: { ...next.flags, [candidate.flagOnHire]: !isHired },
+    };
+  }
+
+  const nextSelection = isHired
+    ? currentlyHired.filter((id) => id !== candidateId)
+    : [...currentlyHired, candidateId];
+
+  return {
+    ...next,
+    toolSelections: { ...next.toolSelections, [toolId]: nextSelection },
+  };
+}
+
+export function isHiringComplete(state: GameState, toolId: string, maxHires: number): boolean {
+  return (state.toolSelections[toolId]?.length ?? 0) === maxHires;
+}
+
+// ---------------------------------------------------------------------------
+// gantt_placement (Milestone Timeline) — place fixed-duration bars on a
+// week axis, subject to hard dependency rules written as prose in the
+// data ("X cannot start before [BOTH] Y [and Z] end[s]"). Placements reuse
+// toolPlacements' existing milestoneId -> string shape (the week number
+// stringified) rather than inventing a new GameState field.
+// ---------------------------------------------------------------------------
+
+/** Parses a dependencyRules[].rule prose string into a structured
+ * milestoneId + prerequisite id list. Generic pattern match, not tied to
+ * any specific milestone name — new rules of the same shape need no
+ * engine change. Returns null if the sentence doesn't match the
+ * convention (defensive; such a rule is simply not enforced). */
+function parseDependencyRule(
+  rule: string
+): { milestoneId: string; prerequisiteIds: string[] } | null {
+  const match = rule.match(/^(\S+)\s+cannot start before\s+(?:BOTH\s+)?(.+?)\s+ends?$/i);
+  if (!match) return null;
+  return {
+    milestoneId: match[1],
+    prerequisiteIds: match[2].split(/\s+and\s+/i).map((s) => s.trim()),
+  };
+}
+
+/** Checks a proposed milestone placement against every dependencyRule that
+ * applies to it. Returns an error message if it violates one ("Error:
+ * Dependency", matching the data's own wrongPlacementBehavior note), or
+ * null if the placement is valid. Doesn't mutate state — the caller only
+ * calls placeMilestone once this returns null, same bounce-back-without-
+ * penalty pattern as every other tool's wrong placement. */
+export function validateMilestonePlacement(
+  toolScreen: ToolScreenBlock,
+  placements: Record<string, string>,
+  milestoneId: string,
+  startWeek: number
+): string | null {
+  for (const { rule } of toolScreen.dependencyRules ?? []) {
+    const parsed = parseDependencyRule(rule);
+    if (!parsed || parsed.milestoneId !== milestoneId) continue;
+    for (const prerequisiteId of parsed.prerequisiteIds) {
+      const prerequisiteStart = placements[prerequisiteId];
+      if (prerequisiteStart === undefined) return "Error: Dependency";
+      const prerequisite = toolScreen.milestones?.find((m) => m.id === prerequisiteId);
+      const prerequisiteEnd = Number(prerequisiteStart) + (prerequisite?.durationWeeks ?? 0);
+      if (startWeek < prerequisiteEnd) return "Error: Dependency";
+    }
+  }
+  return null;
+}
+
+/** Places (or re-places) a milestone's starting week. Assumes the caller
+ * already validated via validateMilestonePlacement. */
+export function placeMilestone(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  milestoneId: string,
+  startWeek: number
+): GameState {
+  const toolId = toolScreen.toolId;
+  const nextPlacements = {
+    ...(state.toolPlacements[toolId] ?? {}),
+    [milestoneId]: String(startWeek),
+  };
+  return { ...state, toolPlacements: { ...state.toolPlacements, [toolId]: nextPlacements } };
+}
+
+// ---------------------------------------------------------------------------
+// HUD — Deployment Countdown. Purely a display-derivation layer over
+// existing projectMetrics/toolPlacements; introduces no new stored
+// variables of its own (per design: weeksRemaining is derived, never
+// persisted).
+// ---------------------------------------------------------------------------
+
+/** weeksRemaining = round(scheduleHealth / 100 * 24). Not clamped — a bad
+ * scheduleHealth can push this negative or past 24; the HUD displays
+ * whatever comes out, it never gates progression. */
+export function computeWeeksRemaining(scheduleHealth: number): number {
+  return Math.round((scheduleHealth / 100) * 24);
+}
+
+export type MetricBand = "green" | "yellow" | "red";
+
+/** Generic threshold banding for a 0-100-ish score, reused across every
+ * HUD metric (Budget/Schedule/Risk/Quality/Benefits). `higherIsBetter`
+ * flips which end reads as red — e.g. scheduleHealth: higher is better,
+ * riskExposure: lower is better — so the same two thresholds work for
+ * both without the caller pre-inverting anything. */
+export function metricBand(
+  value: number,
+  higherIsBetter: boolean,
+  greenAt = 60,
+  redBelow = 30
+): MetricBand {
+  const score = higherIsBetter ? value : 100 - value;
+  if (score >= greenAt) return "green";
+  if (score < redBelow) return "red";
+  return "yellow";
+}
+
+/**
+ * "Current Objective" — whichever Gantt milestone(s) the current week
+ * falls inside. If more than one bar covers the week (Utilities/Training
+ * can overlap others), joins all of their names. If the week falls in a
+ * gap covered by no bar, shows the nearest upcoming milestone instead. If
+ * every milestone's window has already passed, says so.
+ */
+export function computeCurrentObjective(
+  toolScreen: ToolScreenBlock | null,
+  placements: Record<string, string>,
+  currentWeek: number
+): string {
+  const milestones = toolScreen?.milestones ?? [];
+  const placed = milestones
+    .map((m) => {
+      const start = placements[m.id];
+      return start === undefined ? null : { ...m, start: Number(start) };
+    })
+    .filter((m): m is (typeof milestones)[number] & { start: number } => m !== null);
+
+  const active = placed.filter((m) => currentWeek >= m.start && currentWeek < m.start + m.durationWeeks);
+  if (active.length > 0) return active.map((m) => m.text).join(", ");
+
+  const upcoming = placed
+    .filter((m) => m.start > currentWeek)
+    .sort((a, b) => a.start - b.start);
+  if (upcoming.length > 0) return `Next: ${upcoming[0].text}`;
+
+  return placed.length > 0 ? "Deployment complete" : "";
+}
+
+// ---------------------------------------------------------------------------
+// proof_chain_builder (Benefits Register) — builds Measure/Evidence per
+// benefit. Reuses placeToolCard/isToolComplete's existing "list of
+// resolved ids" persistence with a composite id (benefitId:field), rather
+// than inventing new state shape — Owner/When Measurable are dialogue-
+// revealed, not player-built, so they need no persistence at all.
+// ---------------------------------------------------------------------------
+
+export function benefitFieldId(benefitId: string, field: string): string {
+  return `${benefitId}:${field}`;
 }

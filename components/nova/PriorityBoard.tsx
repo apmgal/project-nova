@@ -17,17 +17,21 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
 });
 
 /**
- * Generic "assign every card to a bucket, at a real cost" interaction
- * (e.g. MoSCoW prioritisation). Unlike ToolScreen's sort-into-buckets,
- * every bucket is a valid placement here — nothing bounces back — and a
- * card that's already placed can be reselected and moved to a different
- * bucket, refunding its old cost. Driven entirely by a tool_screens.json
- * entry; nothing here knows this is specifically a MoSCoW board.
+ * Generic "assign every card to a bucket, optionally at a real cost"
+ * interaction — covers both MoSCoW prioritisation (costed) and the
+ * stakeholder power/interest grid (free placement, judgement call only).
+ * Unlike ToolScreen's sort-into-buckets, every bucket is a valid
+ * placement here — nothing bounces back — and a card that's already
+ * placed can be reselected and moved to a different bucket, refunding
+ * its old cost if it had one. Driven entirely by a tool_screens.json
+ * entry; nothing here knows which specific board it's rendering.
  */
 export default function PriorityBoard({ toolScreen, placements, onPlace }: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-  const unplacedCards = toolScreen.cards.filter((card) => !placements[card.id]);
+  const cards = toolScreen.cards ?? [];
+  const buckets = toolScreen.buckets ?? [];
+  const unplacedCards = cards.filter((card) => !placements[card.id]);
 
   function handleSelectCard(cardId: string) {
     setSelectedCardId((current) => (current === cardId ? null : cardId));
@@ -39,7 +43,8 @@ export default function PriorityBoard({ toolScreen, placements, onPlace }: Prior
     setSelectedCardId(null);
   }
 
-  const committed = toolScreen.cards.reduce((sum, card) => {
+  const hasCosts = cards.some((card) => card.costByBucket);
+  const committed = cards.reduce((sum, card) => {
     const bucket = placements[card.id];
     if (!bucket || !card.costByBucket) return sum;
     return sum + (card.costByBucket[bucket] ?? 0);
@@ -52,8 +57,8 @@ export default function PriorityBoard({ toolScreen, placements, onPlace }: Prior
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {toolScreen.buckets.map((bucket) => {
-          const cardsHere = toolScreen.cards.filter((card) => placements[card.id] === bucket);
+        {buckets.map((bucket) => {
+          const cardsHere = cards.filter((card) => placements[card.id] === bucket);
           return (
             <button
               key={bucket}
@@ -96,9 +101,11 @@ export default function PriorityBoard({ toolScreen, placements, onPlace }: Prior
       <div>
         <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-500">
           <span>Unassigned ({unplacedCards.length})</span>
-          <span className="normal-case tracking-normal text-zinc-400">
-            Committed so far: {currencyFormatter.format(committed)}
-          </span>
+          {hasCosts && (
+            <span className="normal-case tracking-normal text-zinc-400">
+              Committed so far: {currencyFormatter.format(committed)}
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           {unplacedCards.map((card) => {

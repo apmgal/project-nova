@@ -51,6 +51,33 @@
     },
     "pharmacraft_rep": {
       "neutral": "pharmacraft_rep_neutral.png"
+    },
+    "ravi": {
+      "neutral": "ravi_neutral.png"
+    },
+    "elin": {
+      "neutral": "elin_neutral.png"
+    },
+    "priti": {
+      "neutral": "priti_neutral.png"
+    },
+    "jonas": {
+      "neutral": "jonas_neutral.png"
+    },
+    "declan": {
+      "neutral": "declan_neutral.png"
+    },
+    "sam": {
+      "neutral": "sam_neutral.png"
+    },
+    "naomi": {
+      "neutral": "naomi_neutral.png"
+    },
+    "ben": {
+      "neutral": "ben_neutral.png"
+    },
+    "yuki": {
+      "neutral": "yuki_neutral.png"
     }
   },
   "music": {
@@ -66,9 +93,9 @@
     "main_menu": "main_menu_theme.mp3"
   },
   "backgrounds": {
-    "note": "reception and marcus_office are real art; the rest below are still placeholder names — assign real files when available. Engine carries forward the last background shown; only lines that CHANGE the background need this field set.",
-    "reception": "bg_reception.jpg",
-    "marcus_office": "bg_marcus_office.jpg",
+    "note": "Placeholder — assign real background art per act/location. Engine carries forward the last background shown; only lines that CHANGE the background need this field set.",
+    "reception": "bg_reception.png",
+    "marcus_office": "bg_marcus_office.png",
     "player_desk": "bg_player_desk.png",
     "warehouse_week1": "warehouse_week1_empty.png",
     "warehouse_week5": "warehouse_week5_steel_frame.png",

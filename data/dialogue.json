@@ -143,14 +143,12 @@
         "speaker": "marcus",
         "emotion": "concerned",
         "text": "Strengths, weaknesses, opportunities, threats. Yours to fill in. Don't flatter us."
-      }
-    ],
-    "needsWriting": false
-  },
-  "DIALOGUE_ACT1_SCENE04_POST": {
-    "dialogueId": "DIALOGUE_ACT1_SCENE04_POST",
-    "sourceScene": "ACT1_SCENE04",
-    "lines": [
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player builds the SWOT.]"
+      },
       {
         "speaker": "narrator",
         "emotion": null,
@@ -290,14 +288,12 @@
         "speaker": "marcus",
         "emotion": "neutral",
         "text": "One thing at a time. You're chairing this — talk us through it."
-      }
-    ],
-    "needsWriting": false
-  },
-  "DIALOGUE_ACT2_SCENE02_POST": {
-    "dialogueId": "DIALOGUE_ACT2_SCENE02_POST",
-    "sourceScene": "ACT2_SCENE02",
-    "lines": [
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player drags requirements into Must / Should / Could / Won't. The room watches the board fill in. Nobody says anything until it's done.]"
+      },
       {
         "speaker": "marcus",
         "emotion": "concerned",
@@ -338,7 +334,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Line 1 (moscow_overcommitted) only fires if 6+ of 8 MoSCoW cards ended up in Must (EV-E3). Lines 2/3 are mutually exclusive on automation_marked_must (set by the MoSCoW tool screen, first card). Exactly one of 2/3 should render before Camille's interruption."
+    "engineNote": "Line 6/7 are mutually exclusive on automation_marked_must (set by the MoSCoW tool screen). Exactly one should render before Camille's interruption."
   },
   "DIALOGUE_ACT2_SCENE03": {
     "dialogueId": "DIALOGUE_ACT2_SCENE03",
@@ -377,7 +373,26 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Marcus's name at the top. It isn't, not quite. Daniel's budget authority reaches further than anyone admitted out loud in that room. And Camille — Camille doesn't need permission to escalate anything. She's never used it. Yet."
+        "text": "You expect Marcus's name at the top. It isn't, not quite. You've already placed Daniel's budget authority and Camille's escalation power correctly — both belong right where you put them.",
+        "condition": "daniel_power_recognized_and_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You expect Marcus's name at the top. It isn't, not quite. Daniel's budget authority reaches further than you gave him credit for — you'll want to move him. Camille, at least, you read correctly.",
+        "condition": "not_daniel_power_recognized_and_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You expect Marcus's name at the top. It isn't, not quite. Camille doesn't need permission to escalate anything — she's never used it, yet, but she has it. You'll want to move her. Daniel, at least, you read correctly.",
+        "condition": "daniel_power_recognized_and_not_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You expect Marcus's name at the top. It isn't, not quite. Daniel's budget authority reaches further than anyone admitted out loud in that room. And Camille doesn't need permission to escalate anything. She's never used it. Yet.",
+        "condition": "not_daniel_power_recognized_and_not_camille_power_recognized"
       },
       {
         "speaker": "marcus",
@@ -385,7 +400,8 @@
         "text": "Now you're starting to see it."
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Lines 6a-6d are four mutually exclusive variants covering all combinations of daniel_power_recognized and camille_power_recognized (both set by the stakeholder grid tool). Exactly one should render, matching whichever combination is true. 'not_X' conditions are logical negations (flag false or absent), not separately stored flags — same pattern as camilleTrust_high/_not_high."
   },
   "DIALOGUE_ACT2_SCENE04": {
     "dialogueId": "DIALOGUE_ACT2_SCENE04",
@@ -430,9 +446,44 @@
         "speaker": "vaughn",
         "emotion": "warm",
         "text": "...Appreciate that, actually."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Camille's still waiting on an answer."
+      },
+      {
+        "speaker": "camille",
+        "emotion": "neutral",
+        "text": "Good. That's one less thing I'll have to raise again in three months.",
+        "condition": "validation_risk_logged"
+      },
+      {
+        "speaker": "camille",
+        "emotion": "neutral",
+        "text": "Noted. I'll raise it again if it becomes a problem.",
+        "condition": "not_validation_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Daniel's still waiting on an answer, too."
+      },
+      {
+        "speaker": "daniel",
+        "emotion": "neutral",
+        "text": "Appreciate you taking it seriously. I'll stop mentioning it every meeting.",
+        "condition": "contingency_risk_logged"
+      },
+      {
+        "speaker": "daniel",
+        "emotion": "neutral",
+        "text": "Noted. Don't say I didn't flag it.",
+        "condition": "not_contingency_risk_logged"
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "This scene now has THREE sequential choices, not one: CHOICE_ACT2_SCENE04 (contractor, existing), then CHOICE_ACT2_SCENE04_VALIDATION, then CHOICE_ACT2_SCENE04_CONTINGENCY — each fires at the dialogue line matching its 'insertAfterLine', in that order. Present each choice's 3 options, apply the result's reaction line, then continue to the next block. Flow per risk: [risk raised] -> [investigation: player picks 2 of 3 questions from risk_investigation.json, sees answers, sets flagOnAsk for each asked] -> [response choice from choices.json, unchanged] -> [reaction line]. The investigation is a NEW step inserted before each existing choice, not a replacement for it."
   },
   "DIALOGUE_ACT2_SCENE05": {
     "dialogueId": "DIALOGUE_ACT2_SCENE05",
@@ -711,6 +762,11 @@
         "text": "How are we actually proving this project was worth twelve million pounds?"
       },
       {
+        "speaker": "daniel",
+        "emotion": "neutral",
+        "text": "Because when this finishes, nobody's going to congratulate us for a beautiful Gantt chart. They'll ask one question: was it worth it? A benefit nobody can measure isn't a benefit. It's a hope."
+      },
+      {
         "speaker": "narrator",
         "emotion": null,
         "text": "Not hostile. Genuinely asking."
@@ -726,12 +782,23 @@
         "text": "[Player builds the Benefits Register, linking outputs to outcomes.]"
       },
       {
+        "speaker": "marcus",
+        "emotion": "neutral",
+        "text": "Can't we just measure success by the facility being open?"
+      },
+      {
+        "speaker": "camille",
+        "emotion": "serious",
+        "text": "Opening a facility doesn't mean we've delivered anything. Nobody's been treated yet."
+      },
+      {
         "speaker": "daniel",
         "emotion": "warm",
         "text": "...This is the first version of this document that's actually made me feel better about our chances."
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Tension moment (Marcus vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].tensionMoment."
   },
   "DIALOGUE_ACT3_SCENE07": {
     "dialogueId": "DIALOGUE_ACT3_SCENE07",
@@ -1463,6 +1530,40 @@
       {
         "speaker": "narrator",
         "emotion": null,
+        "text": "And the Benefits Register you built with Daniel, back before any of this started:"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "✓ NHS Contract Secured",
+        "condition": "contract_secured"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "✗ NHS Contract Secured",
+        "condition": "contract_lost"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "✓ More Patients Treated — batch released.",
+        "condition": "batch_released"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "✗ More Patients Treated — batch rejected.",
+        "condition": "batch_rejected"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "⚠ £12M Investment Justified — not yet demonstrable. ROI isn't measured for another twelve months. Nobody in this room gets to know that answer today."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
         "text": "Late, packing up the last of your things from the desk you've had for months now, you find one more page. The last one.",
         "condition": "all_ellis_fragments_found"
       },
@@ -1491,12 +1592,17 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive — exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Marcus/Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) — check those BEFORE falling through to the score-banded endings 1–5, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1–6 are all in gameState.flags."
+    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive — exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Marcus/Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) — check those BEFORE falling through to the score-banded endings 1–5, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1–6 are all in gameState.flags. BENEFITS REGISTER READOUT (new): contract_secured and contract_lost are NOT separately stored flags — they are computed at render time as: contract_secured = (ending_END-1 OR ending_END-2 OR ending_END-4), contract_lost = (ending_END-3 OR ending_END-5 OR ending_END-6 OR ending_END-7), reading the already-set ending band flags from ACT6_SCENE03's ending selection. Do not add them to game_state.flags as stored values. batch_released/batch_rejected reuse the existing flags already set in ACT6_SCENE02. The ROI line always renders unconditionally — by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
   },
   "DIALOGUE_BIG-01": {
     "dialogueId": "DIALOGUE_BIG-01",
     "sourceScene": "BIG-01",
     "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Week {currentWeek}. Everything's been going well."
+      },
       {
         "speaker": "narrator",
         "emotion": null,
@@ -1553,7 +1659,8 @@
         "text": "I fought this. I lost. The Board's already told the market — this is happening. The only question left is how."
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "{currentWeek} = the live HUD week number at the moment this scene fires (derived from scheduleHealth via the weeksRemaining formula, NOT a hardcoded value — this is intentionally whatever the player's actual playthrough has produced by this point, same template-substitution pattern as EV-R1's {chosenSupplier}). Also: this scene should set flag second_product_benefits_undefined = true on completion (any of the 3 choices) — read by the HUD to surface a new 'Second Product Benefits: Undefined' line once BIG-01 resolves."
   },
   "DIALOGUE_ACT1_SCENE02R": {
     "dialogueId": "DIALOGUE_ACT1_SCENE02R",
@@ -1619,6 +1726,12 @@
     "dialogueId": "DIALOGUE_ACT1_SCENE03B",
     "sourceScene": "ACT1_SCENE03B",
     "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player tags PESTLE factors: new environmental regulations affecting construction, global shortages of specialist stainless steel, government funding incentives for UK pharmaceutical manufacturing, and demographic-driven demand growth.]",
+        "background": "marcus_office"
+      },
       {
         "speaker": "marcus",
         "emotion": "neutral",
@@ -1934,10 +2047,24 @@
       {
         "speaker": "aisha",
         "emotion": "concerned",
-        "text": "One of the automation engineers just resigned. Effective immediately."
+        "text": "Ravi just resigned. Effective immediately.",
+        "condition": "ravi_hired"
+      },
+      {
+        "speaker": "aisha",
+        "emotion": "concerned",
+        "text": "Elin just resigned. Effective immediately.",
+        "condition": "elin_hired"
+      },
+      {
+        "speaker": "aisha",
+        "emotion": "concerned",
+        "text": "One of the automation engineers just resigned. Effective immediately.",
+        "condition": "not_ravi_hired_and_not_elin_hired"
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Severity: if ravi_hired, this event's likelihood/impact should trend higher (he was the flagged flight risk). If elin_hired, trend lower/this event may not fire at all (she was hired specifically because she wasn't a flight risk). If neither was hired (candidate skipped or unavailable in that playthrough), use the generic unnamed line."
   },
   "DIALOGUE_EV-09": {
     "dialogueId": "DIALOGUE_EV-09",
@@ -1970,10 +2097,24 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Your validation engineer hands in her notice. A competitor made an offer she didn't want to refuse."
+        "text": "Ravi hands in his notice. A competitor made an offer he didn't want to refuse.",
+        "condition": "ravi_hired"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Elin hands in her notice. A competitor made an offer she didn't want to refuse.",
+        "condition": "elin_hired"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Your validation engineer hands in her notice. A competitor made an offer she didn't want to refuse.",
+        "condition": "not_ravi_hired_and_not_elin_hired"
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Same naming/severity logic as EV-07."
   },
   "DIALOGUE_EV-15": {
     "dialogueId": "DIALOGUE_EV-15",
@@ -1986,5 +2127,161 @@
       }
     ],
     "needsWriting": false
+  },
+  "DIALOGUE_REVISITED_CONTRACTOR": {
+    "dialogueId": "DIALOGUE_REVISITED_CONTRACTOR",
+    "sourceScene": "EV-06_preamble",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "RISK REGISTER — REVISITED",
+        "style": "header"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Electrical Contractor Reliability — not formally logged.",
+        "condition": "not_contractor_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Electrical Contractor Reliability — logged, with a clear early warning sign on record.",
+        "condition": "contractor_risk_logged_and_asked_contractor_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Electrical Contractor Reliability — logged.",
+        "condition": "contractor_risk_logged_and_not_asked_contractor_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now. You weren't ready for it.",
+        "condition": "not_contractor_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now.",
+        "condition": "contractor_risk_logged"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Plays immediately before DIALOGUE_EV-06. asked_contractor_likelihood only affects framing tone here, no mechanical effect. asked_contractor_mitigation and asked_contractor_impact affect EV-06's own choice options directly — see events.json EV-06 engineNote."
+  },
+  "DIALOGUE_REVISITED_VALIDATION": {
+    "dialogueId": "DIALOGUE_REVISITED_VALIDATION",
+    "sourceScene": "EV-02_preamble",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "RISK REGISTER — REVISITED",
+        "style": "header"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Validation Timeline — not formally logged.",
+        "condition": "not_validation_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Validation Timeline — logged, flagged as near-certain to slip.",
+        "condition": "validation_risk_logged_and_asked_validation_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Validation Timeline — logged.",
+        "condition": "validation_risk_logged_and_not_asked_validation_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now. You weren't ready for it.",
+        "condition": "not_validation_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now.",
+        "condition": "validation_risk_logged"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Plays immediately before DIALOGUE_EV-02. asked_validation_mitigation gates the effectiveness of EV-02's 'phase the fix' option — see events.json EV-02 engineNote."
+  },
+  "DIALOGUE_REVISITED_CONTINGENCY": {
+    "dialogueId": "DIALOGUE_REVISITED_CONTINGENCY",
+    "sourceScene": "EV-10_preamble",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "RISK REGISTER — REVISITED",
+        "style": "header"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Contingency Adequacy — not formally logged.",
+        "condition": "not_contingency_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Contingency Adequacy — logged, with a clear warning this was likely.",
+        "condition": "contingency_risk_logged_and_asked_contingency_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Contingency Adequacy — logged.",
+        "condition": "contingency_risk_logged_and_not_asked_contingency_likelihood"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now. You weren't ready for it.",
+        "condition": "not_contingency_risk_logged"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "This is happening now.",
+        "condition": "contingency_risk_logged"
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "Plays immediately before DIALOGUE_EV-10. asked_contingency_mitigation gates the effectiveness of EV-10's 'descope a Should' option — see events.json EV-10 engineNote."
+  },
+  "DIALOGUE_ACT3_SCENE06B": {
+    "dialogueId": "DIALOGUE_ACT3_SCENE06B",
+    "sourceScene": "ACT3_SCENE06B",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "BASELINE APPROVED",
+        "style": "header"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Deployment begins."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Week 1 / 24."
+      }
+    ],
+    "needsWriting": false,
+    "engineNote": "HUD activates here for the first time, showing Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Schedule/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins."
   }
 }
