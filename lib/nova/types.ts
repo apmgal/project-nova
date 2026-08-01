@@ -253,7 +253,7 @@ export interface ToolMilestone {
   wbsCategory?: string;
 }
 
-/** proof_chain_builder's embedded no-penalty choice moment (e.g. Marcus vs
+/** proof_chain_builder's embedded no-penalty choice moment (e.g. Mike E. vs
  * Camille disagreeing on how "More Patients Treated" should be measured). */
 export interface BenefitTensionMoment {
   marcusLine?: string;

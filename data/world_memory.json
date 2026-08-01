@@ -20,9 +20,9 @@
   {
     "id": "recurring_random_office_events",
     "category": "recurring_moment",
-    "description": "Marcus brings breakfast; Camille wins an industry award; Priya's lunch is stolen and she's irrationally annoyed about it",
+    "description": "Mike E. brings breakfast; Camille wins an industry award; Priya's lunch is stolen and she's irrationally annoyed about it",
     "frequency": "Scattered, roughly one per act, non-scheduled",
-    "conditionalVariation": "Some variants require a minimum trust band to appear at all (e.g. Marcus won't bring breakfast to a Cold relationship)",
+    "conditionalVariation": "Some variants require a minimum trust band to appear at all (e.g. Mike E. won't bring breakfast to a Cold relationship)",
     "mechanicalWeight": "None — pure world-building",
     "triggered": false
   },
@@ -57,7 +57,7 @@
     "id": "ellis_fragment_2",
     "category": "ellis_fragment",
     "actFound": "Act 2",
-    "notebookLine": "\"Marcus doesn't want certainty. He wants confidence.\"",
+    "notebookLine": "\"Mike E. doesn't want certainty. He wants confidence.\"",
     "laterProven": "Right — pays off across Act 2–4 status reporting",
     "narrativeFunction": "Reframes what 'good' governance communication looks like",
     "triggered": false
@@ -101,17 +101,17 @@
   {
     "id": "callback_marcus_never_surprise_me",
     "category": "callback",
-    "character": "Marcus",
+    "character": "Mike E.",
     "plantedLine": "\"Never surprise me.\"",
     "plantedAt": "Act 1, screen 16–18",
     "payoffLine": "\"I asked for one thing.\"",
-    "payoffTrigger": "Fires if the player hides a known problem from Marcus in a status report",
+    "payoffTrigger": "Fires if the player hides a known problem from Mike E. in a status report",
     "triggered": false
   },
   {
     "id": "callback_marcus_youre_the_pm_who_always_wants_",
     "category": "callback",
-    "character": "Marcus",
+    "character": "Mike E.",
     "plantedLine": "\"You're the PM who always wants another meeting.\"",
     "plantedAt": "Emerges from repeated behaviour, not a single planted line",
     "payoffLine": "Same line, said with warmth once the player starts deciding faster",

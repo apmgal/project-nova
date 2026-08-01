@@ -400,7 +400,7 @@
     "sourceScene": "ACT4_SCENE02",
     "options": [
       {
-        "text": "Approve it — Marcus wants this, and Priya's done her homework.",
+        "text": "Approve it — Mike E. wants this, and Priya's done her homework.",
         "effects": {
           "priyaTrust": 10,
           "marcusTrust": 5,
@@ -672,7 +672,7 @@
         "nextScene": null
       },
       {
-        "text": "Renegotiate the Act 5 timeline with Marcus.",
+        "text": "Renegotiate the Act 5 timeline with Mike E..",
         "effects": {
           "marcusTrust": -5,
           "scheduleHealth": -5

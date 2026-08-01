@@ -11,14 +11,14 @@ interface TitleScreenProps {
 }
 
 /**
- * Title screen — "Guild of Project Masters" quest-log framing: Marcus
- * (the sponsor who chases status reports throughout the game) needling
- * the player before the mission even starts, over a deep blue radial
- * backdrop. Styled to the design-system reskin handoff's token set
- * (nova-design-tokens.css) and Button/QuestBar primitives.
+ * Title screen — "Guild of Project Masters" quest-log framing: Mike
+ * Elloian (the sponsor who chases status reports throughout the game)
+ * needling the player before the mission even starts, over a deep blue
+ * radial backdrop. Styled to the design-system reskin handoff's token
+ * set (nova-design-tokens.css) and Button/QuestBar primitives.
  *
- * Layout now matches the handoff's reference exactly: Marcus's full-
- * figure transparent cutout stands bottom-right (marcus_fullbody.png,
+ * Layout now matches the handoff's reference exactly: Mike Elloian's
+ * full-figure transparent cutout stands bottom-right (marcus_fullbody.png,
  * absolutely positioned, object-contain, bottom-anchored, drop-shadow +
  * slight desaturation per the handoff's filter spec), with his speech
  * bubble pinned near his head rather than beside a headshot avatar. Main
@@ -35,12 +35,12 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
   return (
     <div className="relative flex flex-1 items-stretch overflow-hidden bg-[image:var(--gradient-quest-bg)] p-4 sm:p-5">
       <div className="relative flex w-full flex-1 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--nova-navy-400)]/25">
-        {/* Marcus — full-figure cutout, bottom-anchored on the right */}
+        {/* Mike Elloian — full-figure cutout, bottom-anchored on the right */}
         <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[34%] items-end justify-center sm:flex md:w-[28%]">
           <div className="relative h-[92%] w-full">
             <Image
               src="/assets/characters/marcus_fullbody.png"
-              alt="Marcus"
+              alt="Mike Elloian"
               fill
               sizes="400px"
               className="object-contain object-bottom drop-shadow-[0_18px_20px_rgba(0,0,0,0.45)] saturate-[.85]"
@@ -49,7 +49,7 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
           </div>
         </div>
 
-        {/* Speech bubble — pinned near Marcus's head, clear of his hair */}
+        {/* Speech bubble — pinned near Mike Elloian's head, clear of his hair */}
         <div className="absolute right-[2%] top-[3%] z-20 hidden max-w-[190px] sm:block">
           <div className="relative rounded-[var(--radius-lg)] bg-[var(--nova-parchment-100)] px-4 py-2.5 text-sm font-bold text-[var(--color-text-on-parchment)] shadow-[var(--shadow-panel-parchment)] [font-family:var(--font-body)]">
             &ldquo;Where&apos;s my status report?!&rdquo;

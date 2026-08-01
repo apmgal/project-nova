@@ -12,7 +12,7 @@
       {
         "speaker": "joan",
         "emotion": "neutral",
-        "text": "Morning. You'll be the new project manager? Marcus is expecting you — go on up."
+        "text": "Morning. You'll be the new project manager? Mike E. is expecting you — go on up."
       },
       {
         "speaker": "narrator",
@@ -37,7 +37,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Marcus is waiting, door open. He doesn't get up.",
+        "text": "Mike E. is waiting, door open. He doesn't get up.",
         "background": "marcus_office"
       },
       {
@@ -235,7 +235,7 @@
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "Barely, right? Marcus was in a mood all morning. Something about scope."
+        "text": "Barely, right? Mike E. was in a mood all morning. Something about scope."
       },
       {
         "speaker": "narrator",
@@ -315,7 +315,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Camille cuts in before Marcus can respond."
+        "text": "Camille cuts in before Mike E. can respond."
       },
       {
         "speaker": "camille",
@@ -325,7 +325,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "The room goes quiet. Marcus looks between them — this isn't a fight he called."
+        "text": "The room goes quiet. Mike E. looks between them — this isn't a fight he called."
       },
       {
         "speaker": "marcus",
@@ -373,25 +373,25 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Marcus's name at the top. It isn't, not quite. You've already placed Daniel's budget authority and Camille's escalation power correctly — both belong right where you put them.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. You've already placed Daniel's budget authority and Camille's escalation power correctly — both belong right where you put them.",
         "condition": "daniel_power_recognized_and_camille_power_recognized"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Marcus's name at the top. It isn't, not quite. Daniel's budget authority reaches further than you gave him credit for — you'll want to move him. Camille, at least, you read correctly.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Daniel's budget authority reaches further than you gave him credit for — you'll want to move him. Camille, at least, you read correctly.",
         "condition": "not_daniel_power_recognized_and_camille_power_recognized"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Marcus's name at the top. It isn't, not quite. Camille doesn't need permission to escalate anything — she's never used it, yet, but she has it. You'll want to move her. Daniel, at least, you read correctly.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Camille doesn't need permission to escalate anything — she's never used it, yet, but she has it. You'll want to move her. Daniel, at least, you read correctly.",
         "condition": "daniel_power_recognized_and_not_camille_power_recognized"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Marcus's name at the top. It isn't, not quite. Daniel's budget authority reaches further than anyone admitted out loud in that room. And Camille doesn't need permission to escalate anything. She's never used it. Yet.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Daniel's budget authority reaches further than anyone admitted out loud in that room. And Camille doesn't need permission to escalate anything. She's never used it. Yet.",
         "condition": "not_daniel_power_recognized_and_not_camille_power_recognized"
       },
       {
@@ -524,12 +524,12 @@
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“Marcus doesn't want certainty. He wants confidence.”"
+        "text": "“Mike E. doesn't want certainty. He wants confidence.”"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You think about the Board meeting. About Camille's “Actually—”. About the version of this project where somebody told Marcus what he wanted to hear instead of what was true."
+        "text": "You think about the Board meeting. About Camille's “Actually—”. About the version of this project where somebody told Mike E. what he wanted to hear instead of what was true."
       },
       {
         "speaker": "narrator",
@@ -682,7 +682,7 @@
       {
         "speaker": "vaughn",
         "emotion": "neutral",
-        "text": "...That's tight, but I've built to tighter. Just don't tell Marcus I said that."
+        "text": "...That's tight, but I've built to tighter. Just don't tell Mike E. I said that."
       },
       {
         "speaker": "narrator",
@@ -798,7 +798,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Tension moment (Marcus vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].measureTensionMoment. Every Measure/Evidence field across all 3 benefits now has its own tensionMoment (wrongOption/correctOption/reaction); this one is the only pair with marcusLine/camilleLine framing lines."
+    "engineNote": "Tension moment (Mike E. vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].measureTensionMoment. Every Measure/Evidence field across all 3 benefits now has its own tensionMoment (wrongOption/correctOption/reaction); this one is the only pair with marcusLine/camilleLine framing lines."
   },
   "DIALOGUE_ACT3_SCENE07": {
     "dialogueId": "DIALOGUE_ACT3_SCENE07",
@@ -930,13 +930,13 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render. ADDITIONALLY: the scene now opens with one of two mutually exclusive framings based on filling_line_committed_act2 (set in the Act 2 MoSCoW tool) — a 'confirming a prior commitment' framing vs. a 'brand new ask' framing. Marcus's 'I like it' line and everything from Camille's revalidation concern onward is UNCHANGED and follows either opener."
+    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render. ADDITIONALLY: the scene now opens with one of two mutually exclusive framings based on filling_line_committed_act2 (set in the Act 2 MoSCoW tool) — a 'confirming a prior commitment' framing vs. a 'brand new ask' framing. Mike E.'s 'I like it' line and everything from Camille's revalidation concern onward is UNCHANGED and follows either opener."
   },
   "DIALOGUE_ACT4_SCENE03": {
     "dialogueId": "DIALOGUE_ACT4_SCENE03",
     "sourceScene": "ACT4_SCENE03",
     "lines": [],
-    "sourceSummary": "Week 18. Everything is going well. Marcus walks in: the Board has bought a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits, risk, timeline and politics all move at once.",
+    "sourceSummary": "Week 18. Everything is going well. Mike E. walks in: the Board has bought a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits, risk, timeline and politics all move at once.",
     "needsWriting": true
   },
   "DIALOGUE_ACT4_SCENE04": {
@@ -1091,7 +1091,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You produce the Change Control record — cost, schedule, quality impact, all assessed before Marcus signed off.",
+        "text": "You produce the Change Control record — cost, schedule, quality impact, all assessed before Mike E. signed off.",
         "condition": "filling_line_approved"
       },
       {
@@ -1141,7 +1141,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You show the revised schedule, and the message where you told Marcus it would slip, in writing, before it slipped.",
+        "text": "You show the revised schedule, and the message where you told Mike E. it would slip, in writing, before it slipped.",
         "condition": "isolator_absorbed"
       },
       {
@@ -1221,7 +1221,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Marcus stands by the window, not really looking at anything."
+        "text": "Mike E. stands by the window, not really looking at anything."
       },
       {
         "speaker": "narrator",
@@ -1246,7 +1246,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Marcus answers it."
+        "text": "Mike E. answers it."
       },
       {
         "speaker": "narrator",
@@ -1306,7 +1306,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Everyone who can fit is in the control room. Marcus. Camille. Vaughn — and, if you did right by him, his daughter, hovering near the back, trying not to look as nervous as she clearly is. Priya. Daniel. Tomasz. Aisha."
+        "text": "Everyone who can fit is in the control room. Mike E.. Camille. Vaughn — and, if you did right by him, his daughter, hovering near the back, trying not to look as nervous as she clearly is. Priya. Daniel. Tomasz. Aisha."
       },
       {
         "speaker": "narrator",
@@ -1592,7 +1592,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive — exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Marcus/Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) — check those BEFORE falling through to the score-banded endings 1–5, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1–6 are all in gameState.flags. BENEFITS REGISTER READOUT (new): contract_secured and contract_lost are NOT separately stored flags — they are computed at render time as: contract_secured = (ending_END-1 OR ending_END-2 OR ending_END-4), contract_lost = (ending_END-3 OR ending_END-5 OR ending_END-6 OR ending_END-7), reading the already-set ending band flags from ACT6_SCENE03's ending selection. Do not add them to game_state.flags as stored values. batch_released/batch_rejected reuse the existing flags already set in ACT6_SCENE02. The ROI line always renders unconditionally — by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
+    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive — exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Mike E./Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) — check those BEFORE falling through to the score-banded endings 1–5, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1–6 are all in gameState.flags. BENEFITS REGISTER READOUT (new): contract_secured and contract_lost are NOT separately stored flags — they are computed at render time as: contract_secured = (ending_END-1 OR ending_END-2 OR ending_END-4), contract_lost = (ending_END-3 OR ending_END-5 OR ending_END-6 OR ending_END-7), reading the already-set ending band flags from ACT6_SCENE03's ending selection. Do not add them to game_state.flags as stored values. batch_released/batch_rejected reuse the existing flags already set in ACT6_SCENE02. The ROI line always renders unconditionally — by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
   },
   "DIALOGUE_BIG-01": {
     "dialogueId": "DIALOGUE_BIG-01",
@@ -1606,7 +1606,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Marcus doesn't sit down."
+        "text": "Mike E. doesn't sit down."
       },
       {
         "speaker": "marcus",
@@ -1641,7 +1641,7 @@
       {
         "speaker": "daniel",
         "emotion": "concerned",
-        "text": "Both? Marcus, we costed one product line. Not two."
+        "text": "Both? Mike E., we costed one product line. Not two."
       },
       {
         "speaker": "marcus",

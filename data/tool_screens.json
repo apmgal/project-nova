@@ -220,7 +220,7 @@
       "minCount": 6,
       "trigger": "EV-E3",
       "reactionFlag": "moscow_overcommitted",
-      "note": "EV-E3 already exists in events.json — fire it as an interrupting reaction before the scene continues, per its existing design (Marcus's dry 'you've just doubled the budget' line)."
+      "note": "EV-E3 already exists in events.json — fire it as an interrupting reaction before the scene continues, per its existing design (Mike E.'s dry 'you've just doubled the budget' line)."
     },
     "completionCondition": "All 8 cards placed in some bucket (Won't counts as placed)",
     "onComplete": {
@@ -262,7 +262,7 @@
     "completionCondition": "All 7 stakeholders placed in some quadrant",
     "buckets": ["Manage Closely", "Keep Satisfied", "Keep Informed", "Monitor"],
     "cards": [
-      { "id": "marcus", "text": "Marcus Reid" },
+      { "id": "marcus", "text": "Mike Elloian" },
       {
         "id": "camille",
         "text": "Camille Okafor",
@@ -633,7 +633,7 @@
       },
       {
         "id": "comms_marcus",
-        "text": "Marcus",
+        "text": "Mike E.",
         "correctBucket": "Monthly written report"
       },
       {
@@ -652,7 +652,7 @@
         "correctBucket": "Async dashboard"
       }
     ],
-    "note": "Multiple stakeholders can share a bucket (Marcus+Daniel both Monthly report, Camille+Tomasz both Decision-triggered) — not one-to-one. Marcus's placement here is the setup for ACT4_SCENE05's monthly status report mechanic — same system, paid off later.",
+    "note": "Multiple stakeholders can share a bucket (Mike E.+Daniel both Monthly report, Camille+Tomasz both Decision-triggered) — not one-to-one. Mike E.'s placement here is the setup for ACT4_SCENE05's monthly status report mechanic — same system, paid off later.",
     "wrongPlacementBehavior": {
       "penalty": "none",
       "reaction": "Card bounces back. No penalty."
@@ -683,10 +683,10 @@
           "note": "Activity vs. outcome, same lesson as the patients-treated tension moment: attending meetings is work toward the goal, not proof the goal happened."
         },
         "evidenceTensionMoment": {
-          "wrongOption": "Marcus's monthly status report",
+          "wrongOption": "Mike E.'s monthly status report",
           "correctOption": "Procurement records",
           "reaction": "A status report says the deal's coming. Procurement's paperwork says it's done.",
-          "note": "Deliberately tempting: Marcus's monthly written report is a real mechanic set up in ACT3_SCENE05 and paid off in ACT4_SCENE05, so a player who's been paying attention may reach for it here — it's a real artifact, just not the primary source. Procurement's own signed records are."
+          "note": "Deliberately tempting: Mike E.'s monthly written report is a real mechanic set up in ACT3_SCENE05 and paid off in ACT4_SCENE05, so a player who's been paying attention may reach for it here — it's a real artifact, just not the primary source. Procurement's own signed records are."
         }
       },
       {

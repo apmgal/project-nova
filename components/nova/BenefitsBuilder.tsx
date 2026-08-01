@@ -50,7 +50,7 @@ export default function BenefitsBuilder({
         ) : tension ? (
           <div className="flex flex-col gap-1">
             {tension.marcusLine && (
-              <p className="italic text-zinc-400">Marcus: “{tension.marcusLine}”</p>
+              <p className="italic text-zinc-400">Mike E.: “{tension.marcusLine}”</p>
             )}
             {tension.camilleLine && (
               <p className="italic text-zinc-400">Camille: “{tension.camilleLine}”</p>

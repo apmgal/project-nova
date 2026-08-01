@@ -4,7 +4,7 @@
     "title": "The Board Bought Another Company",
     "act": "Act 4",
     "trigger": "Scheduled — fixed narrative beat, Week 18",
-    "description": "Marcus walks in mid-project: the Board has acquired a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits case, risk profile, timeline and internal politics all move simultaneously.",
+    "description": "Mike E. walks in mid-project: the Board has acquired a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits case, risk profile, timeline and internal politics all move simultaneously.",
     "pmConcept": "Emergency re-planning / scope change at portfolio level",
     "impact": [
       "Budget Remaining",
@@ -227,7 +227,7 @@
     "pmConcept": "Communications & stakeholder management",
     "impact": [
       "Board Confidence",
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "participants": [],
     "possibleChoices": [
@@ -343,7 +343,7 @@
     "impact": [
       "Risk Exposure",
       "Regulatory Readiness",
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "participants": [],
     "possibleChoices": [
@@ -365,7 +365,7 @@
     "pmConcept": "Cost control / negotiation",
     "impact": [
       "Budget Remaining",
-      "Marcus Trust",
+      "Mike E. Trust",
       "Benefits Realisation Score"
     ],
     "participants": [
@@ -415,7 +415,7 @@
     "impact": [
       "Budget Remaining",
       "Camille Trust",
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "participants": [
       "priya"
@@ -457,7 +457,7 @@
     "eventId": "EV-14",
     "title": "Validation Engineer Poached by a Competitor",
     "act": "Act 4",
-    "trigger": "Conditional (Team Morale < 50 OR Marcus Trust Cold/Cool)",
+    "trigger": "Conditional (Team Morale < 50 OR Mike E. Trust Cold/Cool)",
     "description": "An engineer is poached a week before commissioning.",
     "pmConcept": "Resourcing risk / succession planning",
     "impact": [
@@ -550,7 +550,7 @@
     "title": "MoSCoW Over-commitment Trap",
     "act": "Act 2",
     "trigger": "Scheduled",
-    "description": "If the player marks everything 'Must', Marcus notes the budget has just doubled.",
+    "description": "If the player marks everything 'Must', Mike E. notes the budget has just doubled.",
     "pmConcept": "Prioritisation discipline",
     "impact": [
       "Budget Remaining"

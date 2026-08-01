@@ -11,10 +11,10 @@
       "marcus"
     ],
     "pmConcept": "Project initiation",
-    "contentSummary": "Player arrives; Marcus greets them coolly; no handover notes from Ellis.",
+    "contentSummary": "Player arrives; Mike E. greets them coolly; no handover notes from Ellis.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "dialogueId": "DIALOGUE_ACT1_SCENE01",
     "choicesId": "CHOICE_ACT1_SCENE01",
@@ -37,7 +37,7 @@
       "marcus"
     ],
     "pmConcept": "Evidence-based diagnostics",
-    "contentSummary": "Marcus withholds a briefing until the player diagnoses the project themselves.",
+    "contentSummary": "Mike E. withholds a briefing until the player diagnoses the project themselves.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Regulatory Readiness"
@@ -64,7 +64,7 @@
     "contentSummary": "Player selects PESTLE and tags real external factors.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "dialogueId": "DIALOGUE_ACT1_SCENE03",
     "choicesId": "CHOICE_ACT1_SCENE03",
@@ -88,7 +88,7 @@
     "contentSummary": "Player builds SWOT for internal readiness.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "dialogueId": "DIALOGUE_ACT1_SCENE04",
     "choicesId": null,
@@ -144,7 +144,7 @@
     "contentSummary": "Player delivers a diagnosis synthesising findings; still no confirmed reason for Ellis leaving.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust",
+      "Mike E. Trust",
       "Board Confidence"
     ],
     "dialogueId": "DIALOGUE_ACT1_SCENE06",
@@ -191,11 +191,11 @@
       "marcus"
     ],
     "pmConcept": "MoSCoW prioritisation",
-    "contentSummary": "Executives argue priorities; player drags requirements into Must/Should/Could/Won't. Midway, Camille cuts across Marcus unprompted — \"Actually...\" — visibly reshaping the room.",
+    "contentSummary": "Executives argue priorities; player drags requirements into Must/Should/Could/Won't. Midway, Camille cuts across Mike E. unprompted — \"Actually...\" — visibly reshaping the room.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Budget Remaining",
-      "Marcus Trust",
+      "Mike E. Trust",
       "Stakeholder Goodwill"
     ],
     "dialogueId": "DIALOGUE_ACT2_SCENE02",
@@ -435,7 +435,7 @@
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Stakeholder Goodwill",
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "dialogueId": "DIALOGUE_ACT3_SCENE05",
     "choicesId": null,
@@ -540,12 +540,12 @@
       "priya"
     ],
     "pmConcept": "Change control",
-    "contentSummary": "Priya requests scope Marcus loves and Camille opposes; Camille interrupts Marcus mid-sentence if her trust is high.",
+    "contentSummary": "Priya requests scope Mike E. loves and Camille opposes; Camille interrupts Mike E. mid-sentence if her trust is high.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Budget Remaining",
       "Camille Trust",
-      "Marcus Trust"
+      "Mike E. Trust"
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE02",
     "choicesId": "CHOICE_ACT4_SCENE02",
@@ -568,7 +568,7 @@
       "marcus"
     ],
     "pmConcept": "Full re-planning under forced scope change — the deliberate 'holy crap' moment",
-    "contentSummary": "Week 18. Everything is going well. Marcus walks in: the Board has bought a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits, risk, timeline and politics all move at once.",
+    "contentSummary": "Week 18. Everything is going well. Mike E. walks in: the Board has bought a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits, risk, timeline and politics all move at once.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Budget Remaining",
@@ -623,7 +623,7 @@
     "contentSummary": "Status reports now must account for the two-product reality.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust",
+      "Mike E. Trust",
       "Board Confidence"
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE05",
@@ -753,7 +753,7 @@
       "marcus"
     ],
     "pmConcept": "Delayed consequence — deliberate structural change from v1",
-    "contentSummary": "Inspectors leave. Nobody knows the result. The office waits in silence. The phone rings. Marcus answers, doesn't speak, slowly smiles. Fade to black.",
+    "contentSummary": "Inspectors leave. Nobody knows the result. The office waits in silence. The phone rings. Mike E. answers, doesn't speak, slowly smiles. Fade to black.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "None — this scene deliberately withholds all variables from the player"
@@ -957,7 +957,7 @@
     "contentSummary": "Status Report — Month 2 (bridge)",
     "worldMemoryBeat": "callback_marcus_never_surprise_me",
     "variablesTouched": [
-      "Marcus Trust",
+      "Mike E. Trust",
       "Board Confidence"
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE05B",
@@ -985,7 +985,7 @@
     "contentSummary": "Status Report — Month 3 close (bridge)",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Marcus Trust",
+      "Mike E. Trust",
       "Board Confidence"
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE05C",
@@ -1010,7 +1010,7 @@
       "marcus"
     ],
     "pmConcept": "N/A — narrative branch, not a PM tool beat",
-    "contentSummary": "Marcus deflects the direct question about Ellis and redirects the player back to the investigation.",
+    "contentSummary": "Mike E. deflects the direct question about Ellis and redirects the player back to the investigation.",
     "worldMemoryBeat": null,
     "variablesTouched": [],
     "dialogueId": "DIALOGUE_ACT1_SCENE02B",
