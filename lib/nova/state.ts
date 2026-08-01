@@ -699,6 +699,108 @@ export function placeMilestone(
   return { ...state, toolPlacements: { ...state.toolPlacements, [toolId]: nextPlacements } };
 }
 
+/**
+ * Computes the critical path — the chain of milestones with zero slack
+ * that actually determines the project's finish date — from the player's
+ * real placements, not the dependency graph's shape alone. Fully generic:
+ * built from parseDependencyRule's structured output plus each
+ * milestone's placed end time (start + durationWeeks); no milestone id is
+ * ever hardcoded, so it stays correct no matter how the player arranged
+ * the timeline (e.g. it correctly swaps to a different prerequisite if
+ * the player placed it to finish later than its sibling).
+ *
+ * Algorithm: find whichever milestone finishes last overall (the true
+ * project end); walk backward through its prerequisites, at each step
+ * following whichever prerequisite finishes latest (the one actually
+ * gating the next milestone's start), until a milestone with no
+ * prerequisites is reached. Milestones off this backward walk — including
+ * ones with no dependency edges at all — have slack and aren't returned.
+ *
+ * Returned in end-to-start order (the final milestone first). Returns []
+ * if any milestone isn't placed yet — callers should gate on
+ * isPriorityToolComplete first.
+ */
+export function computeCriticalPath(
+  toolScreen: ToolScreenBlock,
+  placements: Record<string, string>
+): string[] {
+  const milestones = toolScreen.milestones ?? [];
+  if (milestones.length === 0) return [];
+
+  const endTime = (id: string): number | null => {
+    const milestone = milestones.find((m) => m.id === id);
+    const start = placements[id];
+    if (!milestone || start === undefined) return null;
+    return Number(start) + milestone.durationWeeks;
+  };
+
+  if (milestones.some((m) => endTime(m.id) === null)) return [];
+
+  const prerequisitesOf = new Map<string, string[]>();
+  for (const { rule } of toolScreen.dependencyRules ?? []) {
+    const parsed = parseDependencyRule(rule);
+    if (parsed) prerequisitesOf.set(parsed.milestoneId, parsed.prerequisiteIds);
+  }
+
+  let current = milestones[0].id;
+  let latestEnd = endTime(current) ?? -Infinity;
+  for (const m of milestones) {
+    const end = endTime(m.id) ?? -Infinity;
+    if (end > latestEnd) {
+      latestEnd = end;
+      current = m.id;
+    }
+  }
+
+  const path: string[] = [];
+  let cursor: string | undefined = current;
+  while (cursor) {
+    path.push(cursor);
+    const prerequisites = prerequisitesOf.get(cursor) ?? [];
+    if (prerequisites.length === 0) break;
+    let next: string | undefined;
+    let nextEnd = -Infinity;
+    for (const prerequisiteId of prerequisites) {
+      const end = endTime(prerequisiteId) ?? -Infinity;
+      if (end > nextEnd) {
+        nextEnd = end;
+        next = prerequisiteId;
+      }
+    }
+    cursor = next;
+  }
+  return path;
+}
+
+/** True if the player's guessed set of milestone ids exactly matches the
+ * computed critical path (order-independent — the player taps bars in
+ * whatever order, only the final set matters). */
+export function isCriticalPathGuessCorrect(guessedIds: string[], criticalPath: string[]): boolean {
+  if (guessedIds.length !== criticalPath.length) return false;
+  const guessedSet = new Set(guessedIds);
+  return criticalPath.every((id) => guessedSet.has(id));
+}
+
+/**
+ * Toggles a milestone in/out of the player's live critical-path guess.
+ * Lives in toolSelections (the same live, reversible toggle-set shape as
+ * Team Selection's hire toggle) rather than toolProgress, since changing
+ * your mind mid-guess should fully remove a milestone, not just leave it
+ * accumulated in a history.
+ */
+export function toggleCriticalPathGuess(
+  state: GameState,
+  toolScreen: ToolScreenBlock,
+  milestoneId: string
+): GameState {
+  const toolId = toolScreen.toolId;
+  const current = state.toolSelections[toolId] ?? [];
+  const next = current.includes(milestoneId)
+    ? current.filter((id) => id !== milestoneId)
+    : [...current, milestoneId];
+  return { ...state, toolSelections: { ...state.toolSelections, [toolId]: next } };
+}
+
 // ---------------------------------------------------------------------------
 // HUD — Deployment Countdown. Purely a display-derivation layer over
 // existing projectMetrics/toolPlacements; introduces no new stored

@@ -675,7 +675,19 @@
         "correctMeasure": "Signed agreement",
         "correctEvidence": "Procurement records",
         "correctOwner": "tomasz",
-        "correctWhen": "Before launch (Week 24)"
+        "correctWhen": "Before launch (Week 24)",
+        "measureTensionMoment": {
+          "wrongOption": "Meetings held with procurement",
+          "correctOption": "Signed agreement",
+          "reaction": "Meetings don't secure a contract. Nothing's real until it's signed.",
+          "note": "Activity vs. outcome, same lesson as the patients-treated tension moment: attending meetings is work toward the goal, not proof the goal happened."
+        },
+        "evidenceTensionMoment": {
+          "wrongOption": "Marcus's monthly status report",
+          "correctOption": "Procurement records",
+          "reaction": "A status report says the deal's coming. Procurement's paperwork says it's done.",
+          "note": "Deliberately tempting: Marcus's monthly written report is a real mechanic set up in ACT3_SCENE05 and paid off in ACT4_SCENE05, so a player who's been paying attention may reach for it here — it's a real artifact, just not the primary source. Procurement's own signed records are."
+        }
       },
       {
         "id": "benefit_patients_treated",
@@ -684,12 +696,19 @@
         "correctEvidence": "Manufacturing dashboard",
         "correctOwner": "priya",
         "correctWhen": "After go-live",
-        "tensionMoment": {
+        "measureTensionMoment": {
           "marcusLine": "Can't we just measure success by the facility being open?",
           "camilleLine": "Opening a facility doesn't mean we've delivered anything. Nobody's been treated yet.",
           "wrongOption": "Facility completion date",
           "correctOption": "Monthly production output",
+          "reaction": "Facility completion tells you the building's finished. It doesn't tell you anyone's been treated.",
           "note": "Player picks between the two, learning outputs (facility exists) vs. outcomes (patients actually treated). No penalty for picking wrong, but a correcting reaction line, same as the PESTLE tool-selection pattern."
+        },
+        "evidenceTensionMoment": {
+          "wrongOption": "Validation certificate",
+          "correctOption": "Manufacturing dashboard",
+          "reaction": "The validation certificate says the line works. It doesn't say anyone's used it yet.",
+          "note": "Tempting because the player just spent an entire earlier scene (IQ/OQ, in the WBS) earning this artifact — it's real, it's just evidence the equipment functions, not evidence patients are being treated."
         }
       },
       {
@@ -698,7 +717,19 @@
         "correctMeasure": "ROI",
         "correctEvidence": "Finance report",
         "correctOwner": "daniel",
-        "correctWhen": "12 months after go-live"
+        "correctWhen": "12 months after go-live",
+        "measureTensionMoment": {
+          "wrongOption": "Total revenue",
+          "correctOption": "ROI",
+          "reaction": "Revenue alone doesn't tell Daniel if it was worth twelve million. ROI weighs it against what was spent.",
+          "note": "Classic finance near-miss: revenue sounds like the obvious answer to 'was it worth it', but it ignores the cost side of the question Daniel is actually asking."
+        },
+        "evidenceTensionMoment": {
+          "wrongOption": "Sales pipeline forecast",
+          "correctOption": "Finance report",
+          "reaction": "A forecast is a guess about what might happen. Daniel wants what actually did.",
+          "note": "Projected vs. actual, echoing correctWhen's '12 months after go-live' — a forecast is exactly the kind of thing that would be available too early and wouldn't hold up to Daniel's question."
+        }
       }
     ],
     "fieldsPlayerBuilds": [

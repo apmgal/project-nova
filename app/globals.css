@@ -48,3 +48,68 @@ body {
 .animate-nova-bounce-back {
   animation: nova-bounce-back 0.4s ease-in-out;
 }
+
+/* Announcement/title-card scenes (e.g. "Baseline Approved") — every line
+   pops in together as one beat instead of being revealed one at a time. */
+@keyframes nova-announce-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-nova-announce-pop {
+  animation: nova-announce-pop 0.6s ease-out both;
+}
+
+@keyframes nova-rule-reveal {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.animate-nova-rule-reveal {
+  animation: nova-rule-reveal 0.5s ease-out both;
+}
+
+@keyframes nova-hint-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-nova-hint-fade {
+  animation: nova-hint-fade 0.5s ease-out 0.9s both;
+}
+
+/* Title screen's "Preparing your quest..." bar — an indeterminate sweep
+   (a segment cycling left-to-right), not a fill animating toward 100%,
+   since there's nothing real to load before Start Mission is clickable. */
+@keyframes nova-quest-bar-sweep {
+  0% {
+    left: -35%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-nova-quest-bar-sweep {
+  animation: nova-quest-bar-sweep 1.4s ease-in-out infinite;
+}

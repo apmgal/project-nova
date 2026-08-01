@@ -798,7 +798,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Tension moment (Marcus vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].tensionMoment."
+    "engineNote": "Tension moment (Marcus vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].measureTensionMoment. Every Measure/Evidence field across all 3 benefits now has its own tensionMoment (wrongOption/correctOption/reaction); this one is the only pair with marcusLine/camilleLine framing lines."
   },
   "DIALOGUE_ACT3_SCENE07": {
     "dialogueId": "DIALOGUE_ACT3_SCENE07",

@@ -35,6 +35,7 @@ import {
   isHiringComplete,
   validateMilestonePlacement,
   placeMilestone,
+  toggleCriticalPathGuess,
   benefitFieldId,
   substituteTemplate,
   computeWeeksRemaining,
@@ -50,6 +51,7 @@ import type {
 } from "@/lib/nova/types";
 import TitleScreen from "./TitleScreen";
 import DialogueTranscript from "./DialogueTranscript";
+import AnnouncementCard from "./AnnouncementCard";
 import ChoiceButtons from "./ChoiceButtons";
 import ToolScreen from "./ToolScreen";
 import PriorityBoard from "./PriorityBoard";
@@ -74,6 +76,15 @@ import EndOfContent from "./EndOfContent";
  */
 const HUD_START_SCENE_ID = "ACT3_SCENE06B";
 const HUD_ALWAYS_ON_ACTS = new Set(["Act 4"]);
+
+/** Sentinel id pushed into toolProgress[toolId] once the player has
+ * correctly identified the critical path AND explicitly continued past
+ * the reveal — a gantt_placement tool isn't "complete" on guess
+ * correctness alone (that's derived live from toolSelections and could
+ * flip true mid-tap), it's complete once the player has actually seen
+ * and confirmed the answer. Reuses toolProgress's existing "list of
+ * resolved ids" shape rather than inventing new state. */
+const CRITICAL_PATH_CONFIRMED_MARKER = "critical_path_confirmed";
 
 function isHudActiveForScene(scene: Scene): boolean {
   if (HUD_ALWAYS_ON_ACTS.has(scene.act)) return true;
@@ -150,10 +161,17 @@ function computeToolComplete(state: GameState, toolScreen: ToolScreenBlock | nul
       return isCbsComplete(state, toolScreen);
     case "pick_n_of_m_swipeable":
       return isHiringComplete(state, toolId, toolScreen.maxHires ?? toolScreen.candidates?.length ?? 0);
-    case "gantt_placement":
-      // Same "every key placed" shape as priority_assignment — reused
-      // directly rather than duplicating the check.
-      return isPriorityToolComplete(state, toolId, toolScreen.milestones?.length ?? 0);
+    case "gantt_placement": {
+      // Placement uses the same "every key placed" shape as
+      // priority_assignment. But that alone isn't "complete" here — the
+      // scene's real payoff is the critical-path puzzle that follows, so
+      // completion also requires the explicit post-reveal confirmation
+      // marker (see CRITICAL_PATH_CONFIRMED_MARKER), not just a correct
+      // live guess (which could momentarily be true mid-tap).
+      const milestoneCount = toolScreen.milestones?.length ?? 0;
+      if (!isPriorityToolComplete(state, toolId, milestoneCount)) return false;
+      return (state.toolProgress[toolId] ?? []).includes(CRITICAL_PATH_CONFIRMED_MARKER);
+    }
     case "proof_chain_builder":
       return isToolComplete(
         state,
@@ -168,10 +186,20 @@ function computeToolComplete(state: GameState, toolScreen: ToolScreenBlock | nul
 
 /** On resume, a tool scene the player already reached (toolProgress has an
  * entry for it, even an empty one) should skip straight back to its action
- * phase instead of replaying dialogue from line one. */
+ * phase instead of replaying dialogue from line one. An "announcement"
+ * scene (see AnnouncementCard) always fast-forwards straight past every
+ * line — its whole point is showing them all at once, with its action
+ * available immediately, rather than being click-revealed. Also used by
+ * goToScene for every fresh scene transition, not just resume, so the
+ * fast-forward applies the instant the player arrives, not just on reload. */
 function resolveInitialLineIndex(state: GameState, sceneId: string): number {
   const scene = getScene(sceneId);
-  if (scene?.toolId && hasReachedToolScreen(state, scene.toolId)) {
+  if (!scene) return 0;
+  if (scene.displayStyle === "announcement") {
+    const { preLines, postLines } = computeSceneLines(scene, state.flags);
+    return preLines.length + postLines.length;
+  }
+  if (scene.toolId && hasReachedToolScreen(state, scene.toolId)) {
     const { preLines } = computeSceneLines(scene, state.flags);
     return preLines.length;
   }
@@ -254,7 +282,7 @@ export default function GameRoot() {
     const next = enterScene(baseState, nextSceneId);
     saveGame(next);
     setGameState(next);
-    setLineIndex(0);
+    setLineIndex(resolveInitialLineIndex(next, nextSceneId));
     setReactionText(null);
     setEndInfo(null);
     setResolvedChoiceIds(new Set());
@@ -411,6 +439,13 @@ export default function GameRoot() {
     saveGame(next);
   }
 
+  function handleDismissHudTutorial() {
+    if (!gameState || gameState.flags.hud_tutorial_seen) return;
+    const next = applyFlags(gameState, { hud_tutorial_seen: true });
+    setGameState(next);
+    saveGame(next);
+  }
+
   function handleContinueInvestigation(choiceId: string) {
     setResolvedInvestigationIds((current) => new Set(current).add(choiceId));
   }
@@ -542,13 +577,31 @@ export default function GameRoot() {
     setGameState(next);
     saveGame(next);
 
-    if (
-      isPriorityToolComplete(next, scene.toolId, toolScreen.milestones?.length ?? 0) &&
-      postLines.length === 0
-    ) {
+    // Deliberately no auto-advance here (unlike every other tool's
+    // placement handler): placing the last milestone should hand the
+    // player straight into the critical-path phase within this same
+    // GanttBoard, not jump to the next scene. See handleConfirmCriticalPath
+    // for where the actual transition happens.
+    return null;
+  }
+
+  function handleToggleCriticalPathGuess(milestoneId: string) {
+    if (!gameState || !scene?.toolId || !toolScreen) return;
+    const next = toggleCriticalPathGuess(gameState, toolScreen, milestoneId);
+    setGameState(next);
+    saveGame(next);
+  }
+
+  function handleConfirmCriticalPath() {
+    if (!gameState || !scene?.toolId || !toolScreen) return;
+    const toolId = scene.toolId;
+    const next = placeToolCard(gameState, toolId, CRITICAL_PATH_CONFIRMED_MARKER);
+    setGameState(next);
+    saveGame(next);
+
+    if (computeToolComplete(next, toolScreen) && postLines.length === 0) {
       goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
     }
-    return null;
   }
 
   function handleBuildBenefitField(benefitId: string, field: string) {
@@ -578,37 +631,10 @@ export default function GameRoot() {
 
   const hudActive = isHudActiveForScene(scene);
   const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
+  const isAnnouncement = scene.displayStyle === "announcement";
 
-  return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-zinc-950">
-      <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.3em] text-emerald-500">
-            {scene.act}
-          </div>
-          <div className="text-sm font-semibold text-zinc-100">{scene.title}</div>
-        </div>
-        <button
-          onClick={handleRestart}
-          className="rounded border border-zinc-700 px-3 py-1 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
-        >
-          Title
-        </button>
-      </header>
-
-      {hudActive && <HUD gameState={gameState} ganttToolScreen={ganttToolScreen} />}
-
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-end px-4 py-6">
-        <DialogueTranscript
-          sceneAct={scene.act}
-          sceneTitle={scene.title}
-          lines={displayLines}
-          revealedCount={revealedCount}
-          relationships={gameState.relationships}
-          inDialogue={inDialogue}
-          onAdvance={handleAdvanceLine}
-          actionContent={
-            atToolBreak && toolScreen && toolIsPriority ? (
+  const actionContent =
+    atToolBreak && toolScreen && toolIsPriority ? (
               <PriorityBoard
                 toolScreen={toolScreen}
                 placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
@@ -631,6 +657,9 @@ export default function GameRoot() {
                 toolScreen={toolScreen}
                 placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
                 onPlace={handleGanttPlace}
+                criticalPathGuesses={gameState.toolSelections[toolScreen.toolId] ?? []}
+                onToggleCriticalPathGuess={handleToggleCriticalPathGuess}
+                onConfirmCriticalPath={handleConfirmCriticalPath}
               />
             ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
               <BenefitsBuilder
@@ -672,9 +701,52 @@ export default function GameRoot() {
                   Continue ▸
                 </button>
               </div>
-            )
-          }
+            );
+
+  return (
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-zinc-950">
+      <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
+        {isAnnouncement ? (
+          <div />
+        ) : (
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-emerald-500">
+              {scene.act}
+            </div>
+            <div className="text-sm font-semibold text-zinc-100">{scene.title}</div>
+          </div>
+        )}
+        <button
+          onClick={handleRestart}
+          className="rounded border border-zinc-700 px-3 py-1 text-xs text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+        >
+          Title
+        </button>
+      </header>
+
+      {hudActive && (
+        <HUD
+          gameState={gameState}
+          ganttToolScreen={ganttToolScreen}
+          onDismissTutorial={handleDismissHudTutorial}
         />
+      )}
+
+      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-end px-4 py-6">
+        {isAnnouncement ? (
+          <AnnouncementCard lines={displayLines} actionContent={actionContent} />
+        ) : (
+          <DialogueTranscript
+            sceneAct={scene.act}
+            sceneTitle={scene.title}
+            lines={displayLines}
+            revealedCount={revealedCount}
+            relationships={gameState.relationships}
+            inDialogue={inDialogue}
+            onAdvance={handleAdvanceLine}
+            actionContent={actionContent}
+          />
+        )}
       </main>
 
       <DebugDrawer gameState={gameState} onRestart={handleRestart} />

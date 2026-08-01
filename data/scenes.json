@@ -1045,6 +1045,7 @@
       "ACT3_SCENE07"
     ],
     "needsWriting": false,
-    "note": "Non-canonical bridge scene. This is where the Week X/24 HUD countdown activates for the first time — a visual translation layer over scheduleHealth (weeksRemaining = round(scheduleHealth/100*24)), not a new stored variable."
+    "note": "Non-canonical bridge scene. This is where the Week X/24 HUD countdown activates for the first time — a visual translation layer over scheduleHealth (weeksRemaining = round(scheduleHealth/100*24)), not a new stored variable.",
+    "displayStyle": "announcement"
   }
 }

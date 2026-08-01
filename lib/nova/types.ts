@@ -90,12 +90,24 @@ export interface Scene {
   needsWriting?: boolean;
   flagsSet?: string[];
   note?: string;
+  /** When "announcement", the scene's dialogue renders as a single
+   * simultaneous title-card beat (AnnouncementCard) instead of the normal
+   * one-line-at-a-time transcript — every line pops in together and the
+   * scene's action (Continue/choices) is available immediately, rather
+   * than being gated behind clicking through each line. Matches the
+   * content's own "Title Card" screenType convention (e.g.
+   * ACT3_SCENE06B). Absent/any other value renders normally. */
+  displayStyle?: string;
 }
 
 export interface DialogueLine {
   speaker: string;
   emotion: string | null;
   text: string;
+  /** Optional display hint from the content, e.g. "header" — currently
+   * only consumed by AnnouncementCard to pick the headline line out of an
+   * announcement scene's lines; ignored everywhere else. */
+  style?: string;
   condition?: string;
   /** Key into assets.json's `backgrounds` map. Only present on lines that
    * change the backdrop; absent lines keep whatever was last shown. */
@@ -248,10 +260,15 @@ export interface BenefitTensionMoment {
   camilleLine?: string;
   wrongOption: string;
   correctOption: string;
+  /** Player-facing corrective line shown on the wrong pick — distinct
+   * from `note`, which is internal design commentary, never displayed. */
+  reaction: string;
   note?: string;
 }
 
-/** proof_chain_builder benefit entry (Benefits Register). */
+/** proof_chain_builder benefit entry (Benefits Register). Measure and
+ * Evidence each have their own optional tension moment — a benefit can
+ * have one, both, or neither, independent of its sibling field. */
 export interface ToolBenefit {
   id: string;
   text: string;
@@ -259,7 +276,8 @@ export interface ToolBenefit {
   correctEvidence?: string;
   correctOwner?: string;
   correctWhen?: string;
-  tensionMoment?: BenefitTensionMoment;
+  measureTensionMoment?: BenefitTensionMoment;
+  evidenceTensionMoment?: BenefitTensionMoment;
 }
 
 export interface ToolScreenBlock {
