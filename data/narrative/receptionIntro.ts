@@ -13,25 +13,16 @@ import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
   id: "reception_intro",
   background: {
+    // This photo now has the AstraZeneca logo baked in on the wall panel
+    // behind the desk, so no separate `overlay` is needed anymore (that
+    // stays available on SceneBackground/NarrativeSceneScript for a
+    // future background that doesn't already include its own signage).
     src: "/assets/backgrounds/bg_reception_desk.jpg",
     alt: "Group Tax reception desk",
-    overlay: {
-      src: "/assets/branding/astrazeneca_logo.png",
-      alt: "AstraZeneca",
-      // Lines up with the blank lit wall panel behind the reception
-      // desk in this specific photo — a different background photo
-      // would need its own coordinates here, which is exactly why this
-      // lives in the scene's data rather than being hardcoded anywhere
-      // in SceneBackground itself.
-      top: "24%",
-      left: "26%",
-      width: "32%",
-      aspectRatio: 920 / 235,
-    },
   },
   music: {
-    src: "/assets/music/reception_theme.mp3",
-    volume: 0.5,
+    src: "/assets/music/reception_theme.wav",
+    volume: 0.35,
     fadeInMs: 2200,
     fadeOutMs: 1400,
   },
