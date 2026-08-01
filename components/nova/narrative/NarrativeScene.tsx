@@ -3,7 +3,7 @@
 import { useState } from "react";
 import SceneBackground from "./SceneBackground";
 import CharacterSprite from "./CharacterSprite";
-import DialogueBox from "./DialogueBox";
+import SpeechBubble from "./SpeechBubble";
 import SceneAudio from "./SceneAudio";
 import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 
@@ -20,15 +20,17 @@ const EXIT_FADE_MS = 550;
 
 /**
  * Reusable narrative-scene player: full-screen background, positioned
- * character portraits, background music, and a bottom dialogue box that
- * advances through `script.lines` one click at a time. This is the one
- * piece future scenes (stakeholder meetings, boardroom discussions,
- * office conversations, decision moments) are meant to reuse directly —
- * they only need a new NarrativeSceneScript, not new scene logic.
+ * character portraits, background music, and a speech bubble (docked
+ * beside whichever character is speaking) that advances through
+ * `script.lines` one click at a time. This is the one piece future
+ * scenes (stakeholder meetings, boardroom discussions, office
+ * conversations, decision moments) are meant to reuse directly — they
+ * only need a new NarrativeSceneScript, not new scene logic.
  *
  * Flow: background + music start immediately on mount; characters fade in
- * shortly after; dialogue plays line by line; clicking past the last line
- * fades to black and then calls `onComplete`.
+ * shortly after; dialogue plays line by line, each line's bubble docking
+ * near its speaker; clicking past the last line fades to black and then
+ * calls `onComplete`.
  */
 export default function NarrativeScene({ script, onComplete }: NarrativeSceneProps) {
   const [lineIndex, setLineIndex] = useState(0);
@@ -72,13 +74,15 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
       ))}
 
       {line && (
-        <DialogueBox
+        <SpeechBubble
+          key={lineIndex}
           speakerName={speaker?.name ?? null}
           text={line.text}
           voiceSrc={line.voiceSrc}
           onAdvance={handleAdvance}
           lineNumber={lineIndex + 1}
           lineCount={script.lines.length}
+          anchor={speaker?.position ?? "center"}
         />
       )}
 
