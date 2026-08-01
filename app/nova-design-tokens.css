@@ -1,0 +1,186 @@
+/**
+ * Project Nova "Guild of Project Masters" design system tokens — ported
+ * verbatim from the design handoff bundle (tokens/colors.css,
+ * typography.css, spacing.css, effects.css) so component code across the
+ * app can reference the exact same custom properties the handoff's
+ * reference JSX used. No brand font files were supplied, so the three
+ * font families here are a Google Fonts substitution (MedievalSharp for
+ * display, Nunito for body/UI, JetBrains Mono for stat readouts) — swap
+ * for real brand fonts later if/when supplied. The Google Fonts @import
+ * itself lives at the very top of globals.css, not here — CSS requires
+ * @import to precede every other rule in the final bundled stylesheet,
+ * and Tailwind's own @import "tailwindcss" expands to real rules before
+ * this file gets inlined, so keeping it here would silently fail to load.
+ */
+:root {
+  /* ---- Base brand hues ---- */
+  --nova-berry-900: #3d1a26;
+  --nova-berry-800: #54222f;
+  --nova-berry-700: #6b2b3a;
+  --nova-berry-600: #7f3346;
+  --nova-berry-500: #954059;
+  --nova-berry-400: #a8637a;
+  --nova-berry-300: #c294a3;
+  --nova-berry-200: #ddc0c8;
+  --nova-berry-100: #f0e2e5;
+
+  --nova-gold-900: #4a3a1a;
+  --nova-gold-800: #644e20;
+  --nova-gold-700: #7d6428;
+  --nova-gold-600: #a1832f;
+  --nova-gold-500: #c4a038;
+  --nova-gold-400: #d3b664;
+  --nova-gold-300: #e0c98f;
+  --nova-gold-200: #ecdcb8;
+  --nova-gold-100: #f7f0dd;
+
+  --nova-navy-950: #081a2c;
+  --nova-navy-900: #0c2740;
+  --nova-navy-800: #12395c;
+  --nova-navy-700: #194b76;
+  --nova-navy-600: #286183;
+  --nova-navy-500: #3d7b9c;
+  --nova-navy-400: #6fa0b9;
+
+  --nova-cyan-500: #5c96a3;
+  --nova-cyan-400: #79aab5;
+  --nova-cyan-300: #9ec2ca;
+  --nova-cyan-200: #c9dde1;
+
+  --nova-lime-600: #7c8a3a;
+  --nova-lime-500: #93a04a;
+  --nova-lime-400: #aab868;
+  --nova-lime-300: #c4cf95;
+
+  /* ---- Neutrals ---- */
+  --nova-parchment-100: #fdf9f0;
+  --nova-parchment-200: #f7f0e0;
+  --nova-parchment-300: #efe3c8;
+  --nova-parchment-400: #ddcda3;
+
+  --nova-ink-900: #241a1e;
+  --nova-ink-700: #4a3c40;
+  --nova-ink-500: #786a6d;
+  --nova-ink-300: #a99ea0;
+
+  --nova-slate-950: #12161d;
+  --nova-slate-900: #1b212b;
+  --nova-slate-800: #262e3a;
+  --nova-slate-700: #3a4658;
+
+  /* ---- Semantic status ---- */
+  --nova-success: var(--nova-lime-500);
+  --nova-success-strong: var(--nova-lime-600);
+  --nova-warning: var(--nova-gold-500);
+  --nova-warning-strong: var(--nova-gold-700);
+  --nova-danger: #a8453f;
+  --nova-danger-strong: #7a2e2a;
+  --nova-info: var(--nova-cyan-500);
+
+  /* ---- Zone colors (WBS/CBS/Gantt — 6 zones) ---- */
+  --nova-zone-construction: #e8763a;
+  --nova-zone-construction-bg: rgba(232, 118, 58, 0.18);
+  --nova-zone-utilities: var(--nova-cyan-500);
+  --nova-zone-utilities-bg: rgba(63, 184, 212, 0.16);
+  --nova-zone-equipment: var(--nova-gold-500);
+  --nova-zone-equipment-bg: rgba(232, 164, 0, 0.16);
+  --nova-zone-validation: #2fa891;
+  --nova-zone-validation-bg: rgba(47, 168, 145, 0.16);
+  --nova-zone-training: #9662d1;
+  --nova-zone-training-bg: rgba(150, 98, 209, 0.16);
+  --nova-zone-documentation: #d1568f;
+  --nova-zone-documentation-bg: rgba(209, 86, 143, 0.16);
+  --nova-zone-fallback: var(--nova-ink-500);
+  --nova-zone-fallback-bg: rgba(120, 106, 109, 0.16);
+
+  /* ---- Semantic aliases ---- */
+  --color-bg-app: var(--nova-slate-950);
+  --color-bg-panel-dark: var(--nova-slate-900);
+  --color-bg-panel-parchment: var(--nova-parchment-200);
+  --color-bg-card: var(--nova-parchment-100);
+  --color-surface-raised: #ffffff;
+
+  --color-brand-primary: var(--nova-berry-600);
+  --color-brand-primary-hover: var(--nova-berry-700);
+  --color-brand-primary-active: var(--nova-berry-800);
+  --color-brand-secondary: var(--nova-gold-500);
+  --color-brand-secondary-hover: var(--nova-gold-600);
+  --color-brand-accent: var(--nova-cyan-500);
+
+  --color-text-on-dark: var(--nova-parchment-100);
+  --color-text-on-dark-muted: #9fb0c2;
+  --color-text-on-parchment: var(--nova-ink-900);
+  --color-text-on-parchment-muted: var(--nova-ink-700);
+  --color-text-on-brand: #fff8ef;
+
+  --color-border-dark: var(--nova-slate-700);
+  --color-border-parchment: var(--nova-parchment-400);
+  --color-border-focus: var(--nova-cyan-400);
+
+  /* ---- Typography ---- */
+  --font-display: 'MedievalSharp', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  --text-display-xl: clamp(2.75rem, 4vw, 4.75rem);
+  --text-display-lg: clamp(2.25rem, 3vw, 3.25rem);
+  --text-display-md: 1.75rem;
+  --text-heading-lg: 1.375rem;
+  --text-heading-md: 1.125rem;
+  --text-body-lg: 1.0625rem;
+  --text-body-md: 0.9375rem;
+  --text-body-sm: 0.8125rem;
+  --text-label-sm: 0.6875rem;
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.12em;
+  --tracking-widest: 0.28em;
+
+  /* ---- Spacing / radii ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  --container-max: 1200px;
+
+  /* ---- Effects: "carved panel" shadows, gradients, easing ---- */
+  --shadow-panel-dark: 0 2px 0 rgba(0, 0, 0, 0.55), 0 10px 24px rgba(0, 0, 0, 0.45);
+  --shadow-panel-parchment: 0 3px 0 rgba(94, 62, 20, 0.35), 0 10px 20px rgba(36, 26, 30, 0.22);
+  --shadow-card-hover: 0 4px 0 rgba(0, 0, 0, 0.4), 0 14px 30px rgba(0, 0, 0, 0.4);
+  --shadow-inset-well: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-glow-gold: 0 0 0 3px rgba(232, 164, 0, 0.35);
+  --shadow-glow-cyan: 0 0 0 3px rgba(63, 184, 212, 0.35);
+  --shadow-glow-danger: 0 0 0 3px rgba(194, 59, 59, 0.35);
+
+  --border-frame-width: 3px;
+
+  --gradient-quest-bg: radial-gradient(circle at 50% 35%, var(--nova-navy-700) 0%, var(--nova-navy-900) 45%, var(--nova-navy-950) 100%);
+  --gradient-parchment: linear-gradient(180deg, var(--nova-parchment-100), var(--nova-parchment-200));
+  --gradient-gold-bar: linear-gradient(180deg, var(--nova-gold-400), var(--nova-gold-600));
+  --gradient-berry-bar: linear-gradient(180deg, var(--nova-berry-500), var(--nova-berry-700));
+  --gradient-danger-bar: linear-gradient(180deg, #c76b62, #7a2e2a);
+
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Button from "./Button";
+import QuestBar from "./QuestBar";
 
 interface TitleScreenProps {
   hasSave: boolean;
@@ -12,81 +14,90 @@ interface TitleScreenProps {
  * Title screen — "Guild of Project Masters" quest-log framing: Marcus
  * (the sponsor who chases status reports throughout the game) needling
  * the player before the mission even starts, over a deep blue radial
- * backdrop. Rebuilt from an approved external mockup; the mockup's
- * "upload background art" placeholder was a tool artifact of however it
- * was designed, not part of the actual design, so it's intentionally
- * left out here — the gradient backdrop is the real background.
+ * backdrop. Styled to the design-system reskin handoff's token set
+ * (nova-design-tokens.css) and Button/QuestBar primitives.
+ *
+ * Layout now matches the handoff's reference exactly: Marcus's full-
+ * figure transparent cutout stands bottom-right (marcus_fullbody.png,
+ * absolutely positioned, object-contain, bottom-anchored, drop-shadow +
+ * slight desaturation per the handoff's filter spec), with his speech
+ * bubble pinned near his head rather than beside a headshot avatar. Main
+ * copy/CTA column sits on the left with enough max-width to never run
+ * under him. Same props/behavior as before — hasSave/onNewGame/
+ * onContinue — only the visual arrangement changed.
  *
  * "PREPARING YOUR QUEST..." bar is flavour, not a real loader — there's
  * nothing to actually wait on (no network calls before Start Mission is
- * clickable). It's an indeterminate sweep (a segment cycling across the
- * track), not a fill animating toward 100%, so it doesn't imply progress
- * toward completion that isn't actually happening.
+ * clickable), hence QuestBar's indeterminate sweep rather than a
+ * determinate fill implying real progress.
  */
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
   return (
-    <div className="relative flex flex-1 items-center overflow-hidden bg-[radial-gradient(circle_at_50%_40%,#2c6478_0%,#164059_32%,#0c2740_65%,#081a2c_100%)] px-6 py-10 sm:px-14">
-      <div className="absolute left-6 top-6 text-xs font-semibold uppercase tracking-[0.3em] text-sky-300/80 sm:left-10 sm:top-8">
-        Quest Log
-      </div>
-
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <div className="flex items-center gap-4">
-          <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-sky-200/60 shadow-lg">
+    <div className="relative flex flex-1 items-stretch overflow-hidden bg-[image:var(--gradient-quest-bg)] p-4 sm:p-5">
+      <div className="relative flex w-full flex-1 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--nova-navy-400)]/25">
+        {/* Marcus — full-figure cutout, bottom-anchored on the right */}
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[34%] items-end justify-center sm:flex md:w-[28%]">
+          <div className="relative h-[92%] w-full">
             <Image
-              src="/assets/characters/marcus_neutral.jpg"
+              src="/assets/characters/marcus_fullbody.png"
               alt="Marcus"
               fill
-              sizes="80px"
-              className="object-cover"
+              sizes="400px"
+              className="object-contain object-bottom drop-shadow-[0_18px_20px_rgba(0,0,0,0.45)] saturate-[.85]"
+              priority
             />
           </div>
-          <div className="relative rounded-xl bg-stone-100 px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-md">
+        </div>
+
+        {/* Speech bubble — pinned near Marcus's head, clear of his hair */}
+        <div className="absolute right-[2%] top-[3%] z-20 hidden max-w-[190px] sm:block">
+          <div className="relative rounded-[var(--radius-lg)] bg-[var(--nova-parchment-100)] px-4 py-2.5 text-sm font-bold text-[var(--color-text-on-parchment)] shadow-[var(--shadow-panel-parchment)] [font-family:var(--font-body)]">
+            &ldquo;Where&apos;s my status report?!&rdquo;
             <span
-              className="absolute -left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 bg-stone-100"
+              className="absolute bottom-[-9px] left-1/2 h-0 w-0 -translate-x-1/2 border-x-[9px] border-t-[9px] border-x-transparent border-t-[var(--nova-parchment-100)]"
               aria-hidden
             />
-            &ldquo;Where&apos;s my status report?!&rdquo;
           </div>
         </div>
 
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.35em] text-sky-200/90">
-            Guild of Project Masters
-          </p>
-          <h1 className="relative whitespace-nowrap font-serif text-[clamp(2rem,6.5vw,4.75rem)] font-black leading-[0.95]">
-            <span className="absolute left-[3px] top-[5px] text-rose-950/70" aria-hidden>
+        {/* Main content column */}
+        <div className="relative z-10 flex w-full flex-col justify-between gap-8 px-6 py-8 sm:px-10 sm:py-10">
+          <div className="text-xs uppercase tracking-[var(--tracking-widest)] text-[var(--nova-cyan-300)] [font-family:var(--font-mono)]">
+            Quest Log
+          </div>
+
+          <div className="max-w-xl">
+            <p className="mb-2.5 text-xs uppercase tracking-[var(--tracking-widest)] text-[var(--nova-gold-300)] [font-family:var(--font-mono)]">
+              Guild of Project Masters
+            </p>
+            <h1 className="text-[length:var(--text-display-xl)] font-normal leading-[var(--leading-tight)] text-[var(--nova-parchment-100)] [font-family:var(--font-display)]">
               PROJECT NOVA
-            </span>
-            <span className="relative text-stone-50">PROJECT NOVA</span>
-          </h1>
-        </div>
+            </h1>
+            <p className="mb-7 mt-3.5 text-[length:var(--text-body-lg)] font-semibold text-[var(--color-text-on-dark-muted)] [font-family:var(--font-body)]">
+              Your mission begins here&hellip;
+            </p>
+            <div className="flex flex-wrap items-center gap-5">
+              <Button variant="primary" size="lg" onClick={onNewGame} className="whitespace-nowrap">
+                Start Mission
+              </Button>
+              {hasSave && (
+                <button
+                  onClick={onContinue}
+                  className="text-[13px] font-bold text-[var(--nova-cyan-300)] hover:brightness-110 [font-family:var(--font-body)]"
+                >
+                  Continue saved quest
+                </button>
+              )}
+            </div>
+          </div>
 
-        <p className="text-lg font-semibold text-stone-100/90">Your mission begins here&hellip;</p>
-
-        <div className="flex flex-col items-start gap-2">
-          <button
-            onClick={onNewGame}
-            className="rounded-md border-2 border-cyan-200/80 bg-rose-900 px-8 py-3 text-base font-bold uppercase tracking-wide text-stone-50 shadow-lg transition-colors hover:bg-rose-800"
-          >
-            Start Mission
-          </button>
-          {hasSave && (
-            <button
-              onClick={onContinue}
-              className="text-xs font-medium tracking-wide text-sky-200/80 hover:text-sky-100"
-            >
-              Continue saved quest
-            </button>
-          )}
-        </div>
-
-        <div className="mt-2 max-w-xs">
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-stone-200/70">
-            Preparing your quest&hellip;
-          </p>
-          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-slate-700/60">
-            <div className="absolute h-full w-1/3 animate-nova-quest-bar-sweep rounded-full bg-rose-800" />
+          <div className="max-w-[260px]">
+            <QuestBar
+              label="Preparing your quest…"
+              indeterminate
+              color="var(--gradient-gold-bar)"
+              height={6}
+            />
           </div>
         </div>
       </div>
