@@ -13,8 +13,21 @@ import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
   id: "reception_intro",
   background: {
-    src: "/assets/backgrounds/bg_reception_intro.png",
-    alt: "Group Tax reception area",
+    src: "/assets/backgrounds/bg_reception_desk.jpg",
+    alt: "Group Tax reception desk",
+    overlay: {
+      src: "/assets/branding/astrazeneca_logo.png",
+      alt: "AstraZeneca",
+      // Lines up with the blank lit wall panel behind the reception
+      // desk in this specific photo — a different background photo
+      // would need its own coordinates here, which is exactly why this
+      // lives in the scene's data rather than being hardcoded anywhere
+      // in SceneBackground itself.
+      top: "24%",
+      left: "26%",
+      width: "32%",
+      aspectRatio: 920 / 235,
+    },
   },
   music: {
     src: "/assets/music/reception_theme.mp3",
@@ -31,10 +44,6 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
   ],
   lines: [
-    {
-      speaker: "narrator",
-      text: "Reception is quiet at this hour — glass walls, a bank of screens cycling through dashboards nobody's watching, the low hum of a building that runs on schedules. A man in shirtsleeves comes around the desk to meet you, hand already out.",
-    },
     {
       speaker: "mike",
       text: "You must be joining us — good, we've been looking forward to this. Mike Smith. I run the PMO for the Group Tax Portfolio.",
@@ -90,10 +99,6 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       speaker: "mike",
       text: "So that's the job. Bring clarity where there's noise, structure where there's drift, and momentum where things have stalled. I think you're the right person for it — let's get you started.",
-    },
-    {
-      speaker: "narrator",
-      text: "Mike checks his watch, already turning toward the lifts. Project Nova is waiting.",
     },
   ],
 };

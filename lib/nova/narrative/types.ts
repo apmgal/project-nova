@@ -43,11 +43,33 @@ export interface NarrativeMusic {
   fadeOutMs?: number;
 }
 
+export interface SceneBackgroundOverlay {
+  src: string;
+  alt?: string;
+  /** Percentage-based placement against the background's own box (e.g.
+   * "26%"), so it lines up with a fixed feature in that specific photo
+   * (a wall panel, a sign). Width drives the box; height follows from
+   * the overlay image's own aspect ratio. */
+  top: string;
+  left: string;
+  width: string;
+  /** Source image's width ÷ height. Width drives the overlay's box;
+   * this gives it a defined height (needed for next/image's `fill`
+   * mode) without SceneBackground having to know anything about a
+   * specific piece of art. */
+  aspectRatio: number;
+}
+
 export interface NarrativeSceneScript {
   id: string;
   background: {
     src: string;
     alt?: string;
+    /** Decorative art composited onto the backdrop itself — e.g. a
+     * wall-mounted logo — rendered with the same blur/brightness/fade
+     * treatment as the background so it reads as part of the same photo
+     * rather than a sticker placed on top of it. */
+    overlay?: SceneBackgroundOverlay;
   };
   /** Omit entirely for a silent scene. */
   music?: NarrativeMusic | null;

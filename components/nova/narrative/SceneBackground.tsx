@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import type { SceneBackgroundOverlay } from "@/lib/nova/narrative/types";
 
 interface SceneBackgroundProps {
   src: string;
@@ -16,6 +17,9 @@ interface SceneBackgroundProps {
    * the background stays bright; raised only where a specific scene
    * needs more contrast for the dialogue box. */
   dim?: number;
+  /** Decorative art (e.g. a wall-mounted logo) composited onto the
+   * backdrop at a fixed spot in that specific photo. */
+  overlay?: SceneBackgroundOverlay;
 }
 
 /**
@@ -30,8 +34,10 @@ export default function SceneBackground({
   fadeMs = 1000,
   blurPx = 4,
   dim = 0.35,
+  overlay,
 }: SceneBackgroundProps) {
   const [visible, setVisible] = useState(false);
+  const backdropFilter = blurPx > 0 ? `blur(${blurPx}px) brightness(1.12)` : undefined;
 
   useEffect(() => {
     // Two rAFs: the first lets the browser commit the initial opacity-0
@@ -60,11 +66,36 @@ export default function SceneBackground({
         className="scale-110 object-cover ease-out"
         style={{
           opacity: visible ? 1 : 0,
-          filter: blurPx > 0 ? `blur(${blurPx}px) brightness(1.12)` : undefined,
+          filter: backdropFilter,
           transitionProperty: "opacity",
           transitionDuration: `${fadeMs}ms`,
         }}
       />
+
+      {overlay && (
+        <div
+          className="absolute"
+          style={{ top: overlay.top, left: overlay.left, width: overlay.width, aspectRatio: overlay.aspectRatio }}
+        >
+          <Image
+            src={overlay.src}
+            alt={overlay.alt ?? ""}
+            fill
+            sizes="30vw"
+            // Same filter + fade as the backdrop itself (backdropFilter,
+            // shared above) so the logo reads as part of the same photo
+            // rather than a crisp sticker on top of a blurred one.
+            className="object-contain"
+            style={{
+              opacity: visible ? 1 : 0,
+              filter: backdropFilter,
+              transitionProperty: "opacity",
+              transitionDuration: `${fadeMs}ms`,
+            }}
+          />
+        </div>
+      )}
+
       {/* Just enough of a bottom-weighted gradient to keep the dialogue
           box legible over whatever's behind it, without muddying the
           rest of the backdrop — the blur above is doing most of the
