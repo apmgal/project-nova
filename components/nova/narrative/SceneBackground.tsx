@@ -28,7 +28,7 @@ export default function SceneBackground({
   src,
   alt = "",
   fadeMs = 1000,
-  blurPx = 7,
+  blurPx = 4,
   dim = 0.35,
 }: SceneBackgroundProps) {
   const [visible, setVisible] = useState(false);
