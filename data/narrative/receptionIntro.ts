@@ -43,7 +43,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       id: "ben",
       // TODO: swap portraitSrc for Ben's real portrait once it's supplied
       // — nothing else here needs to change.
-      name: "Ben",
+      name: "Ben Goldsworthy",
       portraitSrc: "/assets/characters/ben_placeholder.png",
       position: "left",
     },
@@ -101,7 +101,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       speaker: "ben",
-      text: "Hi, I'm Ben. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
+      text: "Hi, I'm Ben Goldsworthy. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
     },
     {
       speaker: "ben",
