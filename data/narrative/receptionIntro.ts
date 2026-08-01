@@ -17,7 +17,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     // behind the desk, so no separate `overlay` is needed anymore (that
     // stays available on SceneBackground/NarrativeSceneScript for a
     // future background that doesn't already include its own signage).
-    src: "/assets/backgrounds/bg_reception_desk.jpg",
+    src: "/assets/backgrounds/bg_reception_desk_v2.jpg",
     alt: "Group Tax reception desk",
   },
   music: {
