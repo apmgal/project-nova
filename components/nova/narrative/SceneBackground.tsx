@@ -7,6 +7,15 @@ interface SceneBackgroundProps {
   src: string;
   alt?: string;
   fadeMs?: number;
+  /** Soft-focus amount in px. Defaults to a gentle blur that keeps the
+   * backdrop legible as a place while pushing focus onto the character
+   * in front of it — a scene that needs a sharp background (e.g. a
+   * document review screen) can pass 0. */
+  blurPx?: number;
+  /** How dark the bottom-anchored gradient reads, 0-1. Defaults low so
+   * the background stays bright; raised only where a specific scene
+   * needs more contrast for the dialogue box. */
+  dim?: number;
 }
 
 /**
@@ -15,7 +24,13 @@ interface SceneBackgroundProps {
  * mount a fresh instance (render it with `key={src}`) to replay the fade,
  * so future scenes/backgrounds are a pure data change.
  */
-export default function SceneBackground({ src, alt = "", fadeMs = 1000 }: SceneBackgroundProps) {
+export default function SceneBackground({
+  src,
+  alt = "",
+  fadeMs = 1000,
+  blurPx = 7,
+  dim = 0.35,
+}: SceneBackgroundProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -39,12 +54,25 @@ export default function SceneBackground({ src, alt = "", fadeMs = 1000 }: SceneB
         fill
         priority
         sizes="100vw"
-        className="object-cover ease-out"
-        style={{ opacity: visible ? 1 : 0, transitionProperty: "opacity", transitionDuration: `${fadeMs}ms` }}
+        // Scaled up slightly so the blur's soft edge samples stay inside
+        // the frame instead of pulling in the (clipped) transparent
+        // border, which would otherwise show up as a faint rim.
+        className="scale-110 object-cover ease-out"
+        style={{
+          opacity: visible ? 1 : 0,
+          filter: blurPx > 0 ? `blur(${blurPx}px) brightness(1.12)` : undefined,
+          transitionProperty: "opacity",
+          transitionDuration: `${fadeMs}ms`,
+        }}
       />
-      {/* Subtle darken so a bottom-anchored dialogue box always reads
-          clearly regardless of the background art's own brightness. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
+      {/* Just enough of a bottom-weighted gradient to keep the dialogue
+          box legible over whatever's behind it, without muddying the
+          rest of the backdrop — the blur above is doing most of the
+          work of keeping focus on the character in front of it. */}
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"
+        style={{ opacity: dim }}
+      />
     </div>
   );
 }
