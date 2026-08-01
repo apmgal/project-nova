@@ -51,7 +51,7 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
   }
 
   return (
-    <div className="relative flex flex-1 overflow-hidden bg-zinc-950">
+    <div className="isolate relative flex flex-1 overflow-hidden bg-zinc-950">
       <SceneBackground key={script.background.src} src={script.background.src} alt={script.background.alt} />
 
       <SceneAudio

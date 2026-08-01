@@ -32,7 +32,7 @@ export default function SceneBackground({ src, alt = "", fadeMs = 1000 }: SceneB
   }, []);
 
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden bg-zinc-950">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-zinc-950">
       <Image
         src={src}
         alt={alt}
