@@ -5,6 +5,7 @@ import SceneBackground from "./SceneBackground";
 import CharacterSprite from "./CharacterSprite";
 import SpeechBubble from "./SpeechBubble";
 import SceneAudio from "./SceneAudio";
+import SceneVisualInset from "./SceneVisualInset";
 import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 
 interface NarrativeSceneProps {
@@ -27,10 +28,13 @@ const EXIT_FADE_MS = 550;
  * conversations, decision moments) are meant to reuse directly — they
  * only need a new NarrativeSceneScript, not new scene logic.
  *
- * Flow: background + music start immediately on mount; characters fade in
- * shortly after; dialogue plays line by line, each line's bubble docking
- * near its speaker; clicking past the last line fades to black and then
- * calls `onComplete`.
+ * Flow: background + music start immediately on mount; each character
+ * fades in the moment their first line is reached (so a second character
+ * can join partway through the scene rather than everyone appearing at
+ * once); dialogue plays line by line, each line's bubble docking near its
+ * speaker and any line's `visual` (a screenshot, a document) floating
+ * center-stage for just that line; clicking past the last line fades to
+ * black and then calls `onComplete`.
  */
 export default function NarrativeScene({ script, onComplete }: NarrativeSceneProps) {
   const [lineIndex, setLineIndex] = useState(0);
@@ -41,6 +45,18 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
     line && line.speaker !== "narrator"
       ? script.characters.find((character) => character.id === line.speaker) ?? null
       : null;
+
+  // A character joins the stage the moment their first line is reached,
+  // rather than everyone appearing at scene-start — lets a scene bring
+  // a second character in partway through (e.g. someone stepping in to
+  // introduce themselves) just by where their first line falls in
+  // `script.lines`, no separate "entrance cue" data needed.
+  const speakersSoFar = new Set(
+    script.lines.slice(0, lineIndex + 1).map((l) => l.speaker)
+  );
+  const onStageCharacters = script.characters.filter((character) =>
+    speakersSoFar.has(character.id)
+  );
 
   function handleAdvance() {
     if (exiting || !line) return;
@@ -68,7 +84,7 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
         fadeOutMs={script.music?.fadeOutMs}
       />
 
-      {script.characters.map((character) => (
+      {onStageCharacters.map((character) => (
         <CharacterSprite
           key={character.id}
           src={character.portraitSrc}
@@ -77,6 +93,8 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
           delayMs={CHARACTER_ENTER_DELAY_MS}
         />
       ))}
+
+      {line?.visual && <SceneVisualInset key={line.visual.src} visual={line.visual} />}
 
       {line && (
         <SpeechBubble

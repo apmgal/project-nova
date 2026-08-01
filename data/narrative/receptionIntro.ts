@@ -3,11 +3,17 @@ import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 // ---------------------------------------------------------------------------
 // Reception Intro Scene — the game's opening beat. Plays once, before the
 // player's first real decision, and exists purely to orient them: who Mike
-// Smith is, what the PMO does, how the Tax Towers are organised, how
-// projects get managed here, and why Project Nova specifically needs them
-// right now. Content lives here, separate from NarrativeScene's rendering
-// logic, so a future scene (a stakeholder meeting, a boardroom moment) is
-// just another file shaped like this one.
+// Smith (and now Ben) is, what the PMO does, how the Tax Towers are
+// organised, the tools available (SharePoint, the tracker, the dashboard),
+// and why Project Nova specifically needs them right now. Content lives
+// here, separate from NarrativeScene's rendering logic, so a future scene
+// (a stakeholder meeting, a boardroom moment) is just another file shaped
+// like this one.
+//
+// Ben is wired in with a placeholder portrait (ben_placeholder.png, a
+// generic silhouette) until his real art arrives — swapping it later is a
+// one-line change to his `portraitSrc` below, nothing else about the
+// scene needs to move.
 // ---------------------------------------------------------------------------
 
 export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
@@ -33,63 +39,93 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       portraitSrc: "/assets/characters/mike-smith.png",
       position: "right",
     },
+    {
+      id: "ben",
+      // TODO: swap portraitSrc for Ben's real portrait once it's supplied
+      // — nothing else here needs to change.
+      name: "Ben",
+      portraitSrc: "/assets/characters/ben_placeholder.png",
+      position: "left",
+    },
   ],
   lines: [
     {
       speaker: "mike",
-      text: "You must be joining us — good, we've been looking forward to this. Mike Smith. I run the PMO for the Group Tax Portfolio.",
+      text: "You must be the new Project Manager for Project Nova. Welcome — we've been expecting you. I'm Mike Smith, and I lead the PMO for the Group Tax Portfolio.",
     },
     {
       speaker: "mike",
-      text: "Before I hand you off to the team, I want to give you the lay of the land. It'll save you a few weeks of working it out the hard way.",
+      text: "Before you meet the wider team, let me give you a quick overview of how we work and the support available to you.",
     },
     {
       speaker: "mike",
-      text: "The PMO exists to keep this portfolio honest. Governance and oversight — someone has to know what's really happening across every project, not just what the last status report said.",
+      text: "Across Group Tax, the PMO helps bring visibility, governance, and collaboration across our portfolio. We're here to support teams — helping unblock decisions, manage risks and dependencies, and make sure the right conversations happen at the right time.",
     },
     {
       speaker: "mike",
-      text: "Practically, that means we support project teams directly — unblocking decisions, not just auditing them from a distance — and we work hard to keep visibility high, so problems surface while they're still small.",
+      text: "Our work is organised across different Tax Towers, each with their own expertise, stakeholders, and initiatives. You'll be working across these teams as Project Nova progresses.",
     },
     {
       speaker: "mike",
-      text: "We also carry the risks and dependencies that individual teams can't always see from where they sit, and we make sure the decisions that matter get made by the right people, at the right time — not left to drift.",
+      text: "We also have a few tools and resources to help you get started.",
     },
     {
       speaker: "mike",
-      text: "And ultimately, we're accountable for outcomes: it isn't enough for a project to finish. It has to deliver the benefit it was funded for. That's the bar.",
+      text: "This is our Group Tax Portfolio SharePoint page — your central hub for updates, guidance, key contacts, templates, and resources.",
+      visual: {
+        src: "/assets/screens/sharepoint.png",
+        alt: "Group Tax Innovation & Change SharePoint hub",
+        aspectRatio: 794 / 844,
+        label: "Group Tax SharePoint",
+      },
     },
     {
       speaker: "mike",
-      text: "Now — how we're organised. Group Tax's work runs across a set of Towers. Think of each one as a distinct discipline with its own remit.",
+      text: "This is our portfolio tracker. It gives us a shared view of progress, risks, decisions, and where teams may need additional support.",
+      visual: {
+        src: "/assets/screens/tracker.png",
+        alt: "Group Tax Innovation & Change portfolio tracker",
+        aspectRatio: 1828 / 900,
+        label: "Portfolio Tracker",
+      },
     },
     {
       speaker: "mike",
-      text: "Every Tower has its own subject matter experts, its own stakeholders, and its own slate of initiatives running at any given time. You'll work across more than one before long.",
+      text: "And this feeds straight into our portfolio dashboard — a live view of health, progress, and benefits across every Tax Tower, built directly from what's logged in the tracker.",
+      visual: {
+        src: "/assets/screens/dashboard.png",
+        alt: "Global Tax Innovation & Change portfolio dashboard",
+        aspectRatio: 1589 / 905,
+        label: "Portfolio Dashboard",
+      },
+    },
+    {
+      speaker: "ben",
+      text: "Hi, I'm Ben. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
+    },
+    {
+      speaker: "ben",
+      text: "Governance, Digital & Change supports initiatives that help improve how we work across the organisation. For Project Nova, that means bringing together the business, Group Tax, and our delivery teams to move this initiative forward.",
+    },
+    {
+      speaker: "ben",
+      text: "Nova is an important project because it sits at the intersection of business needs, technology, and operational change. Getting this right will help us deliver the outcomes we've committed to.",
     },
     {
       speaker: "mike",
-      text: "Whichever Tower a project sits in, we manage it the same disciplined way: clear objectives from day one, a scope that's actually written down, risks tracked rather than discovered, stakeholders mapped rather than assumed — and reporting and governance that hold the whole thing together.",
+      text: "Thanks, Ben. Which brings us to Project Nova. Nova is an Actively Managed project — a joint initiative between the AstraZeneca business and Group Tax.",
     },
     {
       speaker: "mike",
-      text: "Which brings me to why you're here. Project Nova.",
+      text: "The project has experienced some delays, and our focus now is creating clarity, rebuilding momentum, and making sure we deliver the value this initiative was designed to achieve.",
     },
     {
       speaker: "mike",
-      text: "Nova is one of our Actively Managed projects — the tier that gets the closest PMO attention, because the stakes justify it. It's a joint initiative between the AstraZeneca business and Group Tax, and it sits under Governance, Digital & Change.",
+      text: "You'll have the support of the PMO and the wider team around you. Your role is to bring structure, connect the right people, and help guide Nova through its next stage.",
     },
     {
       speaker: "mike",
-      text: "I'll be straightforward with you, because you'll see it in the numbers within your first week regardless: Nova has slipped. Not from any one bad decision — more a slow drift, the kind that happens when focus spreads too thin.",
-    },
-    {
-      speaker: "mike",
-      text: "What it needs now is exactly what you bring — sharper focus, real visibility, and the structure to keep momentum once we've got it back. Not a rescue. A reset.",
-    },
-    {
-      speaker: "mike",
-      text: "So that's the job. Bring clarity where there's noise, structure where there's drift, and momentum where things have stalled. I think you're the right person for it — let's get you started.",
+      text: "Ready? Let's take a look at where things stand today.",
     },
   ],
 };

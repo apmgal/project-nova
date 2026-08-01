@@ -23,6 +23,17 @@ export interface NarrativeCharacter {
   position: ScenePosition;
 }
 
+export interface SceneVisual {
+  src: string;
+  alt?: string;
+  /** Source image's width ÷ height, so the inset panel gets a sized box
+   * (needed for next/image's `fill` mode) without the rendering
+   * component having to know anything about a specific screenshot. */
+  aspectRatio: number;
+  /** Small caption under the panel, e.g. "Group Tax SharePoint". */
+  label?: string;
+}
+
 export interface NarrativeLine {
   /** Character id from the scene's `characters` list, or "narrator" for
    * unattributed scene-setting text (rendered without a name plate). */
@@ -32,6 +43,12 @@ export interface NarrativeLine {
    * file or an absent field both just mean "no voice", the text still
    * displays and advances normally either way. */
   voiceSrc?: string;
+  /** Optional on-screen insert (a SharePoint page, a tracker, a
+   * dashboard, a document — anything the characters are pointing at)
+   * shown only while this exact line is active. Absent on the next line
+   * means it's gone again — sequencing "show A, then show B" is just
+   * "put A on line N and B on line N+1". */
+  visual?: SceneVisual;
 }
 
 export interface NarrativeMusic {
