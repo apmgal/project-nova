@@ -64,6 +64,8 @@ import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import DebugDrawer from "./DebugDrawer";
 import EndOfContent from "./EndOfContent";
+import NarrativeScene from "./narrative/NarrativeScene";
+import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
 
 /**
  * HUD activation window: starts at ACT3_SCENE06B ("Baseline Approved",
@@ -223,6 +225,13 @@ export default function GameRoot() {
   // resolvedChoiceIds because the investigation and the choice itself are
   // two distinct steps in front of the same breakIndex. Reset alongside it.
   const [resolvedInvestigationIds, setResolvedInvestigationIds] = useState<Set<string>>(new Set());
+  // Reception Intro Scene: a one-off cinematic prologue that plays before
+  // the first real scene on every fresh "New Game" (never on Continue,
+  // which always resumes wherever the player left off). Kept as its own
+  // flag rather than folding it into gameState/currentScene, since it's
+  // presentational scaffolding in front of the save-backed engine, not
+  // part of it.
+  const [showReceptionIntro, setShowReceptionIntro] = useState(false);
 
   function enterScene(state: GameState, sceneId: string): GameState {
     const scene = getScene(sceneId);
@@ -232,6 +241,11 @@ export default function GameRoot() {
   }
 
   function handleNewGame() {
+    setShowReceptionIntro(true);
+  }
+
+  function handleReceptionIntroComplete() {
+    setShowReceptionIntro(false);
     let state = newGameState();
     state = enterScene(state, state.currentScene);
     saveGame(state);
@@ -294,6 +308,11 @@ export default function GameRoot() {
   }
 
   if (!gameState) {
+    if (showReceptionIntro) {
+      return (
+        <NarrativeScene script={RECEPTION_INTRO_SCENE} onComplete={handleReceptionIntroComplete} />
+      );
+    }
     return (
       <TitleScreen
         hasSave={hasSavedGame()}

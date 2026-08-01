@@ -115,3 +115,34 @@ body {
 .animate-nova-quest-bar-sweep {
   animation: nova-quest-bar-sweep 1.4s ease-in-out infinite;
 }
+
+/* Narrative-scene character idle sway — a slow, small breathing motion so
+   a static portrait doesn't read as a frozen image. Kept deliberately
+   subtle per spec (no exaggerated movement). */
+@keyframes nova-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.006);
+  }
+}
+
+.animate-nova-breathe {
+  animation: nova-breathe 4.2s ease-in-out infinite;
+}
+
+/* Narrative-scene backdrop/dialogue-box entrance. */
+@keyframes nova-scene-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-nova-scene-fade-in {
+  animation: nova-scene-fade-in 0.6s ease-out both;
+}
