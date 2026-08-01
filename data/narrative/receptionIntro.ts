@@ -13,7 +13,7 @@ import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
   id: "reception_intro",
   background: {
-    src: "/assets/backgrounds/bg_reception.jpg",
+    src: "/assets/backgrounds/bg_reception_intro.png",
     alt: "Group Tax reception area",
   },
   music: {
