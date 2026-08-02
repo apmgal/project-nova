@@ -51,11 +51,11 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       name: "Ben",
       position: "left",
       expressions: {
-        neutral: { src: "/assets/characters/bengoldsworthyneutral.png" },
-        smile: {
-          src: "/assets/characters/bengoldsworthysmile.png",
-          blinkSrc: "/assets/characters/Bengoldsworthysmileblink.png",
+        neutral: {
+          src: "/assets/characters/benneutral.png",
+          blinkSrc: "/assets/characters/benblink.png",
         },
+        smile: { src: "/assets/characters/bensmile.png" },
       },
     },
   ],
