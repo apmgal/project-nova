@@ -126,19 +126,15 @@ export default function SpeechBubble({
 
   return (
     <div
-      // Anchored by `bottom`, not `top`: the bubble's bottom edge sits a
-      // fixed gap above where CharacterPortrait's box begins (character
-      // height is h-[78%]/sm:h-[85%] bottom-anchored, so its top edge —
-      // roughly where the head starts — is 22%/15% up from the floor;
-      // 27%/20% leaves a clear gap above that). Growing from a pinned
-      // bottom means a longer line makes the box taller *upward*, so it
-      // never creeps down over the character's head the way a top-pinned
-      // box would.
-      className={`pointer-events-none absolute bottom-[27%] z-20 flex w-full flex-col px-4 sm:bottom-[20%] sm:px-0 ${DOCK_CLASSES[anchor]}`}
+      // Docked near the top of the stage, above the character. Made wider
+      // (see the button's max-w below) rather than left tall, so a given
+      // line wraps across fewer lines and the box stays short enough to
+      // clear the character's head instead of growing down into it.
+      className={`pointer-events-none absolute top-[5%] z-20 flex w-full flex-col px-4 sm:px-0 ${DOCK_CLASSES[anchor]}`}
     >
       <button
         onClick={handleClick}
-        className="pointer-events-auto relative w-full max-w-[300px] rounded-2xl border border-zinc-700/80 bg-zinc-900/95 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:max-w-[360px] sm:p-5"
+        className="pointer-events-auto relative w-full max-w-[420px] rounded-2xl border border-zinc-700/80 bg-zinc-900/95 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:max-w-[560px] sm:p-5"
         style={{
           opacity: entered ? 1 : 0,
           transform: entered ? "translateY(0) scale(1)" : "translateY(10px) scale(0.97)",
