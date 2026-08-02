@@ -134,7 +134,7 @@ export default function SpeechBubble({
     >
       <button
         onClick={handleClick}
-        className="pointer-events-auto relative w-full max-w-[420px] rounded-2xl border border-zinc-700/80 bg-zinc-900/95 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:max-w-[560px] sm:p-5"
+        className="pointer-events-auto relative w-full max-w-[480px] rounded-2xl border border-zinc-700/80 bg-zinc-900/95 p-4 text-left shadow-[0_12px_28px_rgba(0,0,0,0.5)] backdrop-blur-sm sm:max-w-[680px] sm:p-5"
         style={{
           opacity: entered ? 1 : 0,
           transform: entered ? "translateY(0) scale(1)" : "translateY(10px) scale(0.97)",
