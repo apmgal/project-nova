@@ -3,7 +3,7 @@
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { getToolScreen } from "@/lib/nova/data";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
-import ConceptHint from "./ConceptHint";
+import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
 interface CBSReviewProps {
   toolScreen: ToolScreenBlock;
@@ -38,6 +38,7 @@ function formatMillions(value: number): string {
  * the WBS scene.
  */
 export default function CBSReview({ toolScreen, cutTaskId, onDescope, pmConcept }: CBSReviewProps) {
+  const hint = useConceptHint(pmConcept);
   const costs = toolScreen.costsByTask ?? {};
   const wbs = getToolScreen("TOOL_ACT3_SCENE01_WBS");
   const wbsCards = wbs?.cards ?? [];
@@ -61,9 +62,10 @@ export default function CBSReview({ toolScreen, cutTaskId, onDescope, pmConcept 
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHint concept={pmConcept} />
+          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
         </div>
       )}
+      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       <div className="flex flex-col items-center">
         <div className="w-64 max-w-full text-center">

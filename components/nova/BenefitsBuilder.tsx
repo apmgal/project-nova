@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BenefitTensionMoment, ToolBenefit, ToolScreenBlock } from "@/lib/nova/types";
 import { benefitFieldId } from "@/lib/nova/state";
-import ConceptHint from "./ConceptHint";
+import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
 interface BenefitsBuilderProps {
   toolScreen: ToolScreenBlock;
@@ -33,6 +33,7 @@ export default function BenefitsBuilder({
   const benefits = toolScreen.benefits ?? [];
   const builtSet = new Set(builtFieldIds);
   const [wrongPick, setWrongPick] = useState<string | null>(null);
+  const hint = useConceptHint(pmConcept);
 
   function renderField(
     benefit: ToolBenefit,
@@ -100,9 +101,10 @@ export default function BenefitsBuilder({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHint concept={pmConcept} />
+          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
         </div>
       )}
+      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       {benefits.map((benefit) => {
         const measureId = benefitFieldId(benefit.id, "Measure");

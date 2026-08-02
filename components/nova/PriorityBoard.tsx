@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
-import ConceptHint from "./ConceptHint";
+import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
 interface PriorityBoardProps {
   toolScreen: ToolScreenBlock;
@@ -35,6 +35,7 @@ export default function PriorityBoard({
   pmConcept,
 }: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const hint = useConceptHint(pmConcept);
 
   const cards = toolScreen.cards ?? [];
   const buckets = toolScreen.buckets ?? [];
@@ -64,9 +65,10 @@ export default function PriorityBoard({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHint concept={pmConcept} />
+          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
         </div>
       )}
+      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {buckets.map((bucket) => {

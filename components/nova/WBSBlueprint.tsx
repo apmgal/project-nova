@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
-import ConceptHint from "./ConceptHint";
+import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
 interface WBSBlueprintProps {
   toolScreen: ToolScreenBlock;
@@ -30,6 +30,7 @@ export default function WBSBlueprint({
 }: WBSBlueprintProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shakeZone, setShakeZone] = useState<{ zone: string; attempt: number } | null>(null);
+  const hint = useConceptHint(pmConcept);
 
   const cards = toolScreen.cards ?? [];
   const zones = toolScreen.buckets ?? [];
@@ -66,9 +67,10 @@ export default function WBSBlueprint({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHint concept={pmConcept} />
+          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
         </div>
       )}
+      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       <div className="flex flex-col items-center">
         <div className="w-48 max-w-full rounded-md border border-zinc-600 bg-zinc-800/80 px-4 py-2 text-center">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
-import ConceptHint from "./ConceptHint";
+import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
 interface TeamSelectorProps {
   toolScreen: ToolScreenBlock;
@@ -33,6 +33,7 @@ export default function TeamSelector({
   const candidates = toolScreen.candidates ?? [];
   const maxHires = toolScreen.maxHires ?? candidates.length;
   const [index, setIndex] = useState(0);
+  const hint = useConceptHint(pmConcept);
 
   if (candidates.length === 0) return null;
   const candidate = candidates[index];
@@ -55,9 +56,10 @@ export default function TeamSelector({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHint concept={pmConcept} />
+          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
         </div>
       )}
+      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-500">
         <span>
