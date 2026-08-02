@@ -21,15 +21,23 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
 interface MoscowQuadrantStyle {
   letter: string;
   cardBg: string;
-  /** Extra padding on the two sides nearest this bucket's own badge
-   * corner, so item chips don't visually run into it. */
-  cardPadding: string;
   badgePosition: string;
   badgeBg: string;
   badgeText: string;
   chipBg: string;
   chipText: string;
 }
+
+/** Every quadrant card shares this exact padding, regardless of which
+ * corner its own badge sits on — item chips should start the same
+ * distance from the edge in every bucket. (Previously each bucket had
+ * extra padding reserved on its own badge's two sides, which kept chips
+ * clear of the badge but made Must's content sit visibly closer to the
+ * card's edge than Won't's, since they were padded by different amounts.
+ * The badge is small and sits mostly outside the card anyway, so it's
+ * fine to let it overlap on top of content in the rare case a corner
+ * fills up, rather than trade that off against consistent spacing.) */
+const MOSCOW_CARD_PADDING = "p-4";
 
 /**
  * MoSCoW's own letter/color per bucket, keyed by the exact bucket strings
@@ -46,7 +54,6 @@ const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
   Must: {
     letter: "M",
     cardBg: "bg-emerald-400",
-    cardPadding: "pb-8 pr-8 pt-3.5 pl-3.5",
     badgePosition: "-bottom-[22px] -right-[22px]",
     badgeBg: "bg-emerald-500",
     badgeText: "text-emerald-950",
@@ -56,7 +63,6 @@ const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
   Should: {
     letter: "S",
     cardBg: "bg-sky-400",
-    cardPadding: "pb-8 pl-8 pt-3.5 pr-3.5",
     badgePosition: "-bottom-[22px] -left-[22px]",
     badgeBg: "bg-sky-500",
     badgeText: "text-sky-950",
@@ -66,7 +72,6 @@ const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
   Could: {
     letter: "C",
     cardBg: "bg-indigo-900",
-    cardPadding: "pt-8 pr-8 pb-3.5 pl-3.5",
     badgePosition: "-top-[22px] -right-[22px]",
     badgeBg: "bg-indigo-700",
     badgeText: "text-indigo-100",
@@ -76,7 +81,6 @@ const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
   "Won't": {
     letter: "W",
     cardBg: "bg-blue-600",
-    cardPadding: "pt-8 pl-8 pb-3.5 pr-3.5",
     badgePosition: "-top-[22px] -left-[22px]",
     badgeBg: "bg-blue-700",
     badgeText: "text-blue-100",
@@ -88,7 +92,6 @@ const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
 const FALLBACK_MOSCOW_STYLE: MoscowQuadrantStyle = {
   letter: "?",
   cardBg: "bg-zinc-700",
-  cardPadding: "p-3.5",
   badgePosition: "-bottom-[22px] -right-[22px]",
   badgeBg: "bg-zinc-500",
   badgeText: "text-zinc-950",
@@ -164,7 +167,7 @@ export default function PriorityBoard({
                 key={bucket}
                 onClick={() => handleAssign(bucket)}
                 aria-label={bucket}
-                className={`relative flex min-h-[110px] flex-col gap-1.5 rounded-2xl text-left transition-all ${style.cardPadding} ${style.cardBg} ${
+                className={`relative flex min-h-[110px] flex-col gap-1.5 rounded-2xl text-left transition-all ${MOSCOW_CARD_PADDING} ${style.cardBg} ${
                   selectedCardId ? "ring-2 ring-white/60" : ""
                 }`}
               >
