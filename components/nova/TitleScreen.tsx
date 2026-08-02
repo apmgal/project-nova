@@ -49,7 +49,11 @@ interface TitleScreenProps {
  * screen, which unmounts TitleScreen (and SceneAudio with it) —
  * SceneAudio's cleanup fades the track out over fadeOutMs on unmount
  * regardless of which button triggered it, so both paths stop the
- * music the same way with no extra wiring here.
+ * music the same way with no extra wiring here. fadeOutMs is 2000ms
+ * (up from an initial 900ms) so it overlaps more of Reception Intro's
+ * own 2200ms music fade-in underneath it — a longer, smoother crossfade
+ * into Mike's dialogue instead of the title theme cutting out abruptly
+ * right as the new scene's track is just getting started.
  */
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
   return (
@@ -57,7 +61,7 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
       className="relative flex flex-1 items-center overflow-hidden"
       style={{ backgroundColor: "var(--nova-cream-photo)" }}
     >
-      <SceneAudio src="/assets/music/main_title_loop_v2.mp3" volume={0.4} loop fadeInMs={1500} fadeOutMs={900} />
+      <SceneAudio src="/assets/music/main_title_loop_v2.mp3" volume={0.4} loop fadeInMs={1500} fadeOutMs={2000} />
 
       {/* Mission team — sticker-outlined cutout, anchored bottom-left */}
       <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-[62%] w-[72%] sm:h-[80%] sm:w-[48%] md:w-[42%]">
