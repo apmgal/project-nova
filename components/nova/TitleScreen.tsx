@@ -66,7 +66,7 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
         >
           <div
             className="text-left text-[clamp(4.5rem,12vw,8.5rem)]"
-            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)", transform: "translateX(-8cm)" }}
+            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)", transform: "translateX(-11cm)" }}
           >
             OPERATION
           </div>
