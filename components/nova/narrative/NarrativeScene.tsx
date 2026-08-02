@@ -2,11 +2,26 @@
 
 import { useState } from "react";
 import SceneBackground from "./SceneBackground";
-import CharacterSprite from "./CharacterSprite";
+import CharacterPortrait from "./CharacterPortrait";
 import SpeechBubble from "./SpeechBubble";
 import SceneAudio from "./SceneAudio";
 import SceneVisualInset from "./SceneVisualInset";
-import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
+import type { NarrativeCharacter, NarrativeSceneScript } from "@/lib/nova/narrative/types";
+
+/** The expression a character is showing at a given point in the script:
+ * whatever the most recent line THEY spoke set explicitly, scanning back
+ * from `uptoIndex`; "neutral" if none of their lines so far set one. */
+function currentExpressionFor(
+  character: NarrativeCharacter,
+  lines: NarrativeSceneScript["lines"],
+  uptoIndex: number
+): string {
+  for (let i = Math.min(uptoIndex, lines.length - 1); i >= 0; i--) {
+    const l = lines[i];
+    if (l.speaker === character.id && l.expression) return l.expression;
+  }
+  return "neutral";
+}
 
 interface NarrativeSceneProps {
   script: NarrativeSceneScript;
@@ -85,9 +100,10 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
       />
 
       {onStageCharacters.map((character) => (
-        <CharacterSprite
+        <CharacterPortrait
           key={character.id}
-          src={character.portraitSrc}
+          expressions={character.expressions}
+          expression={currentExpressionFor(character, script.lines, lineIndex)}
           alt={character.name}
           position={character.position}
           delayMs={CHARACTER_ENTER_DELAY_MS}

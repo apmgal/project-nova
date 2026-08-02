@@ -10,10 +10,10 @@ import type { NarrativeSceneScript } from "@/lib/nova/narrative/types";
 // (a stakeholder meeting, a boardroom moment) is just another file shaped
 // like this one.
 //
-// Ben is wired in with a placeholder portrait (ben_placeholder.png, a
-// generic silhouette) until his real art arrives — swapping it later is a
-// one-line change to his `portraitSrc` below, nothing else about the
-// scene needs to move.
+// Ben's expressions use his real art now. His portrait entry is otherwise
+// exactly the same shape as Mike's — that's the point of the expressions
+// system: a new character (or a new expression for an existing one) is
+// just new image files plus a new map entry here, no component changes.
 // ---------------------------------------------------------------------------
 
 export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
@@ -36,26 +36,39 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       id: "mike",
       name: "Mike Smith",
-      portraitSrc: "/assets/characters/mike-smith.png",
       position: "right",
+      expressions: {
+        neutral: {
+          src: "/assets/characters/mikesmithneutral.png",
+          blinkSrc: "/assets/characters/mikesmithblink.png",
+        },
+        smile: { src: "/assets/characters/mikesmithsmile.png" },
+        serious: { src: "/assets/characters/mikesmithserious.png" },
+      },
     },
     {
       id: "ben",
-      // TODO: swap portraitSrc for Ben's real portrait once it's supplied
-      // — nothing else here needs to change.
       name: "Ben Goldsworthy",
-      portraitSrc: "/assets/characters/ben_placeholder.png",
       position: "left",
+      expressions: {
+        neutral: { src: "/assets/characters/bengoldsworthyneutral.png" },
+        smile: {
+          src: "/assets/characters/bengoldsworthysmile.png",
+          blinkSrc: "/assets/characters/Bengoldsworthysmileblink.png",
+        },
+      },
     },
   ],
   lines: [
     {
       speaker: "mike",
       text: "You must be the new Project Manager for Project Nova. Welcome — we've been expecting you. I'm Mike Smith, and I lead the PMO for the Group Tax Portfolio.",
+      expression: "smile",
     },
     {
       speaker: "mike",
       text: "Before you meet the wider team, let me give you a quick overview of how we work and the support available to you.",
+      expression: "neutral",
     },
     {
       speaker: "mike",
@@ -102,10 +115,12 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       speaker: "ben",
       text: "Hi, I'm Ben Goldsworthy. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
+      expression: "smile",
     },
     {
       speaker: "ben",
       text: "Governance, Digital & Change supports initiatives that help improve how we work across the organisation. For Project Nova, that means bringing together the business, Group Tax, and our delivery teams to move this initiative forward.",
+      expression: "neutral",
     },
     {
       speaker: "ben",
@@ -114,14 +129,17 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       speaker: "mike",
       text: "Thanks, Ben. Which brings us to Project Nova. Nova is an Actively Managed project — a joint initiative between the AstraZeneca business and Group Tax.",
+      expression: "neutral",
     },
     {
       speaker: "mike",
       text: "The project has experienced some delays, and our focus now is creating clarity, rebuilding momentum, and making sure we deliver the value this initiative was designed to achieve.",
+      expression: "serious",
     },
     {
       speaker: "mike",
       text: "You'll have the support of the PMO and the wider team around you. Your role is to bring structure, connect the right people, and help guide Nova through its next stage.",
+      expression: "smile",
     },
     {
       speaker: "mike",

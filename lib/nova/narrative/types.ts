@@ -12,15 +12,31 @@
 
 export type ScenePosition = "left" | "center" | "right";
 
+export interface CharacterExpressionArt {
+  /** Base portrait for this expression. */
+  src: string;
+  /** This expression's blink variant. Omit if no blink art exists for
+   * it — CharacterPortrait simply never blinks while this expression is
+   * active rather than faking one, per "use the available blink image
+   * where one exists." */
+  blinkSrc?: string;
+}
+
 export interface NarrativeCharacter {
   /** Stable id, referenced by a line's `speaker`. */
   id: string;
   /** Display name shown in the dialogue box's name plate. */
   name: string;
-  /** Portrait image path (production asset under /assets/characters/). */
-  portraitSrc: string;
   /** Where on stage this character stands. */
   position: ScenePosition;
+  /** Expression name -> art. Every character needs at least a
+   * "neutral" entry (used before any line sets one explicitly, and as
+   * the fallback if a line references an expression this character
+   * doesn't have). Dialogue lines pick from these same keys via
+   * NarrativeLine.expression — adding a new character or a new
+   * expression for an existing one is purely new image files plus a
+   * new entry here, no changes to CharacterPortrait itself. */
+  expressions: Record<string, CharacterExpressionArt>;
 }
 
 export interface SceneVisual {
@@ -49,6 +65,13 @@ export interface NarrativeLine {
    * means it's gone again — sequencing "show A, then show B" is just
    * "put A on line N and B on line N+1". */
   visual?: SceneVisual;
+  /** Expression key (from the speaking character's `expressions` map)
+   * to switch them to for this line. Omitted means "keep whatever
+   * expression they were last shown in" — a character defaults to
+   * "neutral" the first time they appear if their very first line
+   * doesn't set one. Unknown keys fall back to "neutral" rather than
+   * rendering nothing. */
+  expression?: string;
 }
 
 export interface NarrativeMusic {
