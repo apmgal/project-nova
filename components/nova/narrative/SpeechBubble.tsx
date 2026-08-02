@@ -126,7 +126,15 @@ export default function SpeechBubble({
 
   return (
     <div
-      className={`pointer-events-none absolute top-[7%] z-20 flex w-full flex-col px-4 sm:px-0 ${DOCK_CLASSES[anchor]}`}
+      // Anchored by `bottom`, not `top`: the bubble's bottom edge sits a
+      // fixed gap above where CharacterPortrait's box begins (character
+      // height is h-[78%]/sm:h-[85%] bottom-anchored, so its top edge —
+      // roughly where the head starts — is 22%/15% up from the floor;
+      // 27%/20% leaves a clear gap above that). Growing from a pinned
+      // bottom means a longer line makes the box taller *upward*, so it
+      // never creeps down over the character's head the way a top-pinned
+      // box would.
+      className={`pointer-events-none absolute bottom-[27%] z-20 flex w-full flex-col px-4 sm:bottom-[20%] sm:px-0 ${DOCK_CLASSES[anchor]}`}
     >
       <button
         onClick={handleClick}
