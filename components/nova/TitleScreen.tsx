@@ -50,33 +50,34 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
         </div>
       </div>
 
-      {/* Title + CTA column — upper-right, mirroring the reference's banner placement */}
-      <div className="relative z-10 ml-auto flex w-full max-w-[440px] flex-col items-end gap-5 px-6 pb-8 pt-9 text-right sm:px-10 sm:pt-14">
-        <h1
-          className="text-[var(--nova-ink-900)]"
-          style={{ fontFamily: "var(--font-poster)", lineHeight: 0.95 }}
-        >
+      {/* Title + CTA column — upper-right, mirroring the reference's banner placement.
+          Not `items-end`/`text-right` anymore: the two title lines need
+          independent alignment (OPERATION right, NOVA left, per direction —
+          the reference's zigzag poster-lettering look), so each element
+          below manages its own alignment instead of inheriting one. */}
+      <div className="relative z-10 ml-auto flex w-full max-w-[560px] flex-col gap-4 px-6 pb-8 pt-8 sm:px-10 sm:pt-12">
+        <h1 className="text-[var(--nova-ink-900)]" style={{ fontFamily: "var(--font-poster)", lineHeight: 0.88 }}>
           <span
-            className="block text-[clamp(1.9rem,4.6vw,3.25rem)]"
-            style={{ textShadow: "2px 3px 0 var(--nova-gold-300)" }}
+            className="block text-right text-[clamp(2.75rem,7.5vw,5.25rem)]"
+            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)" }}
           >
             OPERATION
           </span>
           <span
-            className="block text-[clamp(2.5rem,5.8vw,4.25rem)]"
-            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)" }}
+            className="block text-left text-[clamp(4.5rem,12vw,8.5rem)]"
+            style={{ textShadow: "4px 6px 0 var(--nova-gold-300)" }}
           >
             NOVA
           </span>
         </h1>
 
-        <p className="text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
+        <p className="text-right text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
           Your mission begins here
         </p>
 
         <button
           onClick={hasSave ? onContinue : onNewGame}
-          className="mt-2 rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+          className="mt-2 self-end rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
         >
           {hasSave ? "Continue Mission" : "Start Mission"}
         </button>
