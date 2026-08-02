@@ -46,12 +46,12 @@ const TAIL_OFFSET_CLASSES: Record<ScenePosition, string> = {
 // this — keeps the longest dialogue lines from crawling.
 const MAX_TYPE_MS = 2600;
 
-// Auto-advance fallback pacing, used when a line has no voiceSrc (or its
-// audio fails/is blocked) — read at a generous pace rather than the
-// typewriter's own per-character speed, since the text is already fully
-// visible by this point and the player just needs a moment to finish
-// reading it. Clamped so a one-word line doesn't linger and a very long
-// one doesn't stall for an unreasonable amount of time.
+// Auto-advance fallback pacing for lines with NO voiceSrc — read at a
+// generous pace rather than the typewriter's own per-character speed,
+// since the text is already fully visible by this point and the player
+// just needs a moment to finish reading it. Clamped so a one-word line
+// doesn't linger and a very long one doesn't stall for an unreasonable
+// amount of time.
 const AUTO_ADVANCE_MS_PER_CHAR = 55;
 const AUTO_ADVANCE_MIN_MS = 1400;
 const AUTO_ADVANCE_MAX_MS = 9000;
@@ -59,6 +59,17 @@ const AUTO_ADVANCE_MAX_MS = 9000;
 function autoAdvanceFallbackDelay(text: string): number {
   return Math.min(AUTO_ADVANCE_MAX_MS, Math.max(AUTO_ADVANCE_MIN_MS, text.length * AUTO_ADVANCE_MS_PER_CHAR));
 }
+
+// Safety-net timing for lines that DO have a voiceSrc — only used if the
+// clip's own `ended` event never fires (autoplay blocked, load error,
+// missing file). Sized off the clip's real duration once its metadata
+// loads, plus a small buffer — never a flat cap. A flat cap shorter than
+// some line's actual voiceover length is exactly what cut one line's
+// audio off under the next when this first shipped (a ~16.5s clip
+// racing a 9s fallback). Only falls back to a flat, generous ceiling if
+// duration truly never becomes available.
+const VOICE_FALLBACK_BUFFER_MS = 600;
+const VOICE_FALLBACK_UNKNOWN_DURATION_MS = 20000;
 
 /**
  * Speech bubble anchored near whichever character is currently speaking,
@@ -153,16 +164,39 @@ export default function SpeechBubble({
     }
 
     const voice = voiceRef.current;
-    voice?.addEventListener("ended", advanceOnce);
-    // Safety net regardless of whether a voice clip is playing — covers
-    // both "no voiceSrc" and "voiceSrc present but never actually played"
-    // (autoplay blocked, load error, missing file).
-    const fallbackId = window.setTimeout(advanceOnce, autoAdvanceFallbackDelay(text));
+    let fallbackId: number | null = null;
 
+    if (voice) {
+      const v = voice; // narrowed alias — TS doesn't retain the `if (voice)`
+      // narrowing inside a nested function declaration below.
+      v.addEventListener("ended", advanceOnce);
+
+      function armFallback() {
+        const durationMs =
+          Number.isFinite(v.duration) && v.duration > 0 ? v.duration * 1000 : VOICE_FALLBACK_UNKNOWN_DURATION_MS;
+        fallbackId = window.setTimeout(advanceOnce, durationMs + VOICE_FALLBACK_BUFFER_MS);
+      }
+      // readyState >= 1 (HAVE_METADATA) means `duration` is already
+      // known; otherwise wait for it rather than guessing low.
+      if (v.readyState >= 1) {
+        armFallback();
+      } else {
+        v.addEventListener("loadedmetadata", armFallback, { once: true });
+      }
+
+      return () => {
+        advanced = true;
+        v.removeEventListener("ended", advanceOnce);
+        v.removeEventListener("loadedmetadata", armFallback);
+        if (fallbackId !== null) window.clearTimeout(fallbackId);
+      };
+    }
+
+    // No voiceSrc at all — plain reading-pace timer.
+    fallbackId = window.setTimeout(advanceOnce, autoAdvanceFallbackDelay(text));
     return () => {
       advanced = true;
-      voice?.removeEventListener("ended", advanceOnce);
-      window.clearTimeout(fallbackId);
+      if (fallbackId !== null) window.clearTimeout(fallbackId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTyping, lineNumber, lineCount]);
