@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import SceneAudio from "./narrative/SceneAudio";
 
 interface TitleScreenProps {
   hasSave: boolean;
@@ -31,6 +32,19 @@ interface TitleScreenProps {
  * MedievalSharp title lettering, the indeterminate "preparing your
  * quest" bar) is gone entirely — this screen no longer uses any "quest"
  * language, imagery, or its own now-unused marcus_fullbody.png cutout.
+ *
+ * Music: main_title_loop.mp3 is a ~30s clip (with a short fade at each
+ * end so the loop seam doesn't click) trimmed from the full
+ * Main_title01.mp3 track supplied for this screen. Reuses SceneAudio —
+ * built for the narrative-scene engine but genuinely scene-agnostic
+ * (just a src/volume/loop/fade player, no narrative-specific coupling)
+ * — for its native `loop` + fade-in/out handling rather than
+ * duplicating that logic here. It plays for as long as TitleScreen is
+ * mounted; clicking Begin Mission or Continue Mission navigates
+ * GameRoot away from this screen, which unmounts TitleScreen (and
+ * SceneAudio with it) — SceneAudio's cleanup fades the track out over
+ * fadeOutMs on unmount regardless of which button triggered it, so
+ * both paths stop the music the same way with no extra wiring here.
  */
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
   return (
@@ -38,6 +52,8 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
       className="relative flex flex-1 items-center overflow-hidden"
       style={{ backgroundColor: "var(--nova-cream-photo)" }}
     >
+      <SceneAudio src="/assets/music/main_title_loop.mp3" volume={0.4} loop fadeInMs={1500} fadeOutMs={900} />
+
       {/* Mission team — sticker-outlined cutout, anchored bottom-left */}
       <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-[62%] w-[72%] sm:h-[80%] sm:w-[48%] md:w-[42%]">
         <div className="relative h-full w-full">
