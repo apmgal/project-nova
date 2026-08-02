@@ -56,7 +56,19 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
           Not `items-end`/`text-right` anymore: the two title lines need
           independent alignment (OPERATION left, NOVA right, per direction —
           the reference's zigzag poster-lettering look), so each element
-          below manages its own alignment instead of inheriting one. */}
+          below manages its own alignment instead of inheriting one.
+
+          The left-shift offsets on OPERATION/NOVA/tagline+CTAs are in vw,
+          not a fixed px or cm amount — they started as literal cm values,
+          but those don't scale with screen size (a physical 11cm shift on
+          a phone-width screen would push OPERATION almost entirely
+          off-canvas), so the whole layout could distort at other window
+          sizes even though the font-size clamp()s already scale fine.
+          Converted to vw (at the ~1280px width this was tuned at:
+          -11cm -> -32.5vw, -2cm -> -5.9vw) so every offset scales with
+          the viewport the same way the fonts already do — proportions
+          hold at any screen size instead of only the one this was eyeballed
+          on. */}
       <div className="relative z-10 ml-auto flex w-full max-w-[560px] flex-col gap-4 px-6 py-8 sm:px-10 sm:py-12">
         {/* Two independent boxes (not just two lines of one block) — a
             real gap between them (gap-5/sm:gap-8) plus each managing its
@@ -68,20 +80,21 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
         >
           <div
             className="text-left text-[clamp(4.5rem,12vw,8.5rem)]"
-            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)", transform: "translateX(-11cm)" }}
+            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)", transform: "translateX(-32.5vw)" }}
           >
             OPERATION
           </div>
           <div
             className="text-right text-[clamp(4.5rem,12vw,8.5rem)]"
-            style={{ textShadow: "4px 6px 0 var(--nova-gold-300)", transform: "translateX(-2cm)" }}
+            style={{ textShadow: "4px 6px 0 var(--nova-gold-300)", transform: "translateX(-5.9vw)" }}
           >
             NOVA
           </div>
         </h1>
 
-        {/* Tagline + CTA(s), shifted 2cm left together */}
-        <div className="flex flex-col items-end gap-4" style={{ transform: "translateX(-2cm)" }}>
+        {/* Tagline + CTA(s), shifted left together (in step with the title
+            above, same vw-based scaling) */}
+        <div className="flex flex-col items-end gap-4" style={{ transform: "translateX(-5.9vw)" }}>
           <p className="text-right text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
             Your mission begins here
           </p>
