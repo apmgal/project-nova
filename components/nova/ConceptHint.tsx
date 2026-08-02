@@ -27,6 +27,15 @@ interface ConceptHintProps {
  * Renders nothing if `concept` has no GLOSSARY entry (including if it's
  * undefined) — safe to drop into any tool screen unconditionally; only
  * the ones with a matching entry actually show a bulb.
+ *
+ * The popover is absolutely positioned (anchored to the button, not laid
+ * out in normal flow) so its width isn't capped by whatever sliver of the
+ * host row the trigger happens to occupy — sitting inline, it was
+ * inheriting the button's own narrow flex column and reading as a small
+ * box wedged into one corner. Anchoring it lets it span a real reading
+ * width regardless of where the button sits, and it overlays the tool
+ * screen below it rather than pushing content down, same as any other
+ * popover/dropdown.
  */
 export default function ConceptHint({ concept }: ConceptHintProps) {
   const [open, setOpen] = useState(false);
@@ -35,7 +44,7 @@ export default function ConceptHint({ concept }: ConceptHintProps) {
   if (!entry) return null;
 
   return (
-    <div className="flex flex-shrink-0 flex-col items-end gap-2">
+    <div className="relative flex flex-shrink-0">
       <button
         onClick={() => setOpen((current) => !current)}
         aria-label={`APM concept reminder: ${entry.term}`}
@@ -50,7 +59,7 @@ export default function ConceptHint({ concept }: ConceptHintProps) {
       </button>
 
       {open && (
-        <div className="w-full max-w-[320px] rounded-lg border border-blue-800/50 bg-zinc-900 p-3 text-left">
+        <div className="absolute right-0 top-full z-20 mt-2 w-[min(90vw,440px)] rounded-lg border border-blue-800/50 bg-zinc-900 p-4 text-left shadow-lg shadow-black/40">
           <div className="flex items-center gap-1.5">
             <Lightbulb className="h-2.5 w-2.5 text-blue-500" aria-hidden="true" />
             <span className="text-[10px] uppercase tracking-wide text-blue-400">
@@ -59,7 +68,7 @@ export default function ConceptHint({ concept }: ConceptHintProps) {
           </div>
           <div className="mt-1 text-sm font-semibold text-zinc-100">{entry.term}</div>
           <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">{entry.definition}</p>
-          <div className="mt-2.5 flex justify-end">
+          <div className="mt-3 flex justify-end">
             <button
               onClick={() => setOpen(false)}
               className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500"
