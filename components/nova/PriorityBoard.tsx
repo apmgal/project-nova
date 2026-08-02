@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface PriorityBoardProps {
   toolScreen: ToolScreenBlock;
@@ -12,6 +13,8 @@ interface PriorityBoardProps {
   onPlace: (cardId: string, bucket: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -122,6 +125,8 @@ export default function PriorityBoard({
   onPlace,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const hint = useConceptHint(pmConcept);
@@ -301,6 +306,8 @@ export default function PriorityBoard({
           )}
         </div>
       </div>
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

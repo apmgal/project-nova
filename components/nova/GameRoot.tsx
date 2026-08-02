@@ -40,6 +40,7 @@ import {
   substituteTemplate,
   computeWeeksRemaining,
   resetTool,
+  submitTool,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -359,11 +360,18 @@ export default function GameRoot() {
   const toolScreen = scene.toolId ? getToolScreen(scene.toolId) : null;
   const toolType = toolScreen?.type;
   const toolIsPriority = toolType === "priority_assignment" || toolType === "power_interest_grid";
+  // toolComplete: whether the activity's own requirements are met (every
+  // card placed, hires locked in, etc.) — used only to enable the Submit
+  // button. toolSubmitted: whether the player has actually tapped it.
+  // These are deliberately different — completion alone used to
+  // auto-advance the scene instantly; now the tool screen stays up (with
+  // Submit visibly enabled) until the player chooses to move on.
   const toolComplete = computeToolComplete(gameState, toolScreen);
+  const toolSubmitted = Boolean(toolScreen && gameState.toolSubmitted[toolScreen.toolId]);
 
   // Blocked at the tool interstitial: pre-tool dialogue is done, but the
-  // tool itself isn't complete yet.
-  const atToolBreak = Boolean(scene.toolId) && !toolComplete && lineIndex >= toolBreakIndex;
+  // player hasn't submitted the tool yet.
+  const atToolBreak = Boolean(scene.toolId) && !toolSubmitted && lineIndex >= toolBreakIndex;
 
   // A scene can have more than one choice block: its own trailing
   // choicesId block, plus any insertAfterLine-anchored ones that fire
@@ -537,17 +545,9 @@ export default function GameRoot() {
     const next = placeToolCard(gameState, toolId, cardId);
     setGameState(next);
     saveGame(next);
-
-    if (isToolComplete(next, toolId, toolScreen.cards?.length ?? 0) && postLines.length === 0) {
-      // No dialogue follows the tool in this scene — transition straight
-      // away, same as before postToolDialogueId existed. When post-tool
-      // lines ARE present, we deliberately do nothing here: the next
-      // render sees toolComplete flip true, atToolBreak clears, and the
-      // transcript resumes revealing postLines from where lineIndex
-      // already sits (the tool-break boundary) — the eventual Continue/
-      // choice action carries the scene transition instead.
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
+    // No auto-advance here — once every card is correctly placed, the
+    // Submit button below becomes enabled and the player has to actually
+    // tap it (see handleSubmitTool) before the scene moves on.
   }
 
   // "Undo all" for whichever tool screen is currently showing — generic
@@ -562,18 +562,33 @@ export default function GameRoot() {
     saveGame(next);
   }
 
+  // The explicit "I'm done" action for whichever tool screen is currently
+  // showing — generic across every tool type, mirroring handleResetTool.
+  // Marks toolSubmitted (which is what actually gates atToolBreak/render),
+  // then — same as every placement handler used to do the instant it saw
+  // completion — jumps straight to the next scene if there's no post-tool
+  // dialogue to reveal first. When post-tool lines ARE present, this
+  // deliberately doesn't call goToScene: the next render sees
+  // toolSubmitted flip true, atToolBreak clears, and the transcript
+  // resumes revealing postLines from where lineIndex already sits (the
+  // tool-break boundary) — the eventual Continue/choice action carries
+  // the scene transition instead.
+  function handleSubmitTool() {
+    if (!gameState || !scene || !toolScreen || !toolComplete) return;
+    const next = submitTool(gameState, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
     setGameState(next);
     saveGame(next);
-
-    if (
-      isPriorityToolComplete(next, scene.toolId, toolScreen.cards?.length ?? 0) &&
-      postLines.length === 0
-    ) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
   }
 
   function handleDescopeTask(taskId: string) {
@@ -581,10 +596,6 @@ export default function GameRoot() {
     const next = descopeTask(gameState, toolScreen, taskId);
     setGameState(next);
     saveGame(next);
-
-    if (isCbsComplete(next, toolScreen) && postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
   }
 
   function handleToggleHire(candidateId: string) {
@@ -592,11 +603,6 @@ export default function GameRoot() {
     const next = toggleHire(gameState, toolScreen, candidateId);
     setGameState(next);
     saveGame(next);
-
-    const maxHires = toolScreen.maxHires ?? toolScreen.candidates?.length ?? 0;
-    if (isHiringComplete(next, scene.toolId, maxHires) && postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
   }
 
   function handleGanttPlace(milestoneId: string, startWeek: number): string | null {
@@ -630,10 +636,9 @@ export default function GameRoot() {
     const next = placeToolCard(gameState, toolId, CRITICAL_PATH_CONFIRMED_MARKER);
     setGameState(next);
     saveGame(next);
-
-    if (computeToolComplete(next, toolScreen) && postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
+    // No auto-advance here either — confirming the critical path just
+    // flips computeToolComplete true (enabling the Submit button below);
+    // the actual scene transition waits for handleSubmitTool.
   }
 
   function handleBuildBenefitField(benefitId: string, field: string) {
@@ -642,11 +647,6 @@ export default function GameRoot() {
     const next = placeToolCard(gameState, toolId, benefitFieldId(benefitId, field));
     setGameState(next);
     saveGame(next);
-
-    const totalFields = (toolScreen.benefits?.length ?? 0) * (toolScreen.fieldsPlayerBuilds?.length ?? 2);
-    if (isToolComplete(next, toolId, totalFields) && postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
   }
 
   // {token} placeholders (e.g. "Week {currentWeek}.") are substituted only
@@ -673,6 +673,8 @@ export default function GameRoot() {
                 onPlace={handlePriorityCardPlaced}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
               <CBSReview
@@ -681,6 +683,8 @@ export default function GameRoot() {
                 onDescope={handleDescopeTask}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen && toolType === "pick_n_of_m_swipeable" ? (
               <TeamSelector
@@ -689,6 +693,8 @@ export default function GameRoot() {
                 onToggleHire={handleToggleHire}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen && toolType === "gantt_placement" ? (
               <GanttBoard
@@ -700,6 +706,8 @@ export default function GameRoot() {
                 onConfirmCriticalPath={handleConfirmCriticalPath}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
               <BenefitsBuilder
@@ -708,6 +716,8 @@ export default function GameRoot() {
                 onBuildField={handleBuildBenefitField}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
@@ -716,6 +726,8 @@ export default function GameRoot() {
                 onCorrectPlacement={handleToolCardPlaced}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atToolBreak && toolScreen ? (
               <ToolScreen
@@ -724,6 +736,8 @@ export default function GameRoot() {
                 onCorrectPlacement={handleToolCardPlaced}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
+                canSubmit={toolComplete}
+                onSubmit={handleSubmitTool}
               />
             ) : atInvestigation && investigationBank && pendingChoice ? (
               <RiskInvestigationPanel

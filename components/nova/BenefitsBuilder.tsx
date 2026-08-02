@@ -5,6 +5,7 @@ import type { BenefitTensionMoment, ToolBenefit, ToolScreenBlock } from "@/lib/n
 import { benefitFieldId } from "@/lib/nova/state";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface BenefitsBuilderProps {
   toolScreen: ToolScreenBlock;
@@ -12,6 +13,8 @@ interface BenefitsBuilderProps {
   onBuildField: (benefitId: string, field: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 /**
@@ -32,6 +35,8 @@ export default function BenefitsBuilder({
   onBuildField,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: BenefitsBuilderProps) {
   const benefits = toolScreen.benefits ?? [];
   const builtSet = new Set(builtFieldIds);
@@ -148,6 +153,8 @@ export default function BenefitsBuilder({
           </div>
         );
       })}
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { computeCriticalPath, isCriticalPathGuessCorrect } from "@/lib/nova/stat
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface GanttBoardProps {
   toolScreen: ToolScreenBlock;
@@ -16,6 +17,8 @@ interface GanttBoardProps {
   onConfirmCriticalPath: () => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 const WEEK_PX = 20;
@@ -56,6 +59,8 @@ export default function GanttBoard({
   onConfirmCriticalPath,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: GanttBoardProps) {
   const milestones = toolScreen.milestones ?? [];
   const weeks = toolScreen.timelineWeeks ?? 24;
@@ -335,10 +340,12 @@ export default function GanttBoard({
             onClick={onConfirmCriticalPath}
             className="w-fit rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
           >
-            Continue ▸
+            Confirm critical path
           </button>
         </div>
       )}
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

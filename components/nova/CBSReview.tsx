@@ -5,6 +5,7 @@ import { getToolScreen } from "@/lib/nova/data";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface CBSReviewProps {
   toolScreen: ToolScreenBlock;
@@ -12,6 +13,8 @@ interface CBSReviewProps {
   onDescope: (taskId: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -45,6 +48,8 @@ export default function CBSReview({
   onDescope,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: CBSReviewProps) {
   const hint = useConceptHint(pmConcept);
   const costs = toolScreen.costsByTask ?? {};
@@ -155,6 +160,8 @@ export default function CBSReview({
           Over budget — tap one task above to cut it before continuing.
         </p>
       )}
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

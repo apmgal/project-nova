@@ -36,6 +36,7 @@ export function loadGame(): GameState | null {
     if (!state.toolProgress) state.toolProgress = {};
     if (!state.toolPlacements) state.toolPlacements = {};
     if (!state.toolSelections) state.toolSelections = {};
+    if (!state.toolSubmitted) state.toolSubmitted = {};
     return state;
   } catch {
     return null;
@@ -896,6 +897,7 @@ export function benefitFieldId(benefitId: string, field: string): string {
  */
 export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameState {
   const toolId = toolScreen.toolId;
+  let result: GameState;
 
   switch (toolScreen.type) {
     case "priority_assignment":
@@ -929,18 +931,20 @@ export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameSt
         toolPlacements: { ...state.toolPlacements, [toolId]: {} },
       };
       next = applyOvercommitRule(next, toolScreen, {});
-      return next;
+      result = next;
+      break;
     }
 
     case "cost_review_with_descope": {
       const cutTaskId = getDescopedTaskId(state, toolId);
       const nextFlags = { ...state.flags };
       if (cutTaskId) delete nextFlags[`descoped_${cutTaskId}`];
-      return {
+      result = {
         ...state,
         flags: nextFlags,
         toolProgress: { ...state.toolProgress, [toolId]: [] },
       };
+      break;
     }
 
     case "pick_n_of_m_swipeable": {
@@ -952,16 +956,18 @@ export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameSt
       for (const candidateId of hired) {
         next = toggleHire(next, toolScreen, candidateId);
       }
-      return next;
+      result = next;
+      break;
     }
 
     case "gantt_placement":
-      return {
+      result = {
         ...state,
         toolPlacements: { ...state.toolPlacements, [toolId]: {} },
         toolSelections: { ...state.toolSelections, [toolId]: [] },
         toolProgress: { ...state.toolProgress, [toolId]: [] },
       };
+      break;
 
     // "sort_into_buckets" (PESTLE/SWOT/Comms/WBS) and "proof_chain_builder"
     // (Benefits) both store progress purely as a toolProgress id list, with
@@ -969,9 +975,34 @@ export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameSt
     case "sort_into_buckets":
     case "proof_chain_builder":
     default:
-      return {
+      result = {
         ...state,
         toolProgress: { ...state.toolProgress, [toolId]: [] },
       };
+      break;
   }
+
+  // A reset always un-submits too — otherwise the (now-empty) tool screen
+  // would still read as "already submitted" from a stale flag, blocking
+  // the player from redoing the activity and tapping Submit again.
+  if (!result.toolSubmitted[toolId]) return result;
+  const nextSubmitted = { ...result.toolSubmitted };
+  delete nextSubmitted[toolId];
+  return { ...result, toolSubmitted: nextSubmitted };
+}
+
+// ---------------------------------------------------------------------------
+// submitTool — the explicit "I'm done" action for a tool screen. Kept
+// entirely separate from completion (isToolComplete/isPriorityToolComplete/
+// etc., which just report whether the activity's requirements are met): a
+// tool used to auto-advance the scene the instant its completion condition
+// became true, with no player action in between. This flag instead gates
+// that advance behind a real tap, so the screen — and its enabled Submit
+// button — stays up until the player chooses to move on.
+// ---------------------------------------------------------------------------
+
+export function submitTool(state: GameState, toolScreen: ToolScreenBlock): GameState {
+  const toolId = toolScreen.toolId;
+  if (state.toolSubmitted[toolId]) return state;
+  return { ...state, toolSubmitted: { ...state.toolSubmitted, [toolId]: true } };
 }

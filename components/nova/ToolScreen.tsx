@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface ToolScreenProps {
   toolScreen: ToolScreenBlock;
@@ -11,6 +12,8 @@ interface ToolScreenProps {
   onCorrectPlacement: (cardId: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 /**
@@ -25,6 +28,8 @@ export default function ToolScreen({
   onCorrectPlacement,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: ToolScreenProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shake, setShake] = useState<{ cardId: string; attempt: number } | null>(null);
@@ -142,6 +147,8 @@ export default function ToolScreen({
           )}
         </div>
       </div>
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

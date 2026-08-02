@@ -52,6 +52,16 @@ export interface GameState {
    * player moves on, so both the effects/flags AND this list need to be
    * able to un-apply, not just accumulate. */
   toolSelections: Record<string, string[]>;
+  /** Per-tool-screen record of whether the player has tapped the explicit
+   * Submit button, keyed by toolId. Deliberately separate from
+   * toolProgress/toolPlacements/toolSelections (which track whether the
+   * activity's completion condition is *met*) — completion alone used to
+   * auto-advance the scene the instant the last card/candidate/milestone
+   * was placed; this flag instead gates that advance behind a real player
+   * action, so the tool screen stays up (with its Submit button visibly
+   * enabled) until they choose to move on. resetTool clears this back to
+   * unset alongside the rest of a tool's progress. */
+  toolSubmitted: Record<string, boolean>;
 }
 
 export interface ChoiceHistoryEntry {

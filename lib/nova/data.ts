@@ -127,5 +127,6 @@ export function getDefaultGameState(): GameState {
   if (!state.toolProgress) state.toolProgress = {};
   if (!state.toolPlacements) state.toolPlacements = {};
   if (!state.toolSelections) state.toolSelections = {};
+  if (!state.toolSubmitted) state.toolSubmitted = {};
   return state;
 }

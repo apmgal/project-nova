@@ -5,6 +5,7 @@ import type { ToolScreenBlock } from "@/lib/nova/types";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface WBSBlueprintProps {
   toolScreen: ToolScreenBlock;
@@ -12,6 +13,8 @@ interface WBSBlueprintProps {
   onCorrectPlacement: (cardId: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 /**
@@ -30,6 +33,8 @@ export default function WBSBlueprint({
   onCorrectPlacement,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: WBSBlueprintProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shakeZone, setShakeZone] = useState<{ zone: string; attempt: number } | null>(null);
@@ -172,6 +177,8 @@ export default function WBSBlueprint({
           )}
         </div>
       </div>
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }

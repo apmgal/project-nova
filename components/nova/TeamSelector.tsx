@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
+import { SubmitToolButton } from "./SubmitTool";
 
 interface TeamSelectorProps {
   toolScreen: ToolScreenBlock;
@@ -11,6 +12,8 @@ interface TeamSelectorProps {
   onToggleHire: (candidateId: string) => void;
   pmConcept?: string;
   onReset: () => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -32,6 +35,8 @@ export default function TeamSelector({
   onToggleHire,
   pmConcept,
   onReset,
+  canSubmit,
+  onSubmit,
 }: TeamSelectorProps) {
   const candidates = toolScreen.candidates ?? [];
   const maxHires = toolScreen.maxHires ?? candidates.length;
@@ -126,6 +131,8 @@ export default function TeamSelector({
           Next ▸
         </button>
       </div>
+
+      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
     </div>
   );
 }
