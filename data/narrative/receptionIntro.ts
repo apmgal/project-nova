@@ -27,9 +27,15 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     alt: "Group Tax reception desk",
   },
   music: {
-    src: "/assets/music/reception_theme.wav",
+    src: "/assets/music/Reception_theme01.mp3",
     volume: 0.35,
     fadeInMs: 2200,
+    // Fades out via NarrativeScene's exit transition: once the player
+    // clicks past the last line, `exiting` flips true, SceneAudio's src
+    // prop goes to null, and its cleanup fades this exact track to
+    // silence over fadeOutMs before the game screen underneath appears —
+    // so the music is already gone by the time gameplay begins, not cut
+    // off abruptly.
     fadeOutMs: 1400,
   },
   characters: [
