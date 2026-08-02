@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Check } from "lucide-react";
+import { SendHorizontal, Check } from "lucide-react";
 
 interface SubmitToolButtonProps {
   /** Whether the activity's own completion condition is currently met
@@ -23,7 +23,9 @@ interface SubmitToolButtonProps {
  * full-width labelled bar — muted while the activity is incomplete, blue
  * once it can be submitted, and green with a checkmark for a beat right
  * after tapping, a real colour change the player can see before the
- * screen moves on rather than an instant swap.
+ * screen moves on rather than an instant swap. Sized to match
+ * ConceptHintButton/ResetToolButton (h-6 w-6, icon h-3.5 w-3.5) so all
+ * three small action icons read as one family.
  */
 export function SubmitToolButton({ canSubmit, onSubmit }: SubmitToolButtonProps) {
   const [submitted, setSubmitted] = useState(false);
@@ -42,7 +44,7 @@ export function SubmitToolButton({ canSubmit, onSubmit }: SubmitToolButtonProps)
         onClick={handleClick}
         disabled={!canSubmit || submitted}
         aria-label={submitted ? "Submitted" : canSubmit ? "Submit" : "Complete the activity to submit"}
-        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+        className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
           submitted
             ? "border-emerald-400 bg-emerald-500 text-white"
             : canSubmit
@@ -51,9 +53,9 @@ export function SubmitToolButton({ canSubmit, onSubmit }: SubmitToolButtonProps)
         }`}
       >
         {submitted ? (
-          <Check className="h-5 w-5" aria-hidden="true" />
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
         ) : (
-          <Send className="h-5 w-5" aria-hidden="true" />
+          <SendHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
         )}
       </button>
     </div>
