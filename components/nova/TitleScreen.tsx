@@ -52,23 +52,30 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
 
       {/* Title + CTA column — upper-right, mirroring the reference's banner placement.
           Not `items-end`/`text-right` anymore: the two title lines need
-          independent alignment (OPERATION right, NOVA left, per direction —
+          independent alignment (OPERATION left, NOVA right, per direction —
           the reference's zigzag poster-lettering look), so each element
           below manages its own alignment instead of inheriting one. */}
       <div className="relative z-10 ml-auto flex w-full max-w-[560px] flex-col gap-4 px-6 py-8 sm:px-10 sm:py-12">
-        <h1 className="text-[var(--nova-ink-900)]" style={{ fontFamily: "var(--font-poster)", lineHeight: 0.88 }}>
-          <span
-            className="block text-right text-[clamp(2.75rem,7.5vw,5.25rem)]"
+        {/* Two independent boxes (not just two lines of one block) — a
+            real gap between them (gap-5/sm:gap-8) plus each managing its
+            own text-align, so OPERATION and NOVA can sit apart and point
+            opposite directions rather than reading as one tight lockup. */}
+        <h1
+          className="flex flex-col gap-5 text-[var(--nova-ink-900)] sm:gap-8"
+          style={{ fontFamily: "var(--font-poster)", lineHeight: 0.88 }}
+        >
+          <div
+            className="text-left text-[clamp(2.75rem,7.5vw,5.25rem)]"
             style={{ textShadow: "3px 4px 0 var(--nova-gold-300)" }}
           >
             OPERATION
-          </span>
-          <span
-            className="block text-left text-[clamp(4.5rem,12vw,8.5rem)]"
+          </div>
+          <div
+            className="text-right text-[clamp(4.5rem,12vw,8.5rem)]"
             style={{ textShadow: "4px 6px 0 var(--nova-gold-300)" }}
           >
             NOVA
-          </span>
+          </div>
         </h1>
 
         <p className="text-right text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
