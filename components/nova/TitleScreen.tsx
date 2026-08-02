@@ -13,10 +13,13 @@ interface TitleScreenProps {
  * studied from a cartoon game-cover reference (thick white/cream sticker
  * outlines on cutout characters anchored bottom-left, bold poster-lettered
  * title banked upper-right over a flat warm backdrop, single CTA in the
- * open space beneath it). mission_team.png is the reference photo with
- * that sticker-outline treatment applied to the three-person cutout
- * group; --nova-cream-photo matches its baked-in background exactly so
- * there's no visible seam where the image meets the page.
+ * open space beneath it). mission_team_v2.png is the reference photo
+ * (now with the AstraZeneca logo composited onto the desk) with that
+ * sticker-outline treatment applied to the three-person cutout group;
+ * --nova-cream-photo matches its baked-in background exactly so
+ * there's no visible seam where the image meets the page. Named _v2
+ * (not overwriting the original mission_team.png filename) so a
+ * cached copy of the old art can never be served in its place.
  *
  * Same props as before — hasSave/onNewGame/onContinue. "Begin Mission"
  * (onNewGame) always shows; "Continue Mission" (onContinue) joins it
@@ -39,7 +42,7 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
       <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-[62%] w-[72%] sm:h-[80%] sm:w-[48%] md:w-[42%]">
         <div className="relative h-full w-full">
           <Image
-            src="/assets/title/mission_team.png"
+            src="/assets/title/mission_team_v2.png"
             alt="The mission team"
             fill
             sizes="620px"
