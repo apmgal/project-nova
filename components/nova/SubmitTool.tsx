@@ -25,7 +25,11 @@ interface SubmitToolButtonProps {
  * after tapping, a real colour change the player can see before the
  * screen moves on rather than an instant swap. Sized to match
  * ConceptHintButton/ResetToolButton (h-6 w-6, icon h-3.5 w-3.5) so all
- * three small action icons read as one family.
+ * three small action icons read as one family. While it's submittable
+ * but not yet tapped, a soft shimmer sweep (animate-nova-shimmer, see
+ * globals.css) plays on loop to draw the eye to the newly-enabled
+ * action — it stops the instant the player taps (submitted) or the
+ * activity gets reset back to incomplete.
  */
 export function SubmitToolButton({ canSubmit, onSubmit }: SubmitToolButtonProps) {
   const [submitted, setSubmitted] = useState(false);
@@ -48,7 +52,7 @@ export function SubmitToolButton({ canSubmit, onSubmit }: SubmitToolButtonProps)
           submitted
             ? "border-emerald-400 bg-emerald-500 text-white"
             : canSubmit
-              ? "border-blue-500 bg-blue-600 text-white hover:bg-blue-500"
+              ? "animate-nova-shimmer border-blue-500 bg-blue-600 text-white hover:bg-blue-500"
               : "cursor-not-allowed border-zinc-800 bg-zinc-900 text-zinc-600"
         }`}
       >
