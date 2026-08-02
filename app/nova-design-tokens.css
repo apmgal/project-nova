@@ -57,6 +57,10 @@
   --nova-parchment-200: #f7f0e0;
   --nova-parchment-300: #efe3c8;
   --nova-parchment-400: #ddcda3;
+  /* Matches the flat cream backdrop baked into the title-screen photo
+     asset (mission_team.png) exactly, so the image sits on the page
+     with no visible seam at its edges. */
+  --nova-cream-photo: #f4eee0;
 
   --nova-ink-900: #241a1e;
   --nova-ink-700: #4a3c40;
@@ -121,6 +125,12 @@
   --font-display: 'MedievalSharp', 'Iowan Old Style', Georgia, serif;
   --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  /* Bold slab-serif poster lettering — used only by the new title-screen
+     lockup (studied from a "Teller's Duty"-style cover reference: thick
+     hand-painted-sign feel). Deliberately separate from --font-display
+     (MedievalSharp), which stays as-is everywhere else it's already
+     used, so this doesn't ripple into HUD/other screens. */
+  --font-poster: 'Alfa Slab One', Georgia, serif;
 
   --text-display-xl: clamp(2.75rem, 4vw, 4.75rem);
   --text-display-lg: clamp(2.25rem, 3vw, 3.25rem);

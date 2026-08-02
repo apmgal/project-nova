@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Button from "./Button";
-import QuestBar from "./QuestBar";
 
 interface TitleScreenProps {
   hasSave: boolean;
@@ -11,95 +9,77 @@ interface TitleScreenProps {
 }
 
 /**
- * Title screen — "Guild of Project Masters" quest-log framing: Mike
- * Elloian (the sponsor who chases status reports throughout the game)
- * needling the player before the mission even starts, over a deep blue
- * radial backdrop. Styled to the design-system reskin handoff's token
- * set (nova-design-tokens.css) and Button/QuestBar primitives.
+ * Title screen — restyled around a "mission team" cover-art composition,
+ * studied from a cartoon game-cover reference (thick white/cream sticker
+ * outlines on cutout characters anchored bottom-left, bold poster-lettered
+ * title banked upper-right over a flat warm backdrop, single CTA in the
+ * open space beneath it). mission_team.png is the reference photo with
+ * that sticker-outline treatment applied to the three-person cutout
+ * group; --nova-cream-photo matches its baked-in background exactly so
+ * there's no visible seam where the image meets the page.
  *
- * Layout now matches the handoff's reference exactly: Mike Elloian's
- * full-figure transparent cutout stands bottom-right (marcus_fullbody.png,
- * absolutely positioned, object-contain, bottom-anchored, drop-shadow +
- * slight desaturation per the handoff's filter spec), with his speech
- * bubble pinned near his head rather than beside a headshot avatar. Main
- * copy/CTA column sits on the left with enough max-width to never run
- * under him. Same props/behavior as before — hasSave/onNewGame/
- * onContinue — only the visual arrangement changed.
+ * Same props/behavior as before — hasSave/onNewGame/onContinue — only
+ * the visual design changed. The one button does double duty per
+ * direction: "Start Mission" for a fresh game, or "Continue Mission"
+ * (calling onContinue instead) the moment a save exists, rather than
+ * showing two separate CTAs.
  *
- * "PREPARING YOUR QUEST..." bar is flavour, not a real loader — there's
- * nothing to actually wait on (no network calls before Start Mission is
- * clickable), hence QuestBar's indeterminate sweep rather than a
- * determinate fill implying real progress.
+ * Previous "Guild of Project Masters" quest-log framing (Mike Elloian's
+ * speech bubble, the "Quest Log"/"Guild of Project Masters" eyebrows,
+ * MedievalSharp title lettering, the indeterminate "preparing your
+ * quest" bar) is gone entirely — this screen no longer uses any "quest"
+ * language, imagery, or its own now-unused marcus_fullbody.png cutout.
  */
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
   return (
-    <div className="relative flex flex-1 items-stretch overflow-hidden bg-[image:var(--gradient-quest-bg)] p-4 sm:p-5">
-      <div className="relative flex w-full flex-1 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--nova-navy-400)]/25">
-        {/* Mike Elloian — full-figure cutout, bottom-anchored on the right */}
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[34%] items-end justify-center sm:flex md:w-[28%]">
-          <div className="relative h-[92%] w-full">
-            <Image
-              src="/assets/characters/marcus_fullbody.png"
-              alt="Mike Elloian"
-              fill
-              sizes="400px"
-              className="object-contain object-bottom drop-shadow-[0_18px_20px_rgba(0,0,0,0.45)] saturate-[.85]"
-              priority
-            />
-          </div>
+    <div
+      className="relative flex flex-1 items-stretch overflow-hidden"
+      style={{ backgroundColor: "var(--nova-cream-photo)" }}
+    >
+      {/* Mission team — sticker-outlined cutout, anchored bottom-left */}
+      <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-[62%] w-[72%] sm:h-[80%] sm:w-[48%] md:w-[42%]">
+        <div className="relative h-full w-full">
+          <Image
+            src="/assets/title/mission_team.png"
+            alt="The mission team"
+            fill
+            sizes="620px"
+            className="object-contain object-left-bottom drop-shadow-[0_16px_22px_rgba(36,26,30,0.22)]"
+            priority
+          />
         </div>
+      </div>
 
-        {/* Speech bubble — pinned near Mike Elloian's head, clear of his hair */}
-        <div className="absolute right-[2%] top-[3%] z-20 hidden max-w-[190px] sm:block">
-          <div className="relative rounded-[var(--radius-lg)] bg-[var(--nova-parchment-100)] px-4 py-2.5 text-sm font-bold text-[var(--color-text-on-parchment)] shadow-[var(--shadow-panel-parchment)] [font-family:var(--font-body)]">
-            &ldquo;Where&apos;s my status report?!&rdquo;
-            <span
-              className="absolute bottom-[-9px] left-1/2 h-0 w-0 -translate-x-1/2 border-x-[9px] border-t-[9px] border-x-transparent border-t-[var(--nova-parchment-100)]"
-              aria-hidden
-            />
-          </div>
-        </div>
+      {/* Title + CTA column — upper-right, mirroring the reference's banner placement */}
+      <div className="relative z-10 ml-auto flex w-full max-w-[440px] flex-col items-end gap-5 px-6 pb-8 pt-9 text-right sm:px-10 sm:pt-14">
+        <h1
+          className="text-[var(--nova-ink-900)]"
+          style={{ fontFamily: "var(--font-poster)", lineHeight: 0.95 }}
+        >
+          <span
+            className="block text-[clamp(1.9rem,4.6vw,3.25rem)]"
+            style={{ textShadow: "2px 3px 0 var(--nova-gold-300)" }}
+          >
+            OPERATION
+          </span>
+          <span
+            className="block text-[clamp(2.5rem,5.8vw,4.25rem)]"
+            style={{ textShadow: "3px 4px 0 var(--nova-gold-300)" }}
+          >
+            NOVA
+          </span>
+        </h1>
 
-        {/* Main content column */}
-        <div className="relative z-10 flex w-full flex-col justify-between gap-8 px-6 py-8 sm:px-10 sm:py-10">
-          <div className="text-xs uppercase tracking-[var(--tracking-widest)] text-[var(--nova-cyan-300)] [font-family:var(--font-mono)]">
-            Quest Log
-          </div>
+        <p className="text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
+          Your mission begins here
+        </p>
 
-          <div className="max-w-xl">
-            <p className="mb-2.5 text-xs uppercase tracking-[var(--tracking-widest)] text-[var(--nova-gold-300)] [font-family:var(--font-mono)]">
-              Guild of Project Masters
-            </p>
-            <h1 className="text-[length:var(--text-display-xl)] font-normal leading-[var(--leading-tight)] text-[var(--nova-parchment-100)] [font-family:var(--font-display)]">
-              PROJECT NOVA
-            </h1>
-            <p className="mb-7 mt-3.5 text-[length:var(--text-body-lg)] font-semibold text-[var(--color-text-on-dark-muted)] [font-family:var(--font-body)]">
-              Your mission begins here&hellip;
-            </p>
-            <div className="flex flex-wrap items-center gap-5">
-              <Button variant="primary" size="lg" onClick={onNewGame} className="whitespace-nowrap">
-                Start Mission
-              </Button>
-              {hasSave && (
-                <button
-                  onClick={onContinue}
-                  className="text-[13px] font-bold text-[var(--nova-cyan-300)] hover:brightness-110 [font-family:var(--font-body)]"
-                >
-                  Continue saved quest
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="max-w-[260px]">
-            <QuestBar
-              label="Preparing your quest…"
-              indeterminate
-              color="var(--gradient-gold-bar)"
-              height={6}
-            />
-          </div>
-        </div>
+        <button
+          onClick={hasSave ? onContinue : onNewGame}
+          className="mt-2 rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+        >
+          {hasSave ? "Continue Mission" : "Start Mission"}
+        </button>
       </div>
     </div>
   );
