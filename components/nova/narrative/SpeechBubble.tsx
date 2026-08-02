@@ -130,7 +130,7 @@ export default function SpeechBubble({
       // (see the button's max-w below) rather than left tall, so a given
       // line wraps across fewer lines and the box stays short enough to
       // clear the character's head instead of growing down into it.
-      className={`pointer-events-none absolute top-[5%] z-20 flex w-full flex-col px-4 sm:px-0 ${DOCK_CLASSES[anchor]}`}
+      className={`pointer-events-none absolute top-[2%] z-20 flex w-full flex-col px-4 sm:px-0 ${DOCK_CLASSES[anchor]}`}
     >
       <button
         onClick={handleClick}
