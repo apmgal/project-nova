@@ -235,6 +235,29 @@ export default function CharacterPortrait({
           />
         )}
       </div>
+
+      {/* Preload every expression (and blink) image for this character up
+          front, keyed by src, rather than only ever fetching one on first
+          use. Without this, the FIRST time a line asks for an expression
+          Mike/Ben hasn't shown yet, the browser starts that download only
+          when the crossfade kicks off — but the crossfade promotes the
+          incoming image to "settled" on a fixed timer (EXPRESSION_
+          CROSSFADE_MS), not on the image's actual load event, so if the
+          fetch is still in flight when that timer fires the settled layer
+          swaps to a src that hasn't finished loading and renders blank
+          until it does. That's the "Mike occasionally glitches" flash —
+          a cache miss, not a rendering bug in the crossfade itself. Same
+          `sizes="420px"` as the real portraits so Next.js requests (and
+          caches) the exact same asset URL, just off-screen and harmless
+          to re-request if it's already the one currently shown. */}
+      <div aria-hidden className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0">
+        {Object.values(expressions).flatMap((art) => [
+          <Image key={`preload-${art.src}`} src={art.src} alt="" fill sizes="420px" priority />,
+          ...(art.blinkSrc
+            ? [<Image key={`preload-${art.blinkSrc}`} src={art.blinkSrc} alt="" fill sizes="420px" priority />]
+            : []),
+        ])}
+      </div>
     </div>
   );
 }
