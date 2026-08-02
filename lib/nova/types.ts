@@ -199,6 +199,11 @@ export interface Character {
 //     of the plain card grid — same placement/completion logic underneath.
 //   - "priority_assignment" (MoSCoW): every bucket is a valid placement —
 //     each card has a costByBucket instead, and an optional flagsByBucket.
+//     MoSCoW's own tool screen sets visualStyle: "moscow_quadrant" for a
+//     2x2 corner-badge presentation (M/S/C/W) instead of the plain dashed
+//     bucket grid — same placement/completion logic underneath, and the
+//     Stakeholder Grid (below) still gets the plain grid since its bucket
+//     names don't map to single letters.
 //   - "power_interest_grid" (Stakeholder Grid): a free-placement variant of
 //     priority_assignment with no cost.
 //   - "cost_review_with_descope" (CBS): auto-summed costs, cut one task if

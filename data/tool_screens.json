@@ -103,6 +103,7 @@
     "toolId": "TOOL_ACT2_SCENE02_MOSCOW",
     "sourceScene": "ACT2_SCENE02",
     "type": "priority_assignment",
+    "visualStyle": "moscow_quadrant",
     "instructions": "Drag each requirement into Must, Should, Could, or Won't. Unlike PESTLE/SWOT, there is no single correct answer here — every placement is a real trade-off against budget.",
     "buckets": [
       "Must",

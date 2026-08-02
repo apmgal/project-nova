@@ -18,6 +18,84 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 0,
 });
 
+interface MoscowQuadrantStyle {
+  letter: string;
+  cardBg: string;
+  /** Extra padding on the two sides nearest this bucket's own badge
+   * corner, so item chips don't visually run into it. */
+  cardPadding: string;
+  badgePosition: string;
+  badgeBg: string;
+  badgeText: string;
+  chipBg: string;
+  chipText: string;
+}
+
+/**
+ * MoSCoW's own letter/color per bucket, keyed by the exact bucket strings
+ * TOOL_ACT2_SCENE02_MOSCOW carries ("Must"/"Should"/"Could"/"Won't"). Each
+ * badge sits on its own card's *inward* corner — Must's bottom-right,
+ * Should's bottom-left, Could's top-right, Won't's top-left — so all four
+ * cluster near the grid's center (approved mockup), rather than on a
+ * shared edge where two badges could collide. Colors are a distinct
+ * green/blue/indigo/blue set, deliberately not reusing emerald (already
+ * "correct" everywhere else) since MoSCoW has no correct answer — every
+ * placement here is a valid trade-off.
+ */
+const MOSCOW_QUADRANT_STYLE: Record<string, MoscowQuadrantStyle> = {
+  Must: {
+    letter: "M",
+    cardBg: "bg-emerald-400",
+    cardPadding: "pb-8 pr-8 pt-3.5 pl-3.5",
+    badgePosition: "-bottom-[22px] -right-[22px]",
+    badgeBg: "bg-emerald-500",
+    badgeText: "text-emerald-950",
+    chipBg: "bg-emerald-950/25",
+    chipText: "text-emerald-950",
+  },
+  Should: {
+    letter: "S",
+    cardBg: "bg-sky-400",
+    cardPadding: "pb-8 pl-8 pt-3.5 pr-3.5",
+    badgePosition: "-bottom-[22px] -left-[22px]",
+    badgeBg: "bg-sky-500",
+    badgeText: "text-sky-950",
+    chipBg: "bg-sky-950/25",
+    chipText: "text-sky-950",
+  },
+  Could: {
+    letter: "C",
+    cardBg: "bg-indigo-900",
+    cardPadding: "pt-8 pr-8 pb-3.5 pl-3.5",
+    badgePosition: "-top-[22px] -right-[22px]",
+    badgeBg: "bg-indigo-700",
+    badgeText: "text-indigo-100",
+    chipBg: "bg-black/25",
+    chipText: "text-indigo-100",
+  },
+  "Won't": {
+    letter: "W",
+    cardBg: "bg-blue-600",
+    cardPadding: "pt-8 pl-8 pb-3.5 pr-3.5",
+    badgePosition: "-top-[22px] -left-[22px]",
+    badgeBg: "bg-blue-700",
+    badgeText: "text-blue-100",
+    chipBg: "bg-black/20",
+    chipText: "text-blue-100",
+  },
+};
+
+const FALLBACK_MOSCOW_STYLE: MoscowQuadrantStyle = {
+  letter: "?",
+  cardBg: "bg-zinc-700",
+  cardPadding: "p-3.5",
+  badgePosition: "-bottom-[22px] -right-[22px]",
+  badgeBg: "bg-zinc-500",
+  badgeText: "text-zinc-950",
+  chipBg: "bg-black/25",
+  chipText: "text-zinc-100",
+};
+
 /**
  * Generic "assign every card to a bucket, optionally at a real cost"
  * interaction — covers both MoSCoW prioritisation (costed) and the
@@ -26,7 +104,12 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
  * placement here — nothing bounces back — and a card that's already
  * placed can be reselected and moved to a different bucket, refunding
  * its old cost if it had one. Driven entirely by a tool_screens.json
- * entry; nothing here knows which specific board it's rendering.
+ * entry; nothing here knows which specific board it's rendering — except
+ * for one visual fork: toolScreen.visualStyle === "moscow_quadrant"
+ * (set only on TOOL_ACT2_SCENE02_MOSCOW) swaps the plain dashed bucket
+ * grid for the four-corner-badge quadrant layout. The Stakeholder Grid
+ * has no visualStyle set, so it always gets the plain grid — its bucket
+ * names don't map to single letters the way Must/Should/Could/Won't do.
  */
 export default function PriorityBoard({
   toolScreen,
@@ -40,6 +123,7 @@ export default function PriorityBoard({
   const cards = toolScreen.cards ?? [];
   const buckets = toolScreen.buckets ?? [];
   const unplacedCards = cards.filter((card) => !placements[card.id]);
+  const isMoscowQuadrant = toolScreen.visualStyle === "moscow_quadrant";
 
   function handleSelectCard(cardId: string) {
     setSelectedCardId((current) => (current === cardId ? null : cardId));
@@ -70,47 +154,105 @@ export default function PriorityBoard({
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {buckets.map((bucket) => {
-          const cardsHere = cards.filter((card) => placements[card.id] === bucket);
-          return (
-            <button
-              key={bucket}
-              onClick={() => handleAssign(bucket)}
-              className={`flex min-h-[104px] flex-col gap-1 rounded-md border-2 border-dashed p-2 text-left text-xs transition-colors ${
-                selectedCardId
-                  ? "border-emerald-600 bg-emerald-950/30 hover:bg-emerald-900/40"
-                  : "border-zinc-700 bg-zinc-950/40"
-              }`}
-            >
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
-                {bucket}
-              </span>
-              {cardsHere.map((card) => (
-                <span
-                  key={card.id}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleSelectCard(card.id);
-                  }}
-                  className={`cursor-pointer rounded px-2 py-1 text-[11px] transition-colors ${
-                    selectedCardId === card.id
-                      ? "bg-emerald-500 text-white ring-2 ring-emerald-300"
-                      : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/70"
-                  }`}
+      {isMoscowQuadrant ? (
+        <div className="grid grid-cols-2 gap-x-14 gap-y-14">
+          {buckets.map((bucket) => {
+            const style = MOSCOW_QUADRANT_STYLE[bucket] ?? FALLBACK_MOSCOW_STYLE;
+            const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+            return (
+              <button
+                key={bucket}
+                onClick={() => handleAssign(bucket)}
+                aria-label={bucket}
+                className={`relative flex min-h-[110px] flex-col gap-1.5 rounded-2xl text-left transition-all ${style.cardPadding} ${style.cardBg} ${
+                  selectedCardId ? "ring-2 ring-white/60" : ""
+                }`}
+              >
+                {cardsHere.length === 0 ? (
+                  <span className={`text-[11px] ${style.chipText} opacity-70`}>
+                    Drop items here
+                  </span>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {cardsHere.map((card) => {
+                      const isSelected = selectedCardId === card.id;
+                      return (
+                        <span
+                          key={card.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleSelectCard(card.id);
+                          }}
+                          className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+                            isSelected
+                              ? "bg-white text-zinc-900 ring-2 ring-white"
+                              : `${style.chipBg} ${style.chipText} hover:brightness-110`
+                          }`}
+                        >
+                          {card.text}
+                          {card.costByBucket && (
+                            <span className="ml-1 opacity-70">
+                              ({currencyFormatter.format(card.costByBucket[bucket] ?? 0)})
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                <div
+                  aria-hidden="true"
+                  className={`absolute z-10 flex h-11 w-11 items-center justify-center rounded-full border-4 border-zinc-900 text-lg font-bold ${style.badgePosition} ${style.badgeBg} ${style.badgeText}`}
                 >
-                  {card.text}
-                  {card.costByBucket && (
-                    <span className="ml-1 text-emerald-300/80">
-                      ({currencyFormatter.format(card.costByBucket[bucket] ?? 0)})
-                    </span>
-                  )}
+                  {style.letter}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {buckets.map((bucket) => {
+            const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+            return (
+              <button
+                key={bucket}
+                onClick={() => handleAssign(bucket)}
+                className={`flex min-h-[104px] flex-col gap-1 rounded-md border-2 border-dashed p-2 text-left text-xs transition-colors ${
+                  selectedCardId
+                    ? "border-emerald-600 bg-emerald-950/30 hover:bg-emerald-900/40"
+                    : "border-zinc-700 bg-zinc-950/40"
+                }`}
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
+                  {bucket}
                 </span>
-              ))}
-            </button>
-          );
-        })}
-      </div>
+                {cardsHere.map((card) => (
+                  <span
+                    key={card.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSelectCard(card.id);
+                    }}
+                    className={`cursor-pointer rounded px-2 py-1 text-[11px] transition-colors ${
+                      selectedCardId === card.id
+                        ? "bg-emerald-500 text-white ring-2 ring-emerald-300"
+                        : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/70"
+                    }`}
+                  >
+                    {card.text}
+                    {card.costByBucket && (
+                      <span className="ml-1 text-emerald-300/80">
+                        ({currencyFormatter.format(card.costByBucket[bucket] ?? 0)})
+                      </span>
+                    )}
+                  </span>
+                ))}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div>
         <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-500">
