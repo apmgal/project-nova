@@ -39,11 +39,11 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       position: "right",
       expressions: {
         neutral: {
-          src: "/assets/characters/mikesmithneutral.png",
-          blinkSrc: "/assets/characters/mikesmithblink.png",
+          src: "/assets/characters/mikeneutral.png",
+          blinkSrc: "/assets/characters/mikeblink.png",
         },
-        smile: { src: "/assets/characters/mikesmithsmile.png" },
-        serious: { src: "/assets/characters/mikesmithserious.png" },
+        smile: { src: "/assets/characters/mikesmile.png" },
+        serious: { src: "/assets/characters/mikeserious.png" },
       },
     },
     {
