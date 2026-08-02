@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
+import ConceptHint from "./ConceptHint";
 
 interface PriorityBoardProps {
   toolScreen: ToolScreenBlock;
   /** cardId -> bucket, for whichever cards have been placed so far. */
   placements: Record<string, string>;
   onPlace: (cardId: string, bucket: string) => void;
+  pmConcept?: string;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -26,7 +28,12 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
  * its old cost if it had one. Driven entirely by a tool_screens.json
  * entry; nothing here knows which specific board it's rendering.
  */
-export default function PriorityBoard({ toolScreen, placements, onPlace }: PriorityBoardProps) {
+export default function PriorityBoard({
+  toolScreen,
+  placements,
+  onPlace,
+  pmConcept,
+}: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const cards = toolScreen.cards ?? [];
@@ -52,8 +59,13 @@ export default function PriorityBoard({ toolScreen, placements, onPlace }: Prior
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

@@ -3,11 +3,13 @@
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
+import ConceptHint from "./ConceptHint";
 
 interface WBSBlueprintProps {
   toolScreen: ToolScreenBlock;
   placedCardIds: string[];
   onCorrectPlacement: (cardId: string) => void;
+  pmConcept?: string;
 }
 
 /**
@@ -24,6 +26,7 @@ export default function WBSBlueprint({
   toolScreen,
   placedCardIds,
   onCorrectPlacement,
+  pmConcept,
 }: WBSBlueprintProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shakeZone, setShakeZone] = useState<{ zone: string; attempt: number } | null>(null);
@@ -58,8 +61,13 @@ export default function WBSBlueprint({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       <div className="flex flex-col items-center">

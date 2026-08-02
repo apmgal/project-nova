@@ -658,18 +658,21 @@ export default function GameRoot() {
                 toolScreen={toolScreen}
                 placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
                 onPlace={handlePriorityCardPlaced}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
               <CBSReview
                 toolScreen={toolScreen}
                 cutTaskId={getDescopedTaskId(gameState, toolScreen.toolId)}
                 onDescope={handleDescopeTask}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen && toolType === "pick_n_of_m_swipeable" ? (
               <TeamSelector
                 toolScreen={toolScreen}
                 hiredIds={gameState.toolSelections[toolScreen.toolId] ?? []}
                 onToggleHire={handleToggleHire}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen && toolType === "gantt_placement" ? (
               <GanttBoard
@@ -679,24 +682,28 @@ export default function GameRoot() {
                 criticalPathGuesses={gameState.toolSelections[toolScreen.toolId] ?? []}
                 onToggleCriticalPathGuess={handleToggleCriticalPathGuess}
                 onConfirmCriticalPath={handleConfirmCriticalPath}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
               <BenefitsBuilder
                 toolScreen={toolScreen}
                 builtFieldIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onBuildField={handleBuildBenefitField}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
                 toolScreen={toolScreen}
                 placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onCorrectPlacement={handleToolCardPlaced}
+                pmConcept={scene.pmConcept}
               />
             ) : atToolBreak && toolScreen ? (
               <ToolScreen
                 toolScreen={toolScreen}
                 placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onCorrectPlacement={handleToolCardPlaced}
+                pmConcept={scene.pmConcept}
               />
             ) : atInvestigation && investigationBank && pendingChoice ? (
               <RiskInvestigationPanel

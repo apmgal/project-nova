@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
+import ConceptHint from "./ConceptHint";
 
 interface TeamSelectorProps {
   toolScreen: ToolScreenBlock;
   hiredIds: string[];
   onToggleHire: (candidateId: string) => void;
+  pmConcept?: string;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -22,7 +24,12 @@ const currencyFormatter = new Intl.NumberFormat("en-GB", {
  * of browse direction; once maxHires are hired, Hire buttons on every
  * remaining un-hired card grey out — no silent auto-replacement.
  */
-export default function TeamSelector({ toolScreen, hiredIds, onToggleHire }: TeamSelectorProps) {
+export default function TeamSelector({
+  toolScreen,
+  hiredIds,
+  onToggleHire,
+  pmConcept,
+}: TeamSelectorProps) {
   const candidates = toolScreen.candidates ?? [];
   const maxHires = toolScreen.maxHires ?? candidates.length;
   const [index, setIndex] = useState(0);
@@ -43,8 +50,13 @@ export default function TeamSelector({ toolScreen, hiredIds, onToggleHire }: Tea
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-500">

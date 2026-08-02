@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
+import ConceptHint from "./ConceptHint";
 
 interface ToolScreenProps {
   toolScreen: ToolScreenBlock;
   placedCardIds: string[];
   onCorrectPlacement: (cardId: string) => void;
+  pmConcept?: string;
 }
 
 /**
@@ -19,6 +21,7 @@ export default function ToolScreen({
   toolScreen,
   placedCardIds,
   onCorrectPlacement,
+  pmConcept,
 }: ToolScreenProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shake, setShake] = useState<{ cardId: string; attempt: number } | null>(null);
@@ -55,8 +58,13 @@ export default function ToolScreen({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

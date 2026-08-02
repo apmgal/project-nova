@@ -3,11 +3,13 @@
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { getToolScreen } from "@/lib/nova/data";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
+import ConceptHint from "./ConceptHint";
 
 interface CBSReviewProps {
   toolScreen: ToolScreenBlock;
   cutTaskId: string | undefined;
   onDescope: (taskId: string) => void;
+  pmConcept?: string;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -35,7 +37,7 @@ function formatMillions(value: number): string {
  * since CBS reviews the exact same task set the player already sorted in
  * the WBS scene.
  */
-export default function CBSReview({ toolScreen, cutTaskId, onDescope }: CBSReviewProps) {
+export default function CBSReview({ toolScreen, cutTaskId, onDescope, pmConcept }: CBSReviewProps) {
   const costs = toolScreen.costsByTask ?? {};
   const wbs = getToolScreen("TOOL_ACT3_SCENE01_WBS");
   const wbsCards = wbs?.cards ?? [];
@@ -54,8 +56,13 @@ export default function CBSReview({ toolScreen, cutTaskId, onDescope }: CBSRevie
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       <div className="flex flex-col items-center">

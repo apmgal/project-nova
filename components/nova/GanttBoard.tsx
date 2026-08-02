@@ -4,6 +4,7 @@ import { useState, type MouseEvent } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { computeCriticalPath, isCriticalPathGuessCorrect } from "@/lib/nova/state";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
+import ConceptHint from "./ConceptHint";
 
 interface GanttBoardProps {
   toolScreen: ToolScreenBlock;
@@ -12,6 +13,7 @@ interface GanttBoardProps {
   criticalPathGuesses: string[];
   onToggleCriticalPathGuess: (milestoneId: string) => void;
   onConfirmCriticalPath: () => void;
+  pmConcept?: string;
 }
 
 const WEEK_PX = 20;
@@ -50,6 +52,7 @@ export default function GanttBoard({
   criticalPathGuesses,
   onToggleCriticalPathGuess,
   onConfirmCriticalPath,
+  pmConcept,
 }: GanttBoardProps) {
   const milestones = toolScreen.milestones ?? [];
   const weeks = toolScreen.timelineWeeks ?? 24;
@@ -146,8 +149,13 @@ export default function GanttBoard({
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
       {error && (
         <div className="rounded-md border border-red-700/50 bg-red-950/40 px-3 py-2 text-xs text-red-300">

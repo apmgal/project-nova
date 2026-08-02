@@ -3,11 +3,13 @@
 import { useState } from "react";
 import type { BenefitTensionMoment, ToolBenefit, ToolScreenBlock } from "@/lib/nova/types";
 import { benefitFieldId } from "@/lib/nova/state";
+import ConceptHint from "./ConceptHint";
 
 interface BenefitsBuilderProps {
   toolScreen: ToolScreenBlock;
   builtFieldIds: string[];
   onBuildField: (benefitId: string, field: string) => void;
+  pmConcept?: string;
 }
 
 /**
@@ -26,6 +28,7 @@ export default function BenefitsBuilder({
   toolScreen,
   builtFieldIds,
   onBuildField,
+  pmConcept,
 }: BenefitsBuilderProps) {
   const benefits = toolScreen.benefits ?? [];
   const builtSet = new Set(builtFieldIds);
@@ -92,8 +95,13 @@ export default function BenefitsBuilder({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {toolScreen.instructions && (
-        <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+      {(toolScreen.instructions || pmConcept) && (
+        <div className="flex items-start justify-between gap-3">
+          {toolScreen.instructions && (
+            <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
+          )}
+          <ConceptHint concept={pmConcept} />
+        </div>
       )}
 
       {benefits.map((benefit) => {
