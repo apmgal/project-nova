@@ -7,11 +7,17 @@ interface SpeechBubbleProps {
   /** Display name, or null for unattributed narrator text. */
   speakerName: string | null;
   text: string;
-  /** Optional voice-over clip for this line — placeholder support only
-   * for now: plays once, best-effort, whenever `text` changes. A missing
-   * clip (or an autoplay block) is a silent no-op — the text still types
-   * out and the scene still advances normally either way. */
+  /** Optional voice-over clip for this line — plays once, best-effort,
+   * whenever `text` changes. A missing clip (or an autoplay block) is a
+   * silent no-op — the text still types out and the scene still advances
+   * normally either way. Also doubles as this line's auto-advance pacing:
+   * once the clip finishes playing, the bubble moves on by itself. */
   voiceSrc?: string;
+  /** Called to move to the next line — by a manual click (any time after
+   * the typewriter finishes) or automatically once the reveal completes,
+   * so the scene keeps flowing without requiring a click every line. The
+   * very last line (lineNumber === lineCount) never auto-advances — its
+   * "Begin" click is the deliberate handoff out of the scene. */
   onAdvance: () => void;
   lineNumber: number;
   lineCount: number;
@@ -39,6 +45,20 @@ const TAIL_OFFSET_CLASSES: Record<ScenePosition, string> = {
 // However long a line is, its typewriter reveal never takes longer than
 // this — keeps the longest dialogue lines from crawling.
 const MAX_TYPE_MS = 2600;
+
+// Auto-advance fallback pacing, used when a line has no voiceSrc (or its
+// audio fails/is blocked) — read at a generous pace rather than the
+// typewriter's own per-character speed, since the text is already fully
+// visible by this point and the player just needs a moment to finish
+// reading it. Clamped so a one-word line doesn't linger and a very long
+// one doesn't stall for an unreasonable amount of time.
+const AUTO_ADVANCE_MS_PER_CHAR = 55;
+const AUTO_ADVANCE_MIN_MS = 1400;
+const AUTO_ADVANCE_MAX_MS = 9000;
+
+function autoAdvanceFallbackDelay(text: string): number {
+  return Math.min(AUTO_ADVANCE_MAX_MS, Math.max(AUTO_ADVANCE_MIN_MS, text.length * AUTO_ADVANCE_MS_PER_CHAR));
+}
 
 /**
  * Speech bubble anchored near whichever character is currently speaking,
@@ -112,6 +132,40 @@ export default function SpeechBubble({
       audio.pause();
     };
   }, [voiceSrc, text]);
+
+  // Auto-advance: once the typewriter finishes revealing this line, move
+  // on by itself rather than waiting for a click — the player only has
+  // to click on the very last line ("Begin"), everything before that
+  // just flows. Primarily driven by the voice clip finishing (feels
+  // natural — the line moves on exactly when Mike/Ben stops talking);
+  // falls back to a generous reading-pace timer for lines with no voice,
+  // or if the clip fails/is blocked and never fires `ended`. A manual
+  // click still works as a fast-forward at any point.
+  useEffect(() => {
+    if (isTyping) return;
+    if (lineNumber >= lineCount) return; // last line: only "Begin" advances
+
+    let advanced = false;
+    function advanceOnce() {
+      if (advanced) return;
+      advanced = true;
+      onAdvance();
+    }
+
+    const voice = voiceRef.current;
+    voice?.addEventListener("ended", advanceOnce);
+    // Safety net regardless of whether a voice clip is playing — covers
+    // both "no voiceSrc" and "voiceSrc present but never actually played"
+    // (autoplay blocked, load error, missing file).
+    const fallbackId = window.setTimeout(advanceOnce, autoAdvanceFallbackDelay(text));
+
+    return () => {
+      advanced = true;
+      voice?.removeEventListener("ended", advanceOnce);
+      window.clearTimeout(fallbackId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTyping, lineNumber, lineCount]);
 
   function handleClick() {
     if (isTyping) {
