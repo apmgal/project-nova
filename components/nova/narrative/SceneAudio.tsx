@@ -43,12 +43,22 @@ export default function SceneAudio({
   // the scene is doing.
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Tracks the volume prop's last-seen value so the [volume] sync effect
+  // below can skip its very first run on mount — without this, that effect
+  // and the mount effect's own fade-in both fire in the same commit and
+  // race to drive the same audio element's volume via two independent rAF
+  // loops. Under React's dev-mode double effect invocation this races badly
+  // enough to compute a momentary out-of-range value, which HTMLMediaElement
+  // throws IndexSizeError on rather than clamping.
+  const lastVolumeRef = useRef(volume);
 
   // Fade helper: ramps the given element's volume from its current value
   // to `target` over `durationMs`, using elapsed wall-clock time (not a
   // fixed step count) so the ramp is smooth regardless of frame rate.
   // `onDone` fires once, after the last frame — used to pause/release the
-  // element once a fade-out reaches zero.
+  // element once a fade-out reaches zero. Volume is clamped to the valid
+  // [0, 1] range as a defensive backstop: HTMLMediaElement.volume throws
+  // (rather than clamping) if it's ever assigned a value outside it.
   function fadeTo(audio: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void) {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     const start = audio.volume;
@@ -57,7 +67,7 @@ export default function SceneAudio({
     function step(now: number) {
       const elapsed = now - startTime;
       const t = durationMs <= 0 ? 1 : Math.min(1, elapsed / durationMs);
-      audio.volume = start + (target - start) * t;
+      audio.volume = Math.min(1, Math.max(0, start + (target - start) * t));
       if (t < 1) {
         rafRef.current = requestAnimationFrame(step);
       } else {
@@ -108,9 +118,14 @@ export default function SceneAudio({
   }, [src]);
 
   // Target volume can change without swapping tracks (e.g. a scene wants
-  // to duck the music) — ramp to it gently rather than restarting.
+  // to duck the music) — ramp to it gently rather than restarting. Skips
+  // its first run: on mount, the effect above already owns the fade-in at
+  // fadeInMs, so re-firing here too (at a hardcoded 400ms) would just be a
+  // second, redundant ramp racing the first one for the same audio element.
   useEffect(() => {
     if (!audioRef.current) return;
+    if (lastVolumeRef.current === volume) return;
+    lastVolumeRef.current = volume;
     fadeTo(audioRef.current, volume, 400);
   }, [volume]);
 
