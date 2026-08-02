@@ -4,12 +4,14 @@ import { useState } from "react";
 import type { BenefitTensionMoment, ToolBenefit, ToolScreenBlock } from "@/lib/nova/types";
 import { benefitFieldId } from "@/lib/nova/state";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
+import { ResetToolButton } from "./ResetTool";
 
 interface BenefitsBuilderProps {
   toolScreen: ToolScreenBlock;
   builtFieldIds: string[];
   onBuildField: (benefitId: string, field: string) => void;
   pmConcept?: string;
+  onReset: () => void;
 }
 
 /**
@@ -29,11 +31,20 @@ export default function BenefitsBuilder({
   builtFieldIds,
   onBuildField,
   pmConcept,
+  onReset,
 }: BenefitsBuilderProps) {
   const benefits = toolScreen.benefits ?? [];
   const builtSet = new Set(builtFieldIds);
   const [wrongPick, setWrongPick] = useState<string | null>(null);
   const hint = useConceptHint(pmConcept);
+
+  // wrongPick is local UI-only state (which field's tension moment is
+  // showing its corrective reaction) — clear it alongside the underlying
+  // progress so a stale reaction line can't linger after reset.
+  function handleReset() {
+    setWrongPick(null);
+    onReset();
+  }
 
   function renderField(
     benefit: ToolBenefit,
@@ -101,7 +112,10 @@ export default function BenefitsBuilder({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+            <ResetToolButton onReset={handleReset} />
+          </div>
         </div>
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />

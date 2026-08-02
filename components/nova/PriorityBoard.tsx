@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
+import { ResetToolButton } from "./ResetTool";
 
 interface PriorityBoardProps {
   toolScreen: ToolScreenBlock;
@@ -10,6 +11,7 @@ interface PriorityBoardProps {
   placements: Record<string, string>;
   onPlace: (cardId: string, bucket: string) => void;
   pmConcept?: string;
+  onReset: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -119,9 +121,17 @@ export default function PriorityBoard({
   placements,
   onPlace,
   pmConcept,
+  onReset,
 }: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const hint = useConceptHint(pmConcept);
+
+  // selectedCardId is local UI-only state — clear it alongside the
+  // underlying placements so no stale selection survives a reset.
+  function handleReset() {
+    setSelectedCardId(null);
+    onReset();
+  }
 
   const cards = toolScreen.cards ?? [];
   const buckets = toolScreen.buckets ?? [];
@@ -152,7 +162,10 @@ export default function PriorityBoard({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+            <ResetToolButton onReset={handleReset} />
+          </div>
         </div>
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />

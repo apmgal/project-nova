@@ -5,6 +5,7 @@ import type { ToolScreenBlock } from "@/lib/nova/types";
 import { computeCriticalPath, isCriticalPathGuessCorrect } from "@/lib/nova/state";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
+import { ResetToolButton } from "./ResetTool";
 
 interface GanttBoardProps {
   toolScreen: ToolScreenBlock;
@@ -14,6 +15,7 @@ interface GanttBoardProps {
   onToggleCriticalPathGuess: (milestoneId: string) => void;
   onConfirmCriticalPath: () => void;
   pmConcept?: string;
+  onReset: () => void;
 }
 
 const WEEK_PX = 20;
@@ -53,6 +55,7 @@ export default function GanttBoard({
   onToggleCriticalPathGuess,
   onConfirmCriticalPath,
   pmConcept,
+  onReset,
 }: GanttBoardProps) {
   const milestones = toolScreen.milestones ?? [];
   const weeks = toolScreen.timelineWeeks ?? 24;
@@ -60,6 +63,17 @@ export default function GanttBoard({
   const [error, setError] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const hint = useConceptHint(pmConcept);
+
+  // Gantt keeps its own local UI state (selection/error/the phase-2
+  // "checked" flag) on top of the placements/guesses that live in
+  // GameState — resetting must clear both, or the board would still look
+  // like it's mid-critical-path-check after the underlying state wiped.
+  function handleReset() {
+    setSelectedId(null);
+    setError(null);
+    setChecked(false);
+    onReset();
+  }
 
   const allPlaced = milestones.length > 0 && milestones.every((m) => placements[m.id] !== undefined);
   const trackWidth = weeks * WEEK_PX;
@@ -155,7 +169,10 @@ export default function GanttBoard({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+            <ResetToolButton onReset={handleReset} />
+          </div>
         </div>
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />

@@ -876,3 +876,102 @@ export function computeCurrentObjective(
 export function benefitFieldId(benefitId: string, field: string): string {
   return `${benefitId}:${field}`;
 }
+
+// ---------------------------------------------------------------------------
+// resetTool — "undo all" for a single tool screen. Wipes only that tool's
+// own toolProgress/toolPlacements/toolSelections entries and reverses any
+// budget/flag side effects it caused, without touching any other tool's
+// state or narrative flags. Dispatches per toolScreen.type since each type
+// stores progress in a different shape, and two of them (priority
+// placement, hiring) have live budget/flag side effects that must be
+// unwound rather than just cleared.
+// ---------------------------------------------------------------------------
+
+/**
+ * Resets a single tool screen back to its untouched state — refunding any
+ * budget it spent, clearing any flags it set, and wiping its progress —
+ * without affecting any other tool or narrative flag. Powers the per-
+ * screen "undo all" button so a player can restart one activity without
+ * losing the rest of their save.
+ */
+export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameState {
+  const toolId = toolScreen.toolId;
+
+  switch (toolScreen.type) {
+    case "priority_assignment":
+    case "power_interest_grid": {
+      // Mirrors placePriorityCard in reverse: refund each placed card's
+      // cost in its current bucket, delete the flags it set (only the
+      // ones this tool's own cards can set — safe since flagsByBucket is
+      // scoped to this toolScreen's data), then re-run the overcommitRule
+      // against an empty distribution so its reactionFlag clears too.
+      const placements = state.toolPlacements[toolId] ?? {};
+      const budgetKey = toolScreen.budgetVariable ?? "budgetRemaining";
+      let budget = state.projectMetrics[budgetKey] ?? 0;
+      const nextFlags = { ...state.flags };
+
+      for (const [cardId, bucket] of Object.entries(placements)) {
+        const card = (toolScreen.cards ?? []).find((c) => c.id === cardId);
+        if (!card) continue;
+        if (card.costByBucket) budget += card.costByBucket[bucket] ?? 0;
+        const flagsForBucket = card.flagsByBucket?.[bucket];
+        if (flagsForBucket) {
+          for (const key of Object.keys(flagsForBucket)) {
+            if (flagsForBucket[key]) delete nextFlags[key];
+          }
+        }
+      }
+
+      let next: GameState = {
+        ...state,
+        projectMetrics: { ...state.projectMetrics, [budgetKey]: budget },
+        flags: nextFlags,
+        toolPlacements: { ...state.toolPlacements, [toolId]: {} },
+      };
+      next = applyOvercommitRule(next, toolScreen, {});
+      return next;
+    }
+
+    case "cost_review_with_descope": {
+      const cutTaskId = getDescopedTaskId(state, toolId);
+      const nextFlags = { ...state.flags };
+      if (cutTaskId) delete nextFlags[`descoped_${cutTaskId}`];
+      return {
+        ...state,
+        flags: nextFlags,
+        toolProgress: { ...state.toolProgress, [toolId]: [] },
+      };
+    }
+
+    case "pick_n_of_m_swipeable": {
+      // Un-hire every currently-hired candidate through toggleHire itself
+      // rather than hand-reversing effects, so budget/otherEffects/
+      // flagOnHire all unwind exactly the same way a manual un-hire would.
+      const hired = state.toolSelections[toolId] ?? [];
+      let next = state;
+      for (const candidateId of hired) {
+        next = toggleHire(next, toolScreen, candidateId);
+      }
+      return next;
+    }
+
+    case "gantt_placement":
+      return {
+        ...state,
+        toolPlacements: { ...state.toolPlacements, [toolId]: {} },
+        toolSelections: { ...state.toolSelections, [toolId]: [] },
+        toolProgress: { ...state.toolProgress, [toolId]: [] },
+      };
+
+    // "sort_into_buckets" (PESTLE/SWOT/Comms/WBS) and "proof_chain_builder"
+    // (Benefits) both store progress purely as a toolProgress id list, with
+    // no cost or flags of their own to reverse.
+    case "sort_into_buckets":
+    case "proof_chain_builder":
+    default:
+      return {
+        ...state,
+        toolProgress: { ...state.toolProgress, [toolId]: [] },
+      };
+  }
+}

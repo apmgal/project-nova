@@ -39,6 +39,7 @@ import {
   benefitFieldId,
   substituteTemplate,
   computeWeeksRemaining,
+  resetTool,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -549,6 +550,18 @@ export default function GameRoot() {
     }
   }
 
+  // "Undo all" for whichever tool screen is currently showing — generic
+  // across every tool type since resetTool itself dispatches on
+  // toolScreen.type. Deliberately never auto-advances the scene the way
+  // the placement handlers above do; resetting should always leave the
+  // player right where they were, free to redo the activity.
+  function handleResetTool() {
+    if (!gameState || !toolScreen) return;
+    const next = resetTool(gameState, toolScreen);
+    setGameState(next);
+    saveGame(next);
+  }
+
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
@@ -659,6 +672,7 @@ export default function GameRoot() {
                 placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
                 onPlace={handlePriorityCardPlaced}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
               <CBSReview
@@ -666,6 +680,7 @@ export default function GameRoot() {
                 cutTaskId={getDescopedTaskId(gameState, toolScreen.toolId)}
                 onDescope={handleDescopeTask}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen && toolType === "pick_n_of_m_swipeable" ? (
               <TeamSelector
@@ -673,6 +688,7 @@ export default function GameRoot() {
                 hiredIds={gameState.toolSelections[toolScreen.toolId] ?? []}
                 onToggleHire={handleToggleHire}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen && toolType === "gantt_placement" ? (
               <GanttBoard
@@ -683,6 +699,7 @@ export default function GameRoot() {
                 onToggleCriticalPathGuess={handleToggleCriticalPathGuess}
                 onConfirmCriticalPath={handleConfirmCriticalPath}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
               <BenefitsBuilder
@@ -690,6 +707,7 @@ export default function GameRoot() {
                 builtFieldIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onBuildField={handleBuildBenefitField}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
@@ -697,6 +715,7 @@ export default function GameRoot() {
                 placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onCorrectPlacement={handleToolCardPlaced}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atToolBreak && toolScreen ? (
               <ToolScreen
@@ -704,6 +723,7 @@ export default function GameRoot() {
                 placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
                 onCorrectPlacement={handleToolCardPlaced}
                 pmConcept={scene.pmConcept}
+                onReset={handleResetTool}
               />
             ) : atInvestigation && investigationBank && pendingChoice ? (
               <RiskInvestigationPanel

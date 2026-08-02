@@ -4,12 +4,14 @@ import type { ToolScreenBlock } from "@/lib/nova/types";
 import { getToolScreen } from "@/lib/nova/data";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
+import { ResetToolButton } from "./ResetTool";
 
 interface CBSReviewProps {
   toolScreen: ToolScreenBlock;
   cutTaskId: string | undefined;
   onDescope: (taskId: string) => void;
   pmConcept?: string;
+  onReset: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -37,7 +39,13 @@ function formatMillions(value: number): string {
  * since CBS reviews the exact same task set the player already sorted in
  * the WBS scene.
  */
-export default function CBSReview({ toolScreen, cutTaskId, onDescope, pmConcept }: CBSReviewProps) {
+export default function CBSReview({
+  toolScreen,
+  cutTaskId,
+  onDescope,
+  pmConcept,
+  onReset,
+}: CBSReviewProps) {
   const hint = useConceptHint(pmConcept);
   const costs = toolScreen.costsByTask ?? {};
   const wbs = getToolScreen("TOOL_ACT3_SCENE01_WBS");
@@ -62,7 +70,10 @@ export default function CBSReview({ toolScreen, cutTaskId, onDescope, pmConcept 
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+            <ResetToolButton onReset={onReset} />
+          </div>
         </div>
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />

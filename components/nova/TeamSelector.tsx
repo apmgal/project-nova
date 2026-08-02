@@ -3,12 +3,14 @@
 import { useState } from "react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
+import { ResetToolButton } from "./ResetTool";
 
 interface TeamSelectorProps {
   toolScreen: ToolScreenBlock;
   hiredIds: string[];
   onToggleHire: (candidateId: string) => void;
   pmConcept?: string;
+  onReset: () => void;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -29,6 +31,7 @@ export default function TeamSelector({
   hiredIds,
   onToggleHire,
   pmConcept,
+  onReset,
 }: TeamSelectorProps) {
   const candidates = toolScreen.candidates ?? [];
   const maxHires = toolScreen.maxHires ?? candidates.length;
@@ -56,7 +59,10 @@ export default function TeamSelector({
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
           )}
-          <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+          <div className="flex flex-shrink-0 items-center gap-1.5">
+            <ConceptHintButton entry={hint.entry} open={hint.open} onToggle={hint.toggle} />
+            <ResetToolButton onReset={onReset} />
+          </div>
         </div>
       )}
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
