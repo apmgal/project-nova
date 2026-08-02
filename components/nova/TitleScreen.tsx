@@ -18,11 +18,10 @@ interface TitleScreenProps {
  * group; --nova-cream-photo matches its baked-in background exactly so
  * there's no visible seam where the image meets the page.
  *
- * Same props/behavior as before — hasSave/onNewGame/onContinue — only
- * the visual design changed. The one button does double duty per
- * direction: "Start Mission" for a fresh game, or "Continue Mission"
- * (calling onContinue instead) the moment a save exists, rather than
- * showing two separate CTAs.
+ * Same props as before — hasSave/onNewGame/onContinue. "Begin Mission"
+ * (onNewGame) always shows; "Continue Mission" (onContinue) joins it
+ * alongside, only once hasSave is true, rather than the two swapping
+ * places as a single button.
  *
  * Previous "Guild of Project Masters" quest-log framing (Mike Elloian's
  * speech bubble, the "Quest Log"/"Guild of Project Masters" eyebrows,
@@ -78,16 +77,32 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
           </div>
         </h1>
 
-        <p className="text-right text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
-          Your mission begins here
-        </p>
+        {/* Tagline + CTA(s), shifted 2cm left together */}
+        <div className="flex flex-col items-end gap-4" style={{ transform: "translateX(-2cm)" }}>
+          <p className="text-right text-[length:var(--text-body-lg)] italic text-[var(--color-text-on-parchment-muted)] [font-family:var(--font-body)]">
+            Your mission begins here
+          </p>
 
-        <button
-          onClick={hasSave ? onContinue : onNewGame}
-          className="mt-2 self-end rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
-        >
-          {hasSave ? "Continue Mission" : "Start Mission"}
-        </button>
+          <div className="mt-2 flex flex-wrap items-center justify-end gap-4">
+            {/* Begin Mission — always shown, always starts a fresh game. */}
+            <button
+              onClick={onNewGame}
+              className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+            >
+              Begin Mission
+            </button>
+
+            {/* Continue Mission — alongside Begin Mission, only once a save exists. */}
+            {hasSave && (
+              <button
+                onClick={onContinue}
+                className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-transparent px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--nova-ink-900)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] hover:bg-[var(--nova-parchment-100)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+              >
+                Continue Mission
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
