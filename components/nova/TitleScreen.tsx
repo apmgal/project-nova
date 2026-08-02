@@ -33,7 +33,7 @@ interface TitleScreenProps {
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
   return (
     <div
-      className="relative flex flex-1 items-stretch overflow-hidden"
+      className="relative flex flex-1 items-center overflow-hidden"
       style={{ backgroundColor: "var(--nova-cream-photo)" }}
     >
       {/* Mission team — sticker-outlined cutout, anchored bottom-left */}
@@ -55,7 +55,7 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
           independent alignment (OPERATION right, NOVA left, per direction —
           the reference's zigzag poster-lettering look), so each element
           below manages its own alignment instead of inheriting one. */}
-      <div className="relative z-10 ml-auto flex w-full max-w-[560px] flex-col gap-4 px-6 pb-8 pt-8 sm:px-10 sm:pt-12">
+      <div className="relative z-10 ml-auto flex w-full max-w-[560px] flex-col gap-4 px-6 py-8 sm:px-10 sm:py-12">
         <h1 className="text-[var(--nova-ink-900)]" style={{ fontFamily: "var(--font-poster)", lineHeight: 0.88 }}>
           <span
             className="block text-right text-[clamp(2.75rem,7.5vw,5.25rem)]"
