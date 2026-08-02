@@ -27,7 +27,9 @@ export default function SceneVisualInset({ visual }: SceneVisualInsetProps) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-[16%] z-[15] flex justify-center px-4 sm:px-0">
       <div
-        className="flex w-full max-w-[420px] flex-col items-center gap-2 sm:max-w-[480px]"
+        className={`flex w-full flex-col items-center gap-2 ${
+          visual.large ? "max-w-[620px] sm:max-w-[760px]" : "max-w-[420px] sm:max-w-[480px]"
+        }`}
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0) scale(1)" : "translateY(14px) scale(0.97)",

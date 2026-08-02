@@ -100,6 +100,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
         alt: "Group Tax Innovation & Change portfolio tracker",
         aspectRatio: 1828 / 900,
         label: "Portfolio Tracker",
+        large: true,
       },
     },
     {
@@ -110,6 +111,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
         alt: "Global Tax Innovation & Change portfolio dashboard",
         aspectRatio: 1589 / 905,
         label: "Portfolio Dashboard",
+        large: true,
       },
     },
     {

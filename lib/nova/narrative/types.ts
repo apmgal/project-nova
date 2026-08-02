@@ -48,6 +48,10 @@ export interface SceneVisual {
   aspectRatio: number;
   /** Small caption under the panel, e.g. "Group Tax SharePoint". */
   label?: string;
+  /** Render at a larger max-width than the default inset size — for a
+   * screenshot (like a dense tracker or dashboard) where the default size
+   * makes its contents hard to read. Omit/false for the normal size. */
+  large?: boolean;
 }
 
 export interface NarrativeLine {
