@@ -85,7 +85,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       speaker: "mike",
-      text: "Our work is organised across different Tax Towers, each with their own expertise, stakeholders, and initiatives. You'll be working across these teams as Project Nova progresses.",
+      text: "Our work is organised across different Tax Towers, each with their own expertise, stakeholders, and projects. You'll be working across these teams as Project Nova progresses.",
       voiceSrc: "/assets/voices/mike/mike-line-04.mp3",
     },
     {
@@ -136,7 +136,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       speaker: "ben",
-      text: "Governance, Digital & Change supports initiatives that help improve how we work across the organisation. For Project Nova, that means bringing together the business, Group Tax, and our delivery teams to move this initiative forward.",
+      text: "Governance, Digital & Change supports projects that help improve how we work across the organisation. For Project Nova, that means bringing together the business, Group Tax, and our delivery teams to move this project forward.",
       expression: "neutral",
       voiceSrc: "/assets/voices/ben/ben-line-10.mp3",
     },
@@ -147,13 +147,13 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       speaker: "mike",
-      text: "Thanks, Ben. Which brings us to Project Nova. Nova is an Actively Managed project — a joint initiative between the AstraZeneca business and Group Tax.",
+      text: "Thanks, Ben. Which brings us to Project Nova. Nova is an Actively Managed project — a joint project between the AstraZeneca business and Group Tax.",
       expression: "neutral",
       voiceSrc: "/assets/voices/mike/mike-line-12.mp3",
     },
     {
       speaker: "mike",
-      text: "The project has experienced some delays, and our focus now is creating clarity, rebuilding momentum, and making sure we deliver the value this initiative was designed to achieve.",
+      text: "The project has experienced some delays, and our focus now is creating clarity, rebuilding momentum, and making sure we deliver the value this project was designed to achieve.",
       expression: "serious",
       voiceSrc: "/assets/voices/mike/mike-line-13.mp3",
     },
