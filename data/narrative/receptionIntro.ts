@@ -35,7 +35,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
   characters: [
     {
       id: "mike",
-      name: "Mike Smith",
+      name: "Mike",
       position: "right",
       expressions: {
         neutral: {
@@ -48,7 +48,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       id: "ben",
-      name: "Ben Goldsworthy",
+      name: "Ben",
       position: "left",
       expressions: {
         neutral: { src: "/assets/characters/bengoldsworthyneutral.png" },
@@ -62,7 +62,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
   lines: [
     {
       speaker: "mike",
-      text: "You must be the new Project Manager for Project Nova. Welcome — we've been expecting you. I'm Mike Smith, and I lead the PMO for the Group Tax Portfolio.",
+      text: "You must be the new Project Manager for Project Nova. Welcome — we've been expecting you. I'm Mike, and I lead the PMO for the Group Tax Portfolio.",
       expression: "smile",
     },
     {
@@ -114,7 +114,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     },
     {
       speaker: "ben",
-      text: "Hi, I'm Ben Goldsworthy. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
+      text: "Hi, I'm Ben. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
       expression: "smile",
     },
     {
