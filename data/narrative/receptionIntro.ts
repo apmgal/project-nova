@@ -70,27 +70,33 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       speaker: "mike",
       text: "You must be the new Project Manager for Project Nova. Welcome — we've been expecting you. I'm Mike, and I lead the PMO for the Group Tax Portfolio.",
       expression: "smile",
+      voiceSrc: "/assets/voices/mike/mike-line-01.mp3",
     },
     {
       speaker: "mike",
       text: "Before you meet the wider team, let me give you a quick overview of how we work and the support available to you.",
       expression: "neutral",
+      voiceSrc: "/assets/voices/mike/mike-line-02.mp3",
     },
     {
       speaker: "mike",
       text: "Across Group Tax, the PMO helps bring visibility, governance, and collaboration across our portfolio. We're here to support teams — helping unblock decisions, manage risks and dependencies, and make sure the right conversations happen at the right time.",
+      voiceSrc: "/assets/voices/mike/mike-line-03.mp3",
     },
     {
       speaker: "mike",
       text: "Our work is organised across different Tax Towers, each with their own expertise, stakeholders, and initiatives. You'll be working across these teams as Project Nova progresses.",
+      voiceSrc: "/assets/voices/mike/mike-line-04.mp3",
     },
     {
       speaker: "mike",
       text: "We also have a few tools and resources to help you get started.",
+      voiceSrc: "/assets/voices/mike/mike-line-05.mp3",
     },
     {
       speaker: "mike",
       text: "This is our Group Tax Portfolio SharePoint page — your central hub for updates, guidance, key contacts, templates, and resources.",
+      voiceSrc: "/assets/voices/mike/mike-line-06.mp3",
       visual: {
         src: "/assets/screens/sharepoint.png",
         alt: "Group Tax Innovation & Change SharePoint hub",
@@ -101,6 +107,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       speaker: "mike",
       text: "This is our portfolio tracker. It gives us a shared view of progress, risks, decisions, and where teams may need additional support.",
+      voiceSrc: "/assets/voices/mike/mike-line-07.mp3",
       visual: {
         src: "/assets/screens/tracker.png",
         alt: "Group Tax Innovation & Change portfolio tracker",
@@ -112,6 +119,7 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
     {
       speaker: "mike",
       text: "And this feeds straight into our portfolio dashboard — a live view of health, progress, and benefits across every Tax Tower, built directly from what's logged in the tracker.",
+      voiceSrc: "/assets/voices/mike/mike-line-08.mp3",
       visual: {
         src: "/assets/screens/dashboard.png",
         alt: "Global Tax Innovation & Change portfolio dashboard",
@@ -124,34 +132,41 @@ export const RECEPTION_INTRO_SCENE: NarrativeSceneScript = {
       speaker: "ben",
       text: "Hi, I'm Ben. I lead Governance, Digital & Change, where Project Nova sits. Welcome aboard — we're glad to have you joining the team.",
       expression: "smile",
+      voiceSrc: "/assets/voices/ben/ben-line-09.mp3",
     },
     {
       speaker: "ben",
       text: "Governance, Digital & Change supports initiatives that help improve how we work across the organisation. For Project Nova, that means bringing together the business, Group Tax, and our delivery teams to move this initiative forward.",
       expression: "neutral",
+      voiceSrc: "/assets/voices/ben/ben-line-10.mp3",
     },
     {
       speaker: "ben",
       text: "Nova is an important project because it sits at the intersection of business needs, technology, and operational change. Getting this right will help us deliver the outcomes we've committed to.",
+      voiceSrc: "/assets/voices/ben/ben-line-11.mp3",
     },
     {
       speaker: "mike",
       text: "Thanks, Ben. Which brings us to Project Nova. Nova is an Actively Managed project — a joint initiative between the AstraZeneca business and Group Tax.",
       expression: "neutral",
+      voiceSrc: "/assets/voices/mike/mike-line-12.mp3",
     },
     {
       speaker: "mike",
       text: "The project has experienced some delays, and our focus now is creating clarity, rebuilding momentum, and making sure we deliver the value this initiative was designed to achieve.",
       expression: "serious",
+      voiceSrc: "/assets/voices/mike/mike-line-13.mp3",
     },
     {
       speaker: "mike",
       text: "You'll have the support of the PMO and the wider team around you. Your role is to bring structure, connect the right people, and help guide Nova through its next stage.",
       expression: "smile",
+      voiceSrc: "/assets/voices/mike/mike-line-14.mp3",
     },
     {
       speaker: "mike",
       text: "Ready? Let's take a look at where things stand today.",
+      voiceSrc: "/assets/voices/mike/mike-line-15.mp3",
     },
   ],
 };
