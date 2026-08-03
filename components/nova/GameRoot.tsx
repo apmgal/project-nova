@@ -241,12 +241,12 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId };
     next = applySceneFlagsSet(next, scene?.flagsSet);
-    // Note: the PID artefact is NOT unlocked just by reaching
-    // ACT1_SCENE05 — it's revealed by handleAskRiskQuestion when the
-    // player specifically digs through the shared drive during that
-    // scene's investigation interstitial (see
-    // INVESTIGATION_ACT1_APPENDICES in data/risk_investigation.json).
-    // The player has to go looking for it, not have it handed to them.
+    // The Missing Appendices scene is where the player first turns up the
+    // (unfinished) PID — from here it's reachable any time from the
+    // artefacts drawer, not just this scene.
+    if (sceneId === "ACT1_SCENE05") {
+      next = setArtefactStatus(next, "pid", "incomplete");
+    }
     return next;
   }
 
@@ -470,10 +470,7 @@ export default function GameRoot() {
 
   function handleAskRiskQuestion(question: RiskInvestigationQuestion) {
     if (!gameState || gameState.flags[question.flagOnAsk]) return;
-    let next = applyFlags(gameState, { [question.flagOnAsk]: true });
-    if (question.revealsArtefactId) {
-      next = setArtefactStatus(next, question.revealsArtefactId, question.revealsArtefactStatus ?? "incomplete");
-    }
+    const next = applyFlags(gameState, { [question.flagOnAsk]: true });
     setGameState(next);
     saveGame(next);
   }

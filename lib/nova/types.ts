@@ -192,17 +192,6 @@ export interface RiskInvestigationQuestion {
   /** Flag set true the moment this question is asked. Never set false —
    * an unasked question just leaves it absent. */
   flagOnAsk: string;
-  /** If set, asking this question also adds/upgrades this artefact id in
-   * the player's drawer (see lib/nova/artefacts.ts and setArtefactStatus
-   * in lib/nova/state.ts) — the "go looking for it" version of what
-   * ACT1_SCENE05 used to do unconditionally on scene entry: the document
-   * only shows up once the player actually digs it out of the right
-   * source, not for free. */
-  revealsArtefactId?: string;
-  /** Status to set revealsArtefactId to; defaults to "incomplete" if
-   * omitted (the common case — a freshly found document is unfinished
-   * until later story beats complete it). */
-  revealsArtefactStatus?: ArtefactStatus;
 }
 
 export interface RiskInvestigationBank {

@@ -94,21 +94,6 @@
     "needsWriting": false,
     "engineNote": "Wrong options show `reaction` inline and re-present the same choice list (nextScene: null = stay). Correct option (PESTLE) advances. No trust penalty for wrong answers — by design, this is a no-fail teaching moment."
   },
-  "CHOICE_ACT1_SCENE05_INVESTIGATE": {
-    "choiceId": "CHOICE_ACT1_SCENE05_INVESTIGATE",
-    "sourceScene": "ACT1_SCENE05",
-    "insertAfterLine": "You go looking for the original Business Case to check it against what you've found. The main document opens fine. The appendices don't exist.",
-    "riskInvestigationId": "INVESTIGATION_ACT1_APPENDICES",
-    "options": [
-      {
-        "text": "Keep reading.",
-        "effects": {},
-        "nextScene": null
-      }
-    ],
-    "needsWriting": false,
-    "engineNote": "Single-option interstitial — its only job is to host the INVESTIGATION_ACT1_APPENDICES panel (email/Teams/shared drive, no wrong picks, checking the shared drive is what unlocks the PID artefact via revealsArtefactId). Not terminal: scene dialogue continues past it into the Benefits_Plan_DRAFT_v3 reveal lines."
-  },
   "CHOICE_ACT1_SCENE06": {
     "choiceId": "CHOICE_ACT1_SCENE06",
     "sourceScene": "ACT1_SCENE06",
