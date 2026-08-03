@@ -7,7 +7,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "Reception. The lobby smells like new carpet over an old building. A wall of awards, none dated later than eighteen months ago.",
-        "background": "reception"
+        "background": "reception",
+        "ambient": "reception"
       },
       {
         "speaker": "joan",
@@ -24,13 +25,16 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "You take the stairs. Posters at every landing insist you're curious, brave, together. Nobody's checked if that's still true.",
-        "background": "hallway_stairs"
+        "background": "hallway_stairs",
+        "footsteps": true
       },
       {
         "speaker": "narrator",
         "emotion": null,
         "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
-        "background": "upstairs_landing"
+        "background": "upstairs_landing",
+        "ambient": "none",
+        "footsteps": false
       },
       {
         "speaker": "priya",

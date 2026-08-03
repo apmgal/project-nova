@@ -10,6 +10,7 @@ import {
   getRiskInvestigation,
   isSceneAvailable,
   getBackgroundFile,
+  getAmbientSoundFile,
 } from "@/lib/nova/data";
 import {
   hasSavedGame,
@@ -47,6 +48,10 @@ import {
   resolveBackground,
   PANORAMA_GROUPS,
   BACKGROUND_KEN_BURNS_OVERRIDES,
+  foldAmbient,
+  foldFootsteps,
+  resolveAmbientSound,
+  FOOTSTEPS_SFX_SRC,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -79,6 +84,7 @@ import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
 import SceneBackground from "./narrative/SceneBackground";
 import PanoramaBackground from "./narrative/PanoramaBackground";
+import SceneAudio from "./narrative/SceneAudio";
 import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
 
 /**
@@ -724,6 +730,15 @@ export default function GameRoot() {
   // remount-and-fade between two separate images.
   const panorama = backgroundKey ? PANORAMA_GROUPS[backgroundKey] : undefined;
 
+  // Ambient sound bed + footstep overlay, folded the same way as the
+  // backdrop but scoped to just this scene's own lines (baseline null/
+  // false every render, not carried in via GameState) — see foldAmbient's
+  // doc comment for why ambience doesn't need cross-scene persistence the
+  // way the backdrop does.
+  const ambientKey = foldAmbient(null, displayLines, gameState.flags, revealedCount - 1);
+  const ambientSrc = resolveAmbientSound(ambientKey, getAmbientSoundFile(ambientKey));
+  const footstepsOn = foldFootsteps(false, displayLines, gameState.flags, revealedCount - 1);
+
   const hudActive = isHudActiveForScene(scene);
   const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
   const isAnnouncement = scene.displayStyle === "announcement";
@@ -864,7 +879,6 @@ export default function GameRoot() {
           under the header/HUD/main content below, which already render at
           z-10. No src (an unmapped key, or no key set yet at all) just
           means no backdrop, same plain look every scene had before this.
-          No audio here by design — this is a visual-only layer.
           Panorama takes priority: a stable key ("panorama") keeps the
           SAME PanoramaBackground instance mounted across e.g.
           reception -> hallway, so it receives a new focusPercent and
@@ -882,6 +896,20 @@ export default function GameRoot() {
             kenBurns={backgroundKey ? BACKGROUND_KEN_BURNS_OVERRIDES[backgroundKey] : undefined}
           />
         )
+      )}
+      {/* Ambient sound bed + footstep overlay (see ambientKey/footstepsOn
+          above). Both are plain conditional mounts rather than always-
+          rendered with a nullable src: SceneAudio's own fade logic runs on
+          mount/unmount, so unmounting IS how each layer fades out — the
+          reception ambience keeps playing untouched across reception ->
+          hallway -> the stairs climb (same src the whole time, never
+          remounts), fades out the moment a line cuts it to "none", and the
+          footstep loop fades in/out independently on top of whichever
+          ambience is currently playing. No key clash with the background
+          layer above — SceneAudio renders nothing to the DOM. */}
+      {ambientSrc && <SceneAudio key="ambient" src={ambientSrc} volume={0.4} fadeInMs={1200} fadeOutMs={1500} />}
+      {footstepsOn && (
+        <SceneAudio key="footsteps" src={FOOTSTEPS_SFX_SRC} volume={0.5} fadeInMs={300} fadeOutMs={500} />
       )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (

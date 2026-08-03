@@ -338,6 +338,46 @@ export function foldBackground(
   return background;
 }
 
+/** Same carry-forward fold as `foldBackground`, for the looping ambience
+ * bed (DialogueLine.ambient). Unlike background, this is only ever folded
+ * within a single scene's own lines (baseline null each time GameRoot
+ * computes it) — ambience is a localized, scene-specific effect, not
+ * something that needs to persist across scene boundaries the way a
+ * backdrop does, so there's no GameState field carrying it forward. */
+export function foldAmbient(
+  baseline: string | null,
+  lines: DialogueLine[],
+  flags: Flags,
+  uptoIndexInclusive: number
+): string | null {
+  let ambient = baseline;
+  for (let i = 0; i <= uptoIndexInclusive && i < lines.length; i++) {
+    const line = lines[i];
+    if (!isLineVisible(line.condition, flags)) continue;
+    if (line.ambient) ambient = line.ambient;
+  }
+  return ambient;
+}
+
+/** Same carry-forward fold as `foldBackground`/`foldAmbient`, for the
+ * footstep overlay (DialogueLine.footsteps). Explicit `true`/`false`
+ * overrides the running value; `undefined` (the field simply isn't set on
+ * that line) leaves it unchanged, same convention as the other two. */
+export function foldFootsteps(
+  baseline: boolean,
+  lines: DialogueLine[],
+  flags: Flags,
+  uptoIndexInclusive: number
+): boolean {
+  let footsteps = baseline;
+  for (let i = 0; i <= uptoIndexInclusive && i < lines.length; i++) {
+    const line = lines[i];
+    if (!isLineVisible(line.condition, flags)) continue;
+    if (line.footsteps !== undefined) footsteps = line.footsteps;
+  }
+  return footsteps;
+}
+
 /**
  * Real background files that actually exist on disk under
  * /public/assets/backgrounds, keyed by extension-agnostic stem. assets.json
@@ -430,6 +470,30 @@ export function resolveBackground(
   }
   return { src: null, key, file };
 }
+
+/** Real ambient-sound files under /public/assets/sfx, keyed by
+ * extension-agnostic stem — same drift-safety convention as
+ * REAL_BACKGROUND_FILES_BY_STEM. "none" (explicit silence) is
+ * intentionally absent: it has no file, and resolveAmbientSound already
+ * returns a null src for any key with no entry here. */
+const REAL_AMBIENT_SOUND_FILES_BY_STEM: Record<string, string> = {
+  reception_ambience: "reception_ambience.mp3",
+};
+
+/** Resolves an ambient sound key to a real audio src if one exists, else
+ * null (caller renders no SceneAudio instance, i.e. silence). Mirrors
+ * resolveBackground's shape/behavior. */
+export function resolveAmbientSound(key: string | null, file: string | null): string | null {
+  if (!key) return null;
+  const realFile = file ? REAL_AMBIENT_SOUND_FILES_BY_STEM[stripExtension(file)] : undefined;
+  return realFile ? `/assets/sfx/${realFile}` : null;
+}
+
+/** The one footstep-overlay track (DialogueLine.footsteps toggles it on/
+ * off) — a fixed effect rather than a content-selectable key like
+ * ambient/background, so it's a plain constant rather than routed through
+ * assets.json's map-and-resolve machinery. */
+export const FOOTSTEPS_SFX_SRC = "/assets/sfx/footsteps_loop.mp3";
 
 export interface PanoramaFocus {
   src: string;

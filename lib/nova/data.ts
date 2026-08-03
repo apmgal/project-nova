@@ -60,6 +60,8 @@ const toolScreens = toolScreensRaw as unknown as Record<string, ToolScreenBlock>
 const riskInvestigations = riskInvestigationRaw as unknown as Record<string, RiskInvestigationBank>;
 const backgroundAssets = (assetsRaw as { backgrounds?: Record<string, string> })
   .backgrounds ?? {};
+const ambientSoundAssets = (assetsRaw as { ambientSounds?: Record<string, string> })
+  .ambientSounds ?? {};
 
 export function getScene(sceneId: string): Scene | null {
   return BUILT_SCENES[sceneId] ?? null;
@@ -116,6 +118,14 @@ export function getRiskInvestigation(
 export function getBackgroundFile(key: string | null): string | null {
   if (!key) return null;
   return backgroundAssets[key] ?? null;
+}
+
+/** Resolves an ambient sound key (e.g. "reception") to its filename from
+ * assets.json. Returns null for an unknown/unset key — including "none",
+ * which has no entry by design (it means silence, not a missing asset). */
+export function getAmbientSoundFile(key: string | null): string | null {
+  if (!key) return null;
+  return ambientSoundAssets[key] ?? null;
 }
 
 export function getDefaultGameState(): GameState {

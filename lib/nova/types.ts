@@ -135,6 +135,15 @@ export interface DialogueLine {
   /** Key into assets.json's `backgrounds` map. Only present on lines that
    * change the backdrop; absent lines keep whatever was last shown. */
   background?: string;
+  /** Key into assets.json's `ambientSounds` map for a looping ambience
+   * bed. Carries forward like `background` — absent lines keep whatever
+   * ambience was last playing. "none" is an explicit, intentional value
+   * (cuts the ambience to silence), distinct from omitting the field. */
+  ambient?: string;
+  /** Starts (true) or stops (false) a looping footstep layer on top of
+   * whatever ambience is currently playing. Carries forward like
+   * `background`/`ambient` — only lines that change it need to set it. */
+  footsteps?: boolean;
 }
 
 export interface DialogueBlock {
