@@ -302,29 +302,41 @@ export default function PriorityBoard({
           })}
         </div>
       ) : isPowerInterestQuadrant ? (
-        // A single CSS grid — [axis column, grid column] x [content row,
-        // axis row] — rather than absolutely-positioned/SVG-overlay axes.
-        // Real column/row gaps (gap-x-4/gap-y-3) give the axes genuine
-        // breathing room from the quadrant grid instead of touching it,
-        // and native grid alignment means the vertical axis always
-        // matches the grid's actual rendered height and the horizontal
-        // axis always matches its actual rendered width — no manual pixel
-        // math or viewBox scaling to get wrong at odd container widths
-        // (which is what produced misaligned/duplicated arrowheads in an
-        // earlier SVG-based version of this).
-        <div className="grid grid-cols-[28px_1fr] grid-rows-[1fr_auto] items-stretch gap-x-4 gap-y-3">
-          {/* Power: points UP — higher on the axis means more power. */}
-          <div className="flex gap-1">
-            <span className="flex w-4 items-center justify-center text-[11px] font-bold tracking-wide text-zinc-400 [writing-mode:vertical-rl] rotate-180">
+        // A single L-shaped bordered box — border-left draws the power
+        // stroke, border-bottom draws the interest stroke, and because
+        // they're two edges of the SAME element they always meet at an
+        // exact 90-degree corner with no risk of the two strokes drifting
+        // apart at different widths (which is what went wrong with an
+        // earlier SVG-viewBox version, and then again with a two-separate-
+        // grid-cells version that left a gap at the corner). The quadrant
+        // grid below is inset further than the L-box's own bounds
+        // (pl-8/pb-11 vs. the box's left-6/bottom-9), so the axis still
+        // never touches the grid itself — just its own corner.
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-9 left-6 right-2 top-2 border-b-2 border-l-2 border-zinc-400"
+          />
+          {/* Power arrowhead: points UP. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-6 top-2 h-0 w-0 -translate-x-1/2 -translate-y-full border-x-[5px] border-b-[7px] border-x-transparent border-b-zinc-400"
+          />
+          {/* Interest arrowhead: points RIGHT. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-9 right-2 h-0 w-0 -translate-y-1/2 translate-x-full border-y-[5px] border-l-[7px] border-y-transparent border-l-zinc-400"
+          />
+          <div className="pointer-events-none absolute bottom-9 left-0 top-2 flex w-6 items-center justify-center">
+            <span className="text-[11px] font-bold tracking-wide text-zinc-400 [writing-mode:vertical-rl] rotate-180">
               POWER
             </span>
-            <div className="flex w-4 flex-col items-center">
-              <div className="h-0 w-0 border-x-[5px] border-x-transparent border-b-[7px] border-b-zinc-400" />
-              <div className="w-0.5 flex-1 bg-zinc-400" />
-            </div>
+          </div>
+          <div className="pointer-events-none absolute bottom-0 left-6 right-2 flex h-7 items-center justify-center">
+            <span className="text-[11px] font-bold tracking-wide text-zinc-400">INTEREST</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 pb-11 pl-8">
             {buckets.map((bucket) => {
               const style = POWER_INTEREST_QUADRANT_STYLE[bucket] ?? FALLBACK_POWER_INTEREST_STYLE;
               const cardsHere = cards.filter((card) => placements[card.id] === bucket);
@@ -374,19 +386,6 @@ export default function PriorityBoard({
                 </button>
               );
             })}
-          </div>
-
-          {/* Empty corner spacer — keeps the axis column's width
-             consistent between the power row and the interest row. */}
-          <div />
-
-          {/* Interest: points RIGHT — further right means more interest. */}
-          <div className="flex flex-col gap-1">
-            <div className="flex h-3 items-center">
-              <div className="h-0.5 flex-1 bg-zinc-400" />
-              <div className="h-0 w-0 border-y-[5px] border-y-transparent border-l-[7px] border-l-zinc-400" />
-            </div>
-            <span className="text-center text-[11px] font-bold tracking-wide text-zinc-400">INTEREST</span>
           </div>
         </div>
       ) : (
