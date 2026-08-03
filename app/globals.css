@@ -171,3 +171,35 @@ body {
   background-size: 200% 100%;
   animation: nova-shimmer-sweep 1.6s ease-in-out infinite;
 }
+
+/* Ken Burns drift for narrative-scene backdrops (SceneBackground, and the
+   Office Journey system's walking legs) — a single parameterized keyframe
+   rather than one per look. Every value comes from a CSS custom property
+   set inline by the caller (lib/nova/narrative/kenBurns.ts), so the same
+   two rules serve both a slow, barely-there ambient drift on a static
+   dialogue backdrop and a much faster, more pronounced "walking forward"
+   push during an Office Journey hallway leg — the difference is entirely
+   in what values get passed in, not in new CSS. `--kb-scale-from`
+   intentionally starts at the same 1.10 SceneBackground always rendered
+   at (its blur-edge safety margin), so turning this on doesn't change a
+   backdrop's very first frame, only how it drifts from there. Runs once
+   per mount (fill-mode: forwards, no infinite loop) — a scene that stays
+   on screen longer than `animation-duration` just settles at the end
+   frame rather than snapping back, which reads as "the shot is holding,"
+   not as a rendering bug. animation-play-state is toggled to "paused" by
+   OfficeJourney while a character is mid-line, so the camera visibly
+   holds still during conversation the way a handheld shot would. */
+@keyframes nova-ken-burns {
+  from {
+    transform: scale(var(--kb-scale-from, 1.1)) translate(0%, 0%);
+  }
+  to {
+    transform: scale(var(--kb-scale-to, 1.16)) translate(var(--kb-x-to, -1.2%), var(--kb-y-to, -0.8%));
+  }
+}
+
+.animate-nova-ken-burns {
+  animation-name: nova-ken-burns;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}

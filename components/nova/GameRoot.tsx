@@ -72,7 +72,9 @@ import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
 import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
+import OfficeJourney from "./narrative/OfficeJourney";
 import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
+import { OFFICE_JOURNEY_TO_SPONSOR } from "@/data/narrative/officeJourneySponsorArrival";
 
 /**
  * HUD activation window: starts at ACT3_SCENE06B ("Baseline Approved",
@@ -245,6 +247,12 @@ export default function GameRoot() {
   // presentational scaffolding in front of the save-backed engine, not
   // part of it.
   const [showReceptionIntro, setShowReceptionIntro] = useState(false);
+  // Office Journey: the walk from Reception to the Sponsor's office,
+  // between Reception Intro finishing and ACT1_SCENE01 starting. Same
+  // "New Game only, never Continue" rule and same reasoning for living
+  // outside gameState as showReceptionIntro above — it's presentational
+  // scaffolding, not save-relevant progress.
+  const [showOfficeJourney, setShowOfficeJourney] = useState(false);
 
   function enterScene(state: GameState, sceneId: string): GameState {
     const scene = getScene(sceneId);
@@ -259,6 +267,11 @@ export default function GameRoot() {
 
   function handleReceptionIntroComplete() {
     setShowReceptionIntro(false);
+    setShowOfficeJourney(true);
+  }
+
+  function handleOfficeJourneyComplete() {
+    setShowOfficeJourney(false);
     let state = newGameState();
     state = enterScene(state, state.currentScene);
     saveGame(state);
@@ -324,6 +337,11 @@ export default function GameRoot() {
     if (showReceptionIntro) {
       return (
         <NarrativeScene script={RECEPTION_INTRO_SCENE} onComplete={handleReceptionIntroComplete} />
+      );
+    }
+    if (showOfficeJourney) {
+      return (
+        <OfficeJourney script={OFFICE_JOURNEY_TO_SPONSOR} onComplete={handleOfficeJourneyComplete} />
       );
     }
     return (

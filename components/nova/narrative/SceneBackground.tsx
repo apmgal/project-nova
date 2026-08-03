@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { SceneBackgroundOverlay } from "@/lib/nova/narrative/types";
+import { kenBurnsStyle, type KenBurnsConfig } from "@/lib/nova/narrative/kenBurns";
 
 interface SceneBackgroundProps {
   src: string;
@@ -20,6 +21,14 @@ interface SceneBackgroundProps {
   /** Decorative art (e.g. a wall-mounted logo) composited onto the
    * backdrop at a fixed spot in that specific photo. */
   overlay?: SceneBackgroundOverlay;
+  /** Slow zoom + pan, on by default (a sensible ambient drift) for every
+   * backdrop this component renders — narrative scenes are meant to
+   * reuse this same component (see narrative/types.ts), so this is how
+   * "every background in the game feels cinematic" is applied once
+   * rather than per-scene. Pass a partial config to tune it for a
+   * specific scene, or `false` to render a genuinely static frame (a
+   * document-review screen that needs to stay put, say). */
+  kenBurns?: KenBurnsConfig | false;
 }
 
 /**
@@ -35,6 +44,7 @@ export default function SceneBackground({
   blurPx = 4,
   dim = 0.35,
   overlay,
+  kenBurns,
 }: SceneBackgroundProps) {
   const [visible, setVisible] = useState(false);
   const backdropFilter = blurPx > 0 ? `blur(${blurPx}px) brightness(1.12)` : undefined;
@@ -55,27 +65,50 @@ export default function SceneBackground({
   return (
     <div className="absolute inset-0 z-0 overflow-hidden bg-zinc-950">
       <Image
+        key={src}
         src={src}
         alt={alt}
         fill
         priority
         sizes="100vw"
-        // Scaled up slightly so the blur's soft edge samples stay inside
-        // the frame instead of pulling in the (clipped) transparent
-        // border, which would otherwise show up as a faint rim.
-        className="scale-110 object-cover ease-out"
+        // Ken Burns (on by default — see the `kenBurns` prop doc above)
+        // owns the scale/pan transform now, starting from the same 1.1
+        // safety margin the old static `scale-110` class used to apply,
+        // so the blur's soft edge still never shows a clipped rim even
+        // on the animation's very first frame. `kenBurns={false}` skips
+        // the class entirely and falls back to that same static 1.1
+        // via the transform below, so a scene can go fully static
+        // without losing the safety margin either way.
+        className={`object-cover ease-out ${kenBurns === false ? "" : "animate-nova-ken-burns"}`}
         style={{
           opacity: visible ? 1 : 0,
           filter: backdropFilter,
+          transform: kenBurns === false ? "scale(1.1)" : undefined,
           transitionProperty: "opacity",
           transitionDuration: `${fadeMs}ms`,
+          ...kenBurnsStyle(src, kenBurns),
         }}
       />
 
       {overlay && (
         <div
-          className="absolute"
-          style={{ top: overlay.top, left: overlay.left, width: overlay.width, aspectRatio: overlay.aspectRatio }}
+          // Same Ken Burns transform as the backdrop Image above (keyed
+          // off the backdrop's own `src`, not the overlay's, so they
+          // always agree on direction/timing) applied to this wrapper
+          // itself — the overlay's top/left/width are percentages of
+          // this same untransformed parent, so panning/scaling the
+          // wrapper by the identical amount keeps the logo glued to its
+          // spot on the backdrop as it drifts, instead of sliding off
+          // the wall panel it's meant to sit on.
+          className={`absolute ${kenBurns === false ? "" : "animate-nova-ken-burns"}`}
+          style={{
+            top: overlay.top,
+            left: overlay.left,
+            width: overlay.width,
+            aspectRatio: overlay.aspectRatio,
+            transform: kenBurns === false ? "scale(1.1)" : undefined,
+            ...kenBurnsStyle(src, kenBurns),
+          }}
         >
           <Image
             src={overlay.src}
