@@ -210,7 +210,12 @@ export interface Character {
 //     PESTLE sets its own visualStyle: "pestle_category_list" for a
 //     collapsible per-category list (icon + name + count per row, expands
 //     once a card lands there) instead of the plain dashed bucket grid —
-//     same placement/completion logic underneath; SWOT keeps the plain grid.
+//     same placement/completion logic underneath. SWOT sets visualStyle:
+//     "swot_postit_quadrant" for a 2x2 quadrant grid where cards render as
+//     post-it notes — neutrally colored (so the color itself never hints
+//     the answer) while unplaced, recoloring to match their quadrant only
+//     once correctly placed; a wrong-quadrant drop still just bounces the
+//     neutral note back to the pool, same as the plain grid always did.
 //   - "priority_assignment" (MoSCoW): every bucket is a valid placement —
 //     each card has a costByBucket instead, and an optional flagsByBucket.
 //     MoSCoW's own tool screen sets visualStyle: "moscow_quadrant" for a
@@ -342,11 +347,12 @@ export interface ToolScreenBlock {
   };
   /** An alternate presentation for the same underlying placement/
    * completion logic — never changes what counts as a valid placement or
-   * when the tool is complete, only how it renders. Four known values:
+   * when the tool is complete, only how it renders. Five known values:
    * sort_into_buckets' "warehouse_blueprint" (WBS — background image with
-   * clickable zone outlines) and "pestle_category_list" (PESTLE —
-   * collapsible icon-per-category list), priority_assignment's
-   * "moscow_quadrant" (MoSCoW — 2x2 corner-badge grid), and
+   * clickable zone outlines), "pestle_category_list" (PESTLE —
+   * collapsible icon-per-category list), and "swot_postit_quadrant"
+   * (SWOT — 2x2 quadrant grid with post-it note cards), priority_
+   * assignment's "moscow_quadrant" (MoSCoW — 2x2 corner-badge grid), and
    * power_interest_grid's "power_interest_quadrant" (Stakeholder Grid —
    * 2x2 grid with real power/interest axes). Unset means the plain
    * card/dashed-bucket grid. */

@@ -60,7 +60,8 @@
     "toolId": "TOOL_ACT1_SCENE04_SWOT",
     "sourceScene": "ACT1_SCENE04",
     "type": "sort_into_buckets",
-    "instructions": "Sort each factor into the category it belongs to.",
+    "visualStyle": "swot_postit_quadrant",
+    "instructions": "Drag each note into the quadrant it belongs to.",
     "buckets": [
       "Strength",
       "Weakness",

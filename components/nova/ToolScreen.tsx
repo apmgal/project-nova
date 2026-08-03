@@ -11,6 +11,10 @@ import {
   Circle,
   ChevronDown,
   ChevronUp,
+  ShieldCheck,
+  TriangleAlert,
+  Sprout,
+  ShieldAlert,
   type LucideIcon,
 } from "lucide-react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
@@ -106,16 +110,110 @@ const FALLBACK_PESTLE_CATEGORY_STYLE: PestleCategoryStyle = {
   chipText: "text-zinc-100",
 };
 
+interface SwotQuadrantStyle {
+  Icon: LucideIcon;
+  headerText: string;
+  noteBg: string;
+  noteText: string;
+}
+
+/**
+ * "swot_postit_quadrant" visualStyle — keyed by the exact bucket strings
+ * TOOL_ACT1_SCENE04_SWOT carries ("Strength"/"Weakness"/"Opportunity"/
+ * "Threat"). Only SWOT opts into this via its own visualStyle field; every
+ * other sort_into_buckets tool keeps its own rendering untouched. noteBg/
+ * noteText are deliberately only used for a CORRECTLY placed card — an
+ * unplaced pool card always renders in NEUTRAL_POSTIT_STYLE below,
+ * regardless of which quadrant it secretly belongs to, so the note's own
+ * color never gives away the answer before it's placed.
+ */
+const SWOT_QUADRANT_STYLE: Record<string, SwotQuadrantStyle> = {
+  Strength: {
+    Icon: ShieldCheck,
+    headerText: "text-emerald-400",
+    noteBg: "bg-emerald-200",
+    noteText: "text-emerald-950",
+  },
+  Weakness: {
+    Icon: TriangleAlert,
+    headerText: "text-amber-400",
+    noteBg: "bg-amber-200",
+    noteText: "text-amber-950",
+  },
+  Opportunity: {
+    Icon: Sprout,
+    headerText: "text-pink-400",
+    noteBg: "bg-pink-200",
+    noteText: "text-pink-950",
+  },
+  Threat: {
+    Icon: ShieldAlert,
+    headerText: "text-indigo-400",
+    noteBg: "bg-indigo-200",
+    noteText: "text-indigo-950",
+  },
+};
+
+const FALLBACK_SWOT_QUADRANT_STYLE: SwotQuadrantStyle = {
+  Icon: Circle,
+  headerText: "text-zinc-400",
+  noteBg: "bg-zinc-200",
+  noteText: "text-zinc-900",
+};
+
+/** Every unplaced pool note uses this same neutral paper-yellow color,
+ * regardless of which quadrant it secretly belongs to — recoloring only
+ * happens once a card lands correctly (see SWOT_QUADRANT_STYLE above). */
+const NEUTRAL_POSTIT_STYLE = { noteBg: "bg-amber-100", noteText: "text-amber-900" };
+
+/** Shared size/shape for every post-it note — pool, placed, and the drag
+ * ghost all use the exact same max-width, padding, and font size so a
+ * note never visibly grows or shrinks between those three states. */
+const POSTIT_NOTE_SIZE =
+  "max-w-[140px] rounded-[2px] pl-2.5 pr-2.5 pt-3 pb-2 text-[11px] leading-snug";
+
+/** Small flat pin, drawn from plain divs rather than an icon glyph — the
+ * loaded icon webfont only ships outline glyphs, and a solid pin head
+ * reads better at this size than an outline one. Meant to sit inside a
+ * `relative` positioned note, anchored to the note's top edge. */
+function PostitPin() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -top-[5px] left-1/2 z-10 h-[13px] w-[10px] -translate-x-1/2 rotate-[10deg]"
+    >
+      <div className="absolute left-[3.5px] top-1 h-1.5 w-0.5 rounded-sm bg-zinc-800" />
+      <div className="absolute left-[1px] top-0 h-2 w-2 rounded-full bg-blue-900" />
+      <div className="absolute left-[2.5px] top-[1.5px] h-[2.5px] w-[2.5px] rounded-full bg-blue-300" />
+    </div>
+  );
+}
+
+/** Fixed, literal Tailwind arbitrary-rotate classes (never built via
+ * string interpolation, so Tailwind's source scanner can actually see
+ * them) — picked per note by index for a hand-scattered post-it look
+ * without any randomness that would jitter on re-render. */
+const POSTIT_ROTATIONS = [
+  "rotate-[-2deg]",
+  "rotate-[1.5deg]",
+  "rotate-[-1deg]",
+  "rotate-[2deg]",
+  "rotate-[-1.5deg]",
+  "rotate-[1deg]",
+];
+
 /**
  * Generic "sort cards into buckets" interaction, driven entirely by a
  * tool_screens.json entry. Nothing here knows about PESTLE or SWOT —
  * bucket names and card text are just data, so the same component will
- * serve later acts' boards (MoSCoW, stakeholder grid, WBS, ...). The one
- * exception is visualStyle: "pestle_category_list" (opted into only by
- * PESTLE's own data), which swaps the plain dashed-bucket grid for a
- * collapsible per-category list with an icon per category — everything
- * else (placement rules, completion, wrong-bucket bounce-back) is
- * identical between the two, only the chrome differs.
+ * serve later acts' boards (MoSCoW, stakeholder grid, WBS, ...). Two
+ * opt-in exceptions swap the plain dashed-bucket grid for their own
+ * chrome, driven by toolScreen.visualStyle: "pestle_category_list"
+ * (PESTLE — a collapsible per-category list with an icon per category)
+ * and "swot_postit_quadrant" (SWOT — a 2x2 quadrant grid with post-it
+ * note cards, neutrally colored until correctly placed). Placement rules,
+ * completion, and wrong-bucket bounce-back are identical across all
+ * three — only the chrome differs.
  */
 export default function ToolScreen({
   toolScreen,
@@ -150,6 +248,7 @@ export default function ToolScreen({
   const placedSet = new Set(placedCardIds);
   const poolCards = cards.filter((card) => !placedSet.has(card.id));
   const isCollapsibleCategoryList = toolScreen.visualStyle === "pestle_category_list";
+  const isSwotPostitQuadrant = toolScreen.visualStyle === "swot_postit_quadrant";
 
   function handleSelectCard(cardId: string) {
     setSelectedCardId((current) => (current === cardId ? null : cardId));
@@ -269,6 +368,53 @@ export default function ToolScreen({
             );
           })}
         </div>
+      ) : isSwotPostitQuadrant ? (
+        <div className="grid grid-cols-2 gap-2">
+          {buckets.map((bucket) => {
+            const cardsHere = cards.filter(
+              (card) => placedSet.has(card.id) && card.correctBucket === bucket
+            );
+            const style = SWOT_QUADRANT_STYLE[bucket] ?? FALLBACK_SWOT_QUADRANT_STYLE;
+            const isDropHover = drag.hoveredTargetId === bucket;
+            return (
+              <div
+                key={bucket}
+                ref={drag.dropTargetRef(bucket)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleDropOnBucket(bucket);
+                }}
+                className={`flex min-h-[130px] cursor-pointer flex-col gap-2 rounded-xl bg-zinc-900/70 p-3 transition-colors ${
+                  selectedCardId || drag.isDragging ? "ring-2 ring-white/40" : ""
+                } ${isDropHover ? "ring-4 ring-white" : ""}`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <style.Icon className={`h-3.5 w-3.5 ${style.headerText}`} aria-hidden="true" />
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide ${style.headerText}`}>
+                    {bucket}
+                  </span>
+                </div>
+                {cardsHere.length === 0 ? (
+                  <span className="text-[11px] text-zinc-600">Drop a note here</span>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {cardsHere.map((card, index) => (
+                      <span
+                        key={card.id}
+                        className={`relative inline-block ${
+                          POSTIT_ROTATIONS[index % POSTIT_ROTATIONS.length]
+                        } ${POSTIT_NOTE_SIZE} shadow-[0_3px_6px_rgba(0,0,0,0.4)] ${style.noteBg} ${style.noteText}`}
+                      >
+                        <PostitPin />
+                        {card.text}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {buckets.map((bucket) => {
@@ -309,13 +455,42 @@ export default function ToolScreen({
 
       <div>
         <div className="mb-2 text-[11px] uppercase tracking-wide text-zinc-500">
-          Unsorted ({poolCards.length})
+          {isSwotPostitQuadrant ? "Notes to place" : "Unsorted"} ({poolCards.length})
         </div>
-        <div className="flex flex-wrap gap-2">
-          {poolCards.map((card) => {
+        <div className={`flex flex-wrap ${isSwotPostitQuadrant ? "gap-3" : "gap-2"}`}>
+          {poolCards.map((card, index) => {
             const isSelected = selectedCardId === card.id;
             const isShaking = shake?.cardId === card.id;
             const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
+            if (isSwotPostitQuadrant) {
+              // Every unplaced note shares the same neutral paper color —
+              // see NEUTRAL_POSTIT_STYLE's doc comment — so nothing here
+              // hints which quadrant a note actually belongs to.
+              return (
+                <button
+                  key={`${card.id}-${isShaking ? shake?.attempt : 0}`}
+                  {...drag.dragHandleProps(card.id)}
+                  onClick={() => {
+                    if (drag.wasDrag()) return;
+                    handleSelectCard(card.id);
+                  }}
+                  className={`relative ${
+                    POSTIT_ROTATIONS[index % POSTIT_ROTATIONS.length]
+                  } inline-block ${POSTIT_NOTE_SIZE} text-left shadow-[0_3px_6px_rgba(0,0,0,0.4)] transition-opacity ${
+                    isBeingDragged ? "opacity-30" : ""
+                  } ${
+                    isSelected
+                      ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-900"
+                      : ""
+                  } ${NEUTRAL_POSTIT_STYLE.noteBg} ${NEUTRAL_POSTIT_STYLE.noteText} ${
+                    isShaking ? "animate-nova-bounce-back" : ""
+                  }`}
+                >
+                  <PostitPin />
+                  {card.text}
+                </button>
+              );
+            }
             return (
               <button
                 key={`${card.id}-${isShaking ? shake?.attempt : 0}`}
@@ -346,9 +521,18 @@ export default function ToolScreen({
 
       {draggedCard && (
         <DragGhost pointer={drag.pointer}>
-          <span className="rounded-md border border-white/40 bg-zinc-800/95 px-3 py-2 text-xs font-medium text-white shadow-lg">
-            {draggedCard.text}
-          </span>
+          {isSwotPostitQuadrant ? (
+            <span
+              className={`relative inline-block ${POSTIT_NOTE_SIZE} shadow-[0_3px_6px_rgba(0,0,0,0.4)] ${NEUTRAL_POSTIT_STYLE.noteBg} ${NEUTRAL_POSTIT_STYLE.noteText}`}
+            >
+              <PostitPin />
+              {draggedCard.text}
+            </span>
+          ) : (
+            <span className="rounded-md border border-white/40 bg-zinc-800/95 px-3 py-2 text-xs font-medium text-white shadow-lg">
+              {draggedCard.text}
+            </span>
+          )}
         </DragGhost>
       )}
     </div>
