@@ -9,6 +9,7 @@ import {
   getToolScreenByType,
   getRiskInvestigation,
   isSceneAvailable,
+  getBackgroundFile,
 } from "@/lib/nova/data";
 import {
   hasSavedGame,
@@ -42,6 +43,8 @@ import {
   resetTool,
   submitTool,
   setArtefactStatus,
+  foldBackground,
+  resolveBackground,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -72,9 +75,8 @@ import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
 import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
-import OfficeJourney from "./narrative/OfficeJourney";
+import SceneBackground from "./narrative/SceneBackground";
 import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
-import { OFFICE_JOURNEY_TO_SPONSOR } from "@/data/narrative/officeJourneySponsorArrival";
 
 /**
  * HUD activation window: starts at ACT3_SCENE06B ("Baseline Approved",
@@ -247,16 +249,24 @@ export default function GameRoot() {
   // presentational scaffolding in front of the save-backed engine, not
   // part of it.
   const [showReceptionIntro, setShowReceptionIntro] = useState(false);
-  // Office Journey: the walk from Reception to the Sponsor's office,
-  // between Reception Intro finishing and ACT1_SCENE01 starting. Same
-  // "New Game only, never Continue" rule and same reasoning for living
-  // outside gameState as showReceptionIntro above — it's presentational
-  // scaffolding, not save-relevant progress.
-  const [showOfficeJourney, setShowOfficeJourney] = useState(false);
 
   function enterScene(state: GameState, sceneId: string): GameState {
+    // Carry the outgoing scene's ending backdrop forward as the new
+    // scene's baseline, so a scene whose own first line doesn't set a
+    // background just keeps showing wherever the last one left off
+    // (foldBackground's whole point — see lib/nova/state.ts). Skipped
+    // when sceneId === state.currentScene: that's the one-time bootstrap
+    // call from handleReceptionIntroComplete, where "the outgoing scene"
+    // and "the scene being entered" are the same scene and there's
+    // nothing to fold yet.
+    let currentBackground = state.currentBackground;
+    if (state.currentScene !== sceneId) {
+      const prevScene = getScene(state.currentScene);
+      const prevLines = prevScene ? getDialogue(prevScene.dialogueId)?.lines ?? [] : [];
+      currentBackground = foldBackground(currentBackground, prevLines, state.flags, prevLines.length - 1);
+    }
     const scene = getScene(sceneId);
-    let next: GameState = { ...state, currentScene: sceneId };
+    let next: GameState = { ...state, currentScene: sceneId, currentBackground };
     next = applySceneFlagsSet(next, scene?.flagsSet);
     return next;
   }
@@ -267,11 +277,6 @@ export default function GameRoot() {
 
   function handleReceptionIntroComplete() {
     setShowReceptionIntro(false);
-    setShowOfficeJourney(true);
-  }
-
-  function handleOfficeJourneyComplete() {
-    setShowOfficeJourney(false);
     let state = newGameState();
     state = enterScene(state, state.currentScene);
     saveGame(state);
@@ -337,11 +342,6 @@ export default function GameRoot() {
     if (showReceptionIntro) {
       return (
         <NarrativeScene script={RECEPTION_INTRO_SCENE} onComplete={handleReceptionIntroComplete} />
-      );
-    }
-    if (showOfficeJourney) {
-      return (
-        <OfficeJourney script={OFFICE_JOURNEY_TO_SPONSOR} onComplete={handleOfficeJourneyComplete} />
       );
     }
     return (
@@ -702,6 +702,19 @@ export default function GameRoot() {
     text: substituteTemplate(line.text, templateValues),
   }));
 
+  // Backdrop currently in effect, right up to whatever's actually
+  // revealed — folds forward from the scene's carried-in baseline
+  // (see enterScene) through displayLines, the same array/indices
+  // DialogueTranscript itself uses, so "what's on screen" and "what the
+  // backdrop shows" can never disagree about how far the scene's got.
+  const backgroundKey = foldBackground(
+    gameState.currentBackground,
+    displayLines,
+    gameState.flags,
+    revealedCount - 1
+  );
+  const resolvedBackground = resolveBackground(backgroundKey, getBackgroundFile(backgroundKey));
+
   const hudActive = isHudActiveForScene(scene);
   const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
   const isAnnouncement = scene.displayStyle === "announcement";
@@ -837,6 +850,15 @@ export default function GameRoot() {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-zinc-950">
+      {/* Backdrop for whatever location the scene's dialogue says we're
+          currently in (see backgroundKey/resolvedBackground above) — z-0
+          under the header/HUD/main content below, which already render at
+          z-10. No src (an unmapped key, or no key set yet at all) just
+          means no backdrop, same plain look every scene had before this.
+          No audio here by design — this is a visual-only layer. */}
+      {resolvedBackground?.src && (
+        <SceneBackground key={resolvedBackground.src} src={resolvedBackground.src} />
+      )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (
           <div />

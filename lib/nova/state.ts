@@ -350,6 +350,7 @@ export function foldBackground(
 const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
   bg_reception: "bg_reception.jpg",
   bg_marcus_office: "bg_marcus_office.jpg",
+  bg_hallway: "bg_hallway_a.png",
 };
 
 function stripExtension(filename: string): string {

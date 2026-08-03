@@ -95,6 +95,7 @@
   "backgrounds": {
     "note": "Placeholder — assign real background art per act/location. Engine carries forward the last background shown; only lines that CHANGE the background need this field set.",
     "reception": "bg_reception.png",
+    "hallway": "bg_hallway.png",
     "marcus_office": "bg_marcus_office.png",
     "player_desk": "bg_player_desk.png",
     "warehouse_week1": "warehouse_week1_empty.png",
