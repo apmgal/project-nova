@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import SceneAudio from "./narrative/SceneAudio";
 
@@ -8,6 +9,20 @@ interface TitleScreenProps {
   onNewGame: () => void;
   onContinue: () => void;
 }
+
+// Browsers block audio-with-sound autoplay until the page has a genuine
+// user gesture. On a fresh visit (no prior interaction on the domain —
+// the common case for a first-time Vercel visitor, unlike local dev where
+// the browser usually already has some engagement with localhost) the
+// title track's autoplay-on-mount is silently rejected; SceneAudio's own
+// fallback then unlocks it on the page's first pointerdown/keydown. The
+// trouble is that first gesture is almost always the "Begin Mission"
+// click itself, which is also what unmounts TitleScreen — so the track
+// gets unlocked and torn down in the same event, audible for a blip if
+// at all. Holding the screen mounted for HOLD_MS after the click gives
+// the now-unlocked track real time to fade in and be heard before the
+// scene actually swaps to Reception Intro.
+const HOLD_MS = 1000;
 
 /**
  * Title screen — restyled around a "mission team" cover-art composition,
@@ -56,6 +71,20 @@ interface TitleScreenProps {
  * right as the new scene's track is just getting started.
  */
 export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScreenProps) {
+  const [pending, setPending] = useState<"new" | "continue" | null>(null);
+
+  function handleBegin() {
+    if (pending) return;
+    setPending("new");
+    window.setTimeout(onNewGame, HOLD_MS);
+  }
+
+  function handleContinueClick() {
+    if (pending) return;
+    setPending("continue");
+    window.setTimeout(onContinue, HOLD_MS);
+  }
+
   return (
     <div
       className="relative flex flex-1 items-center overflow-hidden"
@@ -125,21 +154,25 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
           </p>
 
           <div className="mt-2 flex flex-wrap items-center justify-end gap-4">
-            {/* Begin Mission — always shown, always starts a fresh game. */}
+            {/* Begin Mission — always shown, always starts a fresh game.
+                Disabled (not hidden) while pending, so a slow tap can't
+                double-fire and race the HOLD_MS-delayed navigation above. */}
             <button
-              onClick={onNewGame}
-              className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+              onClick={handleBegin}
+              disabled={pending !== null}
+              className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-[var(--color-brand-primary)] px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--color-text-on-brand)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] disabled:cursor-default disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
             >
-              Begin Mission
+              {pending === "new" ? "Starting…" : "Begin Mission"}
             </button>
 
             {/* Continue Mission — alongside Begin Mission, only once a save exists. */}
             {hasSave && (
               <button
-                onClick={onContinue}
-                className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-transparent px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--nova-ink-900)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] hover:bg-[var(--nova-parchment-100)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
+                onClick={handleContinueClick}
+                disabled={pending !== null}
+                className="rounded-[var(--radius-pill)] border-[3px] border-[var(--nova-ink-900)] bg-transparent px-9 py-3.5 text-[17px] font-extrabold uppercase tracking-[var(--tracking-wide)] text-[var(--nova-ink-900)] shadow-[4px_4px_0_var(--nova-ink-900)] transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--nova-ink-900)] hover:bg-[var(--nova-parchment-100)] active:translate-y-0.5 active:shadow-[2px_2px_0_var(--nova-ink-900)] disabled:cursor-default disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:bg-transparent disabled:hover:shadow-[4px_4px_0_var(--nova-ink-900)] [font-family:var(--font-body)]"
               >
-                Continue Mission
+                {pending === "continue" ? "Starting…" : "Continue Mission"}
               </button>
             )}
           </div>
