@@ -384,7 +384,7 @@ export default function ToolScreen({
                   if (drag.wasDrag()) return;
                   handleDropOnBucket(bucket);
                 }}
-                className={`flex min-h-[130px] cursor-pointer flex-col gap-2 rounded-xl bg-zinc-900/70 p-3 transition-colors ${
+                className={`flex min-h-[130px] cursor-pointer flex-col gap-2 rounded-xl bg-zinc-950/50 p-3 transition-colors ${
                   selectedCardId || drag.isDragging ? "ring-2 ring-white/40" : ""
                 } ${isDropHover ? "ring-4 ring-white" : ""}`}
               >
