@@ -128,5 +128,6 @@ export function getDefaultGameState(): GameState {
   if (!state.toolPlacements) state.toolPlacements = {};
   if (!state.toolSelections) state.toolSelections = {};
   if (!state.toolSubmitted) state.toolSubmitted = {};
+  if (!state.artefacts) state.artefacts = {};
   return state;
 }

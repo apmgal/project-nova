@@ -62,7 +62,20 @@ export interface GameState {
    * enabled) until they choose to move on. resetTool clears this back to
    * unset alongside the rest of a tool's progress. */
   toolSubmitted: Record<string, boolean>;
+  /** Documents the player has found in the world and can revisit from the
+   * artefacts drawer, keyed by artefact id (see lib/nova/artefacts.ts for
+   * the static registry of what each id looks like/means). The value is
+   * which version of that artefact is currently on file — most artefacts
+   * start "incomplete" when first found and later get overwritten with a
+   * "complete" version once the in-fiction work that finishes them wraps
+   * up, so re-opening the same drawer entry later shows the updated copy
+   * rather than a second entry. */
+  artefacts: Record<string, ArtefactStatus>;
 }
+
+/** Which version of a found document is currently on file. See the
+ * `artefacts` field on GameState and lib/nova/artefacts.ts. */
+export type ArtefactStatus = "incomplete" | "complete";
 
 export interface ChoiceHistoryEntry {
   sceneId: string;

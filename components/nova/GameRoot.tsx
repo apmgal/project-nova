@@ -41,6 +41,7 @@ import {
   computeWeeksRemaining,
   resetTool,
   submitTool,
+  setArtefactStatus,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -65,6 +66,7 @@ import BenefitsBuilder from "./BenefitsBuilder";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import DebugDrawer from "./DebugDrawer";
+import ArtefactsDrawer from "./ArtefactsDrawer";
 import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
 import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
@@ -239,6 +241,12 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId };
     next = applySceneFlagsSet(next, scene?.flagsSet);
+    // The Missing Appendices scene is where the player first turns up the
+    // (unfinished) PID — from here it's reachable any time from the
+    // artefacts drawer, not just this scene.
+    if (sceneId === "ACT1_SCENE05") {
+      next = setArtefactStatus(next, "pid", "incomplete");
+    }
     return next;
   }
 
@@ -575,7 +583,12 @@ export default function GameRoot() {
   // the scene transition instead.
   function handleSubmitTool() {
     if (!gameState || !scene || !toolScreen || !toolComplete) return;
-    const next = submitTool(gameState, toolScreen);
+    let next = submitTool(gameState, toolScreen);
+    // Finishing the Benefits Tracker is what actually completes the PID's
+    // Benefits Plan in-fiction, so the drawer copy upgrades here too.
+    if (toolScreen.toolId === "TOOL_ACT3_SCENE06_BENEFITS") {
+      next = setArtefactStatus(next, "pid", "complete");
+    }
     setGameState(next);
     saveGame(next);
 
@@ -823,6 +836,7 @@ export default function GameRoot() {
       </main>
 
       <DebugDrawer gameState={gameState} onRestart={handleRestart} />
+      <ArtefactsDrawer gameState={gameState} />
     </div>
   );
 }

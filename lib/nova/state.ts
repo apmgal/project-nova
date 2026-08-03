@@ -5,6 +5,7 @@ import type {
   DialogueLine,
   ToolScreenBlock,
   RiskInvestigationBank,
+  ArtefactStatus,
 } from "./types";
 import { getCharacter, getDefaultGameState } from "./data";
 
@@ -120,6 +121,22 @@ export function applySceneFlagsSet(
     }
   }
   return { ...state, flags: nextFlags };
+}
+
+/** Adds or upgrades an entry in the player's artefacts drawer. Never
+ * downgrades: if `pid` is already "complete" and something tries to set it
+ * back to "incomplete" (shouldn't happen, but scenes can in principle be
+ * revisited), the more-finished version wins so re-reading old content
+ * can't regress a document the player already saw completed. */
+export function setArtefactStatus(
+  state: GameState,
+  artefactId: string,
+  status: ArtefactStatus
+): GameState {
+  const current = state.artefacts[artefactId];
+  if (current === "complete") return state;
+  if (current === status) return state;
+  return { ...state, artefacts: { ...state.artefacts, [artefactId]: status } };
 }
 
 // ---------------------------------------------------------------------------
