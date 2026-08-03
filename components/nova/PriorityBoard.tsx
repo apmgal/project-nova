@@ -6,6 +6,8 @@ import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
 import { SubmitToolButton } from "./SubmitTool";
+import { usePlacementDrag } from "./usePlacementDrag";
+import { DragGhost } from "./DragGhost";
 
 interface PriorityBoardProps {
   toolScreen: ToolScreenBlock;
@@ -217,11 +219,21 @@ export default function PriorityBoard({
     setSelectedCardId((current) => (current === cardId ? null : cardId));
   }
 
-  function handleAssign(bucket: string) {
-    if (!selectedCardId) return;
-    onPlace(selectedCardId, bucket);
+  // cardIdOverride lets a drag-and-drop completion assign a specific card
+  // directly, independent of whatever (if anything) is currently
+  // tap-selected — the two entry points share this one function so both
+  // interaction modes stay in sync with the same place/refund logic.
+  function handleAssign(bucket: string, cardIdOverride?: string) {
+    const cardId = cardIdOverride ?? selectedCardId;
+    if (!cardId) return;
+    onPlace(cardId, bucket);
     setSelectedCardId(null);
   }
+
+  const drag = usePlacementDrag({
+    onDrop: (cardId, bucket) => handleAssign(bucket, cardId),
+  });
+  const draggedCard = drag.draggingId ? cards.find((c) => c.id === drag.draggingId) : null;
 
   const hasCosts = cards.some((card) => card.costByBucket);
   const committed = cards.reduce((sum, card) => {
@@ -250,14 +262,19 @@ export default function PriorityBoard({
           {buckets.map((bucket) => {
             const style = MOSCOW_QUADRANT_STYLE[bucket] ?? FALLBACK_MOSCOW_STYLE;
             const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+            const isDropHover = drag.hoveredTargetId === bucket;
             return (
               <button
                 key={bucket}
-                onClick={() => handleAssign(bucket)}
+                ref={drag.dropTargetRef(bucket)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleAssign(bucket);
+                }}
                 aria-label={bucket}
                 className={`relative flex min-h-[110px] flex-col gap-1.5 rounded-2xl text-left transition-all ${MOSCOW_CARD_PADDING} ${style.cardBg} ${
-                  selectedCardId ? "ring-2 ring-white/60" : ""
-                }`}
+                  selectedCardId || drag.isDragging ? "ring-2 ring-white/60" : ""
+                } ${isDropHover ? "ring-4 ring-white" : ""}`}
               >
                 {cardsHere.length === 0 ? (
                   <span className={`text-[11px] ${style.chipText} opacity-70`}>
@@ -267,14 +284,19 @@ export default function PriorityBoard({
                   <div className="flex flex-wrap gap-1.5">
                     {cardsHere.map((card) => {
                       const isSelected = selectedCardId === card.id;
+                      const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
                       return (
                         <span
                           key={card.id}
+                          {...drag.dragHandleProps(card.id)}
                           onClick={(event) => {
                             event.stopPropagation();
+                            if (drag.wasDrag()) return;
                             handleSelectCard(card.id);
                           }}
                           className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+                            isBeingDragged ? "opacity-30" : ""
+                          } ${
                             isSelected
                               ? "bg-white text-zinc-900 ring-2 ring-white"
                               : `${style.chipBg} ${style.chipText} hover:brightness-110`
@@ -357,14 +379,19 @@ export default function PriorityBoard({
               const style = POWER_INTEREST_QUADRANT_STYLE[bucket] ?? FALLBACK_POWER_INTEREST_STYLE;
               const cardsHere = cards.filter((card) => placements[card.id] === bucket);
               const definition = toolScreen.quadrantDefinitions?.[bucket];
+              const isDropHover = drag.hoveredTargetId === bucket;
               return (
                 <button
                   key={bucket}
-                  onClick={() => handleAssign(bucket)}
+                  ref={drag.dropTargetRef(bucket)}
+                  onClick={() => {
+                    if (drag.wasDrag()) return;
+                    handleAssign(bucket);
+                  }}
                   aria-label={bucket}
                   className={`flex min-h-[130px] flex-col gap-1.5 rounded-2xl p-3 text-left transition-all ${style.cardBg} ${
-                    selectedCardId ? "ring-2 ring-white/60" : ""
-                  }`}
+                    selectedCardId || drag.isDragging ? "ring-2 ring-white/60" : ""
+                  } ${isDropHover ? "ring-4 ring-white" : ""}`}
                 >
                   <span className={`text-[11px] font-bold uppercase tracking-wide ${style.labelText}`}>
                     {bucket}
@@ -380,14 +407,19 @@ export default function PriorityBoard({
                     <div className="mt-auto flex flex-wrap gap-1.5">
                       {cardsHere.map((card) => {
                         const isSelected = selectedCardId === card.id;
+                        const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
                         return (
                           <span
                             key={card.id}
+                            {...drag.dragHandleProps(card.id)}
                             onClick={(event) => {
                               event.stopPropagation();
+                              if (drag.wasDrag()) return;
                               handleSelectCard(card.id);
                             }}
                             className={`flex cursor-pointer items-center gap-1.5 rounded-full py-[3px] pl-[3px] pr-2.5 text-[11px] font-medium transition-colors ${
+                              isBeingDragged ? "opacity-30" : ""
+                            } ${
                               isSelected
                                 ? "bg-white text-zinc-900 ring-2 ring-white"
                                 : `${style.chipBg} ${style.chipText} hover:brightness-110`
@@ -415,40 +447,52 @@ export default function PriorityBoard({
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {buckets.map((bucket) => {
             const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+            const isDropHover = drag.hoveredTargetId === bucket;
             return (
               <button
                 key={bucket}
-                onClick={() => handleAssign(bucket)}
+                ref={drag.dropTargetRef(bucket)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleAssign(bucket);
+                }}
                 className={`flex min-h-[104px] flex-col gap-1 rounded-md border-2 border-dashed p-2 text-left text-xs transition-colors ${
-                  selectedCardId
+                  selectedCardId || drag.isDragging
                     ? "border-emerald-600 bg-emerald-950/30 hover:bg-emerald-900/40"
                     : "border-zinc-700 bg-zinc-950/40"
-                }`}
+                } ${isDropHover ? "ring-4 ring-emerald-400" : ""}`}
               >
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
                   {bucket}
                 </span>
-                {cardsHere.map((card) => (
-                  <span
-                    key={card.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleSelectCard(card.id);
-                    }}
-                    className={`cursor-pointer rounded px-2 py-1 text-[11px] transition-colors ${
-                      selectedCardId === card.id
-                        ? "bg-emerald-500 text-white ring-2 ring-emerald-300"
-                        : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/70"
-                    }`}
-                  >
-                    {card.text}
-                    {card.costByBucket && (
-                      <span className="ml-1 text-emerald-300/80">
-                        ({currencyFormatter.format(card.costByBucket[bucket] ?? 0)})
-                      </span>
-                    )}
-                  </span>
-                ))}
+                {cardsHere.map((card) => {
+                  const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
+                  return (
+                    <span
+                      key={card.id}
+                      {...drag.dragHandleProps(card.id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (drag.wasDrag()) return;
+                        handleSelectCard(card.id);
+                      }}
+                      className={`cursor-pointer rounded px-2 py-1 text-[11px] transition-colors ${
+                        isBeingDragged ? "opacity-30" : ""
+                      } ${
+                        selectedCardId === card.id
+                          ? "bg-emerald-500 text-white ring-2 ring-emerald-300"
+                          : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/70"
+                      }`}
+                    >
+                      {card.text}
+                      {card.costByBucket && (
+                        <span className="ml-1 text-emerald-300/80">
+                          ({currencyFormatter.format(card.costByBucket[bucket] ?? 0)})
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
               </button>
             );
           })}
@@ -467,6 +511,7 @@ export default function PriorityBoard({
         <div className="flex flex-wrap gap-2">
           {unplacedCards.map((card) => {
             const isSelected = selectedCardId === card.id;
+            const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
             if (isPowerInterestQuadrant) {
               // Person-icon avatar + name underneath, rather than a plain
               // text chip — stakeholders read as people to place, not
@@ -474,8 +519,14 @@ export default function PriorityBoard({
               return (
                 <button
                   key={card.id}
-                  onClick={() => handleSelectCard(card.id)}
-                  className="flex w-16 flex-col items-center gap-1 text-center"
+                  {...drag.dragHandleProps(card.id)}
+                  onClick={() => {
+                    if (drag.wasDrag()) return;
+                    handleSelectCard(card.id);
+                  }}
+                  className={`flex w-16 flex-col items-center gap-1 text-center ${
+                    isBeingDragged ? "opacity-30" : ""
+                  }`}
                 >
                   <span
                     className={`flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] transition-colors ${
@@ -502,8 +553,14 @@ export default function PriorityBoard({
             return (
               <button
                 key={card.id}
-                onClick={() => handleSelectCard(card.id)}
+                {...drag.dragHandleProps(card.id)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleSelectCard(card.id);
+                }}
                 className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                  isBeingDragged ? "opacity-30" : ""
+                } ${
                   isSelected
                     ? "border-emerald-400 bg-emerald-700/70 text-white ring-2 ring-emerald-400"
                     : "border-zinc-700 bg-zinc-800 text-zinc-200 hover:border-zinc-500"
@@ -520,6 +577,23 @@ export default function PriorityBoard({
       </div>
 
       <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+
+      {draggedCard && (
+        <DragGhost pointer={drag.pointer}>
+          {isPowerInterestQuadrant ? (
+            <span className="flex items-center gap-1.5 rounded-full bg-zinc-800/95 py-[3px] pl-[3px] pr-2.5 text-[11px] font-medium text-white shadow-lg ring-1 ring-white/40">
+              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
+                <User className="h-3 w-3" aria-hidden="true" />
+              </span>
+              {draggedCard.text}
+            </span>
+          ) : (
+            <span className="rounded-md border border-white/40 bg-zinc-800/95 px-3 py-2 text-xs font-medium text-white shadow-lg">
+              {draggedCard.text}
+            </span>
+          )}
+        </DragGhost>
+      )}
     </div>
   );
 }

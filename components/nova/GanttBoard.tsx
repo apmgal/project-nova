@@ -7,6 +7,8 @@ import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
 import { SubmitToolButton } from "./SubmitTool";
+import { usePlacementDrag } from "./usePlacementDrag";
+import { DragGhost } from "./DragGhost";
 
 interface GanttBoardProps {
   toolScreen: ToolScreenBlock;
@@ -101,6 +103,28 @@ export default function GanttBoard({
     setError(null);
     setSelectedId(null);
   }
+
+  // Each milestone has exactly one valid drop target: its own track (the
+  // continuous timeline row next to its name) — registered below under
+  // its own milestone id, so targetId !== milestoneId can only happen if
+  // a drag somehow lands on a different row, which this rejects rather
+  // than letting it silently reassign a different milestone's bar. Drag
+  // only applies during the placement phase (allPlaced gates it off in
+  // JSX below); dropping resolves a week from the raw drop x-coordinate
+  // against the track's own live rect, the same math handleTrackClick
+  // already uses for a tap.
+  const drag = usePlacementDrag({
+    onDrop: (milestoneId, targetId, clientX) => {
+      if (allPlaced || targetId !== milestoneId) return;
+      const rect = drag.getTargetRect(targetId);
+      if (!rect) return;
+      const week = Math.max(0, Math.min(weeks - 1, Math.round((clientX - rect.left) / WEEK_PX)));
+      handlePlaceWeek(milestoneId, week);
+    },
+  });
+  const draggedMilestone = drag.draggingId
+    ? milestones.find((m) => m.id === drag.draggingId)
+    : null;
 
   function handleToggleGuess(milestoneId: string) {
     setChecked(false);
@@ -261,13 +285,24 @@ export default function GanttBoard({
               barExtra = " ring-2 ring-zinc-300";
             }
 
+            const isDropHover = !allPlaced && drag.hoveredTargetId === milestone.id;
+            const isBeingDragged = drag.isDragging && drag.draggingId === milestone.id;
+
             return (
               <div key={milestone.id}>
                 <button
-                  onClick={() =>
-                    allPlaced ? handleToggleGuess(milestone.id) : handleSelectMilestone(milestone.id)
-                  }
+                  {...(!allPlaced ? drag.dragHandleProps(milestone.id) : {})}
+                  onClick={() => {
+                    if (drag.wasDrag()) return;
+                    if (allPlaced) {
+                      handleToggleGuess(milestone.id);
+                    } else {
+                      handleSelectMilestone(milestone.id);
+                    }
+                  }}
                   className={`absolute flex items-center gap-1.5 truncate rounded-md px-2.5 py-2 text-left text-[11px] transition-colors ${
+                    isBeingDragged ? "opacity-30" : ""
+                  } ${
                     isSelected
                       ? "bg-emerald-900/50 text-white ring-1 ring-emerald-500"
                       : "bg-zinc-800/70 text-zinc-300 hover:bg-zinc-800"
@@ -280,10 +315,14 @@ export default function GanttBoard({
                 </button>
 
                 <div
-                  onClick={(event) => handleTrackClick(milestone.id, event)}
+                  ref={!allPlaced ? drag.dropTargetRef(milestone.id) : undefined}
+                  onClick={(event) => {
+                    if (drag.wasDrag()) return;
+                    handleTrackClick(milestone.id, event);
+                  }}
                   className={`absolute cursor-pointer rounded-md transition-colors ${
                     isSelected ? "bg-emerald-950/30" : "bg-zinc-800/50"
-                  }`}
+                  } ${isDropHover ? "ring-4 ring-emerald-400" : ""}`}
                   style={{ top: y, left: NAME_W, width: trackWidth, height: ROW_BOX_H }}
                 >
                   {tickWeeks.map((w) => (
@@ -346,6 +385,14 @@ export default function GanttBoard({
       )}
 
       <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+
+      {draggedMilestone && (
+        <DragGhost pointer={drag.pointer}>
+          <span className="flex items-center gap-1.5 rounded-md border border-white/40 bg-zinc-800/95 px-2.5 py-2 text-[11px] font-medium text-white shadow-lg">
+            {draggedMilestone.text}
+          </span>
+        </DragGhost>
+      )}
     </div>
   );
 }

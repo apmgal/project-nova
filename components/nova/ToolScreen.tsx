@@ -5,6 +5,8 @@ import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
 import { SubmitToolButton } from "./SubmitTool";
+import { usePlacementDrag } from "./usePlacementDrag";
+import { DragGhost } from "./DragGhost";
 
 interface ToolScreenProps {
   toolScreen: ToolScreenBlock;
@@ -53,9 +55,14 @@ export default function ToolScreen({
     setSelectedCardId((current) => (current === cardId ? null : cardId));
   }
 
-  function handleDropOnBucket(bucket: string) {
-    if (!selectedCardId) return;
-    const card = cards.find((c) => c.id === selectedCardId);
+  // cardIdOverride lets a drag-and-drop completion target a specific card
+  // directly, independent of whatever (if anything) is currently
+  // tap-selected — both interaction modes share this one function so a
+  // wrong-bucket drop bounces back exactly like a wrong-bucket tap does.
+  function handleDropOnBucket(bucket: string, cardIdOverride?: string) {
+    const cardId = cardIdOverride ?? selectedCardId;
+    if (!cardId) return;
+    const card = cards.find((c) => c.id === cardId);
     if (!card) return;
 
     if (card.correctBucket === bucket) {
@@ -73,6 +80,11 @@ export default function ToolScreen({
     }));
     setSelectedCardId(null);
   }
+
+  const drag = usePlacementDrag({
+    onDrop: (cardId, bucket) => handleDropOnBucket(bucket, cardId),
+  });
+  const draggedCard = drag.draggingId ? cards.find((c) => c.id === drag.draggingId) : null;
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
@@ -94,15 +106,20 @@ export default function ToolScreen({
           const cardsHere = cards.filter(
             (card) => placedSet.has(card.id) && card.correctBucket === bucket
           );
+          const isDropHover = drag.hoveredTargetId === bucket;
           return (
             <button
               key={bucket}
-              onClick={() => handleDropOnBucket(bucket)}
+              ref={drag.dropTargetRef(bucket)}
+              onClick={() => {
+                if (drag.wasDrag()) return;
+                handleDropOnBucket(bucket);
+              }}
               className={`flex min-h-[92px] flex-col gap-1 rounded-md border-2 border-dashed p-2 text-left text-xs transition-colors ${
-                selectedCardId
+                selectedCardId || drag.isDragging
                   ? "border-emerald-600 bg-emerald-950/30 hover:bg-emerald-900/40"
                   : "border-zinc-700 bg-zinc-950/40"
-              }`}
+              } ${isDropHover ? "ring-4 ring-emerald-400" : ""}`}
             >
               <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-300">
                 {bucket}
@@ -128,11 +145,18 @@ export default function ToolScreen({
           {poolCards.map((card) => {
             const isSelected = selectedCardId === card.id;
             const isShaking = shake?.cardId === card.id;
+            const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
             return (
               <button
                 key={`${card.id}-${isShaking ? shake?.attempt : 0}`}
-                onClick={() => handleSelectCard(card.id)}
+                {...drag.dragHandleProps(card.id)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleSelectCard(card.id);
+                }}
                 className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                  isBeingDragged ? "opacity-30" : ""
+                } ${
                   isSelected
                     ? "border-emerald-400 bg-emerald-700/70 text-white ring-2 ring-emerald-400"
                     : "border-zinc-700 bg-zinc-800 text-zinc-200 hover:border-zinc-500"
@@ -149,6 +173,14 @@ export default function ToolScreen({
       </div>
 
       <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+
+      {draggedCard && (
+        <DragGhost pointer={drag.pointer}>
+          <span className="rounded-md border border-white/40 bg-zinc-800/95 px-3 py-2 text-xs font-medium text-white shadow-lg">
+            {draggedCard.text}
+          </span>
+        </DragGhost>
+      )}
     </div>
   );
 }

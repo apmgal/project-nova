@@ -6,6 +6,8 @@ import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
 import { SubmitToolButton } from "./SubmitTool";
+import { usePlacementDrag } from "./usePlacementDrag";
+import { DragGhost } from "./DragGhost";
 
 interface WBSBlueprintProps {
   toolScreen: ToolScreenBlock;
@@ -58,9 +60,14 @@ export default function WBSBlueprint({
     setSelectedCardId((current) => (current === cardId ? null : cardId));
   }
 
-  function handleZoneTap(zone: string) {
-    if (!selectedCardId) return;
-    const card = cards.find((c) => c.id === selectedCardId);
+  // cardIdOverride lets a drag-and-drop completion target a specific card
+  // directly, independent of whatever (if anything) is currently
+  // tap-selected — both interaction modes share this one function so a
+  // wrong-zone drop bounces back exactly like a wrong-zone tap does.
+  function handleZoneTap(zone: string, cardIdOverride?: string) {
+    const cardId = cardIdOverride ?? selectedCardId;
+    if (!cardId) return;
+    const card = cards.find((c) => c.id === cardId);
     if (!card) return;
 
     if (card.correctBucket === zone) {
@@ -76,6 +83,11 @@ export default function WBSBlueprint({
     }));
     setSelectedCardId(null);
   }
+
+  const drag = usePlacementDrag({
+    onDrop: (cardId, zone) => handleZoneTap(zone, cardId),
+  });
+  const draggedCard = drag.draggingId ? cards.find((c) => c.id === drag.draggingId) : null;
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
@@ -108,6 +120,7 @@ export default function WBSBlueprint({
           const zoneCardsPlaced = zoneCards.filter((card) => placedSet.has(card.id));
           const isFilled = zoneCards.length > 0 && zoneCardsPlaced.length === zoneCards.length;
           const isShaking = shakeZone?.zone === zone;
+          const isDropHover = drag.hoveredTargetId === zone;
 
           return (
             <div
@@ -116,14 +129,20 @@ export default function WBSBlueprint({
             >
               <div className="h-4 w-px bg-zinc-700" />
               <button
-                onClick={() => handleZoneTap(zone)}
+                ref={drag.dropTargetRef(zone)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleZoneTap(zone);
+                }}
                 className={`flex min-h-[78px] w-full flex-col items-center gap-1 rounded-md border-2 px-2 py-2 text-center transition-colors ${
                   isFilled
                     ? `${style.ring} ${style.fill}`
-                    : selectedCardId
+                    : selectedCardId || drag.isDragging
                       ? "border-dashed border-emerald-600 bg-emerald-950/20 hover:bg-emerald-900/30"
                       : "border-dashed border-zinc-600 bg-zinc-950/30"
-                } ${isShaking ? "animate-nova-bounce-back" : ""}`}
+                } ${isShaking ? "animate-nova-bounce-back" : ""} ${
+                  isDropHover ? "ring-4 ring-emerald-400" : ""
+                }`}
               >
                 <style.Icon className={`h-4 w-4 ${style.iconColor}`} aria-hidden="true" />
                 <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-200">
@@ -158,11 +177,18 @@ export default function WBSBlueprint({
         <div className="flex flex-wrap gap-2">
           {poolCards.map((card) => {
             const isSelected = selectedCardId === card.id;
+            const isBeingDragged = drag.isDragging && drag.draggingId === card.id;
             return (
               <button
                 key={card.id}
-                onClick={() => handleSelectCard(card.id)}
+                {...drag.dragHandleProps(card.id)}
+                onClick={() => {
+                  if (drag.wasDrag()) return;
+                  handleSelectCard(card.id);
+                }}
                 className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                  isBeingDragged ? "opacity-30" : ""
+                } ${
                   isSelected
                     ? "border-emerald-400 bg-emerald-700/70 text-white ring-2 ring-emerald-400"
                     : "border-zinc-700 bg-zinc-800 text-zinc-200 hover:border-zinc-500"
@@ -179,6 +205,14 @@ export default function WBSBlueprint({
       </div>
 
       <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+
+      {draggedCard && (
+        <DragGhost pointer={drag.pointer}>
+          <span className="rounded-md border border-white/40 bg-zinc-800/95 px-3 py-2 text-xs font-medium text-white shadow-lg">
+            {draggedCard.text}
+          </span>
+        </DragGhost>
+      )}
     </div>
   );
 }
