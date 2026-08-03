@@ -387,12 +387,19 @@ export default function PriorityBoard({
                               event.stopPropagation();
                               handleSelectCard(card.id);
                             }}
-                            className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+                            className={`flex cursor-pointer items-center gap-1.5 rounded-full py-[3px] pl-[3px] pr-2.5 text-[11px] font-medium transition-colors ${
                               isSelected
                                 ? "bg-white text-zinc-900 ring-2 ring-white"
                                 : `${style.chipBg} ${style.chipText} hover:brightness-110`
                             }`}
                           >
+                            <span
+                              className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${
+                                isSelected ? "bg-zinc-900/10" : "bg-black/25"
+                              }`}
+                            >
+                              <User className="h-3 w-3" aria-hidden="true" />
+                            </span>
                             {card.text}
                           </span>
                         );
