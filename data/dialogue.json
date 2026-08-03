@@ -124,6 +124,67 @@
     ],
     "needsWriting": false
   },
+  "DIALOGUE_ACT1_SCENE02_EMAIL": {
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_EMAIL",
+    "sourceScene": "ACT1_SCENE02_EMAIL",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You open the project inbox Marcus forwarded you access to.",
+        "background": "player_desk"
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT1_SCENE02_TEAMS": {
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_TEAMS",
+    "sourceScene": "ACT1_SCENE02_TEAMS",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You open the project's Teams channel.",
+        "background": "player_desk"
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT1_SCENE02_BEN": {
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_BEN",
+    "sourceScene": "ACT1_SCENE02_BEN",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "A message pops up in the corner of your screen."
+      },
+      {
+        "speaker": "ben",
+        "emotion": "neutral",
+        "text": "That's useful, but it's scattered. If you want the full picture, it's in SharePoint — Project NOVA's own folder. I can point you there."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "He drops a link. The breadcrumb at the top reads: Group Tax Innovation & Change › 4. Managed Projects › 11. Project NOVA."
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT1_SCENE02_DRIVE": {
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_DRIVE",
+    "sourceScene": "ACT1_SCENE02_DRIVE",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You navigate to the project's SharePoint folder.",
+        "background": "player_desk"
+      }
+    ],
+    "needsWriting": false
+  },
   "DIALOGUE_ACT1_SCENE04": {
     "dialogueId": "DIALOGUE_ACT1_SCENE04",
     "sourceScene": "ACT1_SCENE04",
@@ -1682,7 +1743,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You find a folder labelled \"DRAFT — do not send.\" It's dated the day Ellis left.",
+        "text": "The PID. Half-finished, but finally in your hands.",
         "condition": "investigated_drive"
       },
       {

@@ -65,6 +65,9 @@ import GanttBoard from "./GanttBoard";
 import BenefitsBuilder from "./BenefitsBuilder";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
+import EmailInboxPanel from "./EmailInboxPanel";
+import TeamsThreadPanel from "./TeamsThreadPanel";
+import SharePointBrowserPanel from "./SharePointBrowserPanel";
 import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
 import EndOfContent from "./EndOfContent";
@@ -229,6 +232,12 @@ export default function GameRoot() {
   // resolvedChoiceIds because the investigation and the choice itself are
   // two distinct steps in front of the same breakIndex. Reset alongside it.
   const [resolvedInvestigationIds, setResolvedInvestigationIds] = useState<Set<string>>(new Set());
+  // Which artefact's full-size viewer ArtefactsDrawer is showing. Lifted up
+  // here (rather than local to the drawer) so SharePointBrowserPanel's
+  // DocumentDiscoveredCard can jump straight to the viewer when the player
+  // picks "Open" on a newly-found artefact, not just when they open the
+  // drawer list themselves.
+  const [viewingArtefactId, setViewingArtefactId] = useState<string | null>(null);
   // Reception Intro Scene: a one-off cinematic prologue that plays before
   // the first real scene on every fresh "New Game" (never on Continue,
   // which always resumes wherever the player left off). Kept as its own
@@ -241,12 +250,6 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId };
     next = applySceneFlagsSet(next, scene?.flagsSet);
-    // The Missing Appendices scene is where the player first turns up the
-    // (unfinished) PID — from here it's reachable any time from the
-    // artefacts drawer, not just this scene.
-    if (sceneId === "ACT1_SCENE05") {
-      next = setArtefactStatus(next, "pid", "incomplete");
-    }
     return next;
   }
 
@@ -470,7 +473,14 @@ export default function GameRoot() {
 
   function handleAskRiskQuestion(question: RiskInvestigationQuestion) {
     if (!gameState || gameState.flags[question.flagOnAsk]) return;
-    const next = applyFlags(gameState, { [question.flagOnAsk]: true });
+    let next = applyFlags(gameState, { [question.flagOnAsk]: true });
+    if (question.revealsArtefactId) {
+      next = setArtefactStatus(
+        next,
+        question.revealsArtefactId,
+        question.revealsArtefactStatus ?? "incomplete"
+      );
+    }
     setGameState(next);
     saveGame(next);
   }
@@ -752,6 +762,37 @@ export default function GameRoot() {
                 canSubmit={toolComplete}
                 onSubmit={handleSubmitTool}
               />
+            ) : atInvestigation &&
+              investigationBank &&
+              pendingChoice &&
+              investigationBank.visualStyle === "outlook_inbox" ? (
+              <EmailInboxPanel
+                bank={investigationBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
+              />
+            ) : atInvestigation &&
+              investigationBank &&
+              pendingChoice &&
+              investigationBank.visualStyle === "teams_thread" ? (
+              <TeamsThreadPanel
+                bank={investigationBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
+              />
+            ) : atInvestigation &&
+              investigationBank &&
+              pendingChoice &&
+              investigationBank.visualStyle === "sharepoint_browser" ? (
+              <SharePointBrowserPanel
+                bank={investigationBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
+                onOpenArtefact={setViewingArtefactId}
+              />
             ) : atInvestigation && investigationBank && pendingChoice ? (
               <RiskInvestigationPanel
                 bank={investigationBank}
@@ -836,7 +877,11 @@ export default function GameRoot() {
       </main>
 
       <DebugDrawer gameState={gameState} onRestart={handleRestart} />
-      <ArtefactsDrawer gameState={gameState} />
+      <ArtefactsDrawer
+        gameState={gameState}
+        viewingId={viewingArtefactId}
+        onViewingChange={setViewingArtefactId}
+      />
     </div>
   );
 }

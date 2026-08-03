@@ -143,6 +143,23 @@
     "note": "Never appears on screen — represented via handwriting/voicemail icon, not a portrait",
     "portraitStatus": "placeholder — no real art yet"
   },
+  "ben": {
+    "id": "ben",
+    "name": "Ben",
+    "role": "Colleague, Group Tax Innovation & Change",
+    "professionalFunction": "Points the player toward the artefacts that matter when an investigation could sprawl in any direction",
+    "personalArc": null,
+    "discoveredVia": null,
+    "visualDescription": "Provisional — fuller characterisation is being drafted separately (see reception intro content)",
+    "voiceStyle": "Brief, practical, redirects without lecturing",
+    "recurringBeats": null,
+    "startingRelationship": 50,
+    "portraits": {
+      "neutral": "benneutral.png",
+      "warm": "bensmile.png"
+    },
+    "portraitStatus": "real art"
+  },
   "joan": {
     "id": "joan",
     "name": "Joan",

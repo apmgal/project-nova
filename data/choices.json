@@ -35,7 +35,7 @@
         "flags": {
           "investigated_emails": true
         },
-        "nextScene": "ACT1_SCENE02R"
+        "nextScene": "ACT1_SCENE02_EMAIL"
       },
       {
         "text": "Check the Teams messages.",
@@ -45,13 +45,64 @@
         "flags": {
           "investigated_teams": true
         },
-        "nextScene": "ACT1_SCENE02R"
+        "nextScene": "ACT1_SCENE02_TEAMS"
       },
       {
         "text": "Check the shared drive.",
         "effects": {
           "regulatoryReadiness": 5
         },
+        "nextScene": "ACT1_SCENE02_DRIVE"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE02_EMAIL": {
+    "choiceId": "CHOICE_ACT1_SCENE02_EMAIL",
+    "sourceScene": "ACT1_SCENE02_EMAIL",
+    "riskInvestigationId": "RISK_INVESTIGATION_ACT1_EMAIL",
+    "options": [
+      {
+        "text": "That's the inbox. Time to look elsewhere.",
+        "effects": {},
+        "nextScene": "ACT1_SCENE02_BEN"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE02_TEAMS": {
+    "choiceId": "CHOICE_ACT1_SCENE02_TEAMS",
+    "sourceScene": "ACT1_SCENE02_TEAMS",
+    "riskInvestigationId": "RISK_INVESTIGATION_ACT1_TEAMS",
+    "options": [
+      {
+        "text": "That's the channel. Time to look elsewhere.",
+        "effects": {},
+        "nextScene": "ACT1_SCENE02_BEN"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE02_BEN": {
+    "choiceId": "CHOICE_ACT1_SCENE02_BEN",
+    "sourceScene": "ACT1_SCENE02_BEN",
+    "options": [
+      {
+        "text": "Follow the link.",
+        "effects": {},
+        "nextScene": "ACT1_SCENE02_DRIVE"
+      }
+    ],
+    "needsWriting": false
+  },
+  "CHOICE_ACT1_SCENE02_DRIVE": {
+    "choiceId": "CHOICE_ACT1_SCENE02_DRIVE",
+    "sourceScene": "ACT1_SCENE02_DRIVE",
+    "riskInvestigationId": "RISK_INVESTIGATION_ACT1_SHAREPOINT",
+    "options": [
+      {
+        "text": "That's enough for now.",
+        "effects": {},
         "flags": {
           "investigated_drive": true,
           "found_draft_folder": true

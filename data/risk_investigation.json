@@ -1,4 +1,125 @@
 {
+  "RISK_INVESTIGATION_ACT1_EMAIL": {
+    "riskId": "act1_email",
+    "sourceScene": "ACT1_SCENE02_EMAIL",
+    "askTarget": "inbox",
+    "maxQuestions": 3,
+    "instructions": "A few unread messages are sitting in the project inbox.",
+    "visualStyle": "outlook_inbox",
+    "questions": [
+      {
+        "id": "q_email_ellis",
+        "dimension": "Ellis Grant",
+        "questionText": "Handover notes — Project NOVA",
+        "answerText": "Hi — sorry for the short notice on this. I've had to step away from NOVA earlier than planned. I didn't get as far as I wanted to on the documentation side. Apologies for leaving it mid-stream.\n\nEllis",
+        "flagOnAsk": "read_email_ellis"
+      },
+      {
+        "id": "q_email_camille",
+        "dimension": "Camille Okafor",
+        "questionText": "Following up — validation timeline",
+        "answerText": "Hi, following up again as I haven't heard back. Our validation slots are booked around the dates in the last plan I saw, but nobody's confirmed whether that's still accurate. If it's changed, I need to know before we lose the slot.\n\nCamille",
+        "flagOnAsk": "read_email_camille"
+      },
+      {
+        "id": "q_email_tomasz",
+        "dimension": "Tomasz Nowak",
+        "questionText": "Re: Equipment order — need a confirmed spec",
+        "answerText": "Hi, we're ready to place the order but I still don't have a confirmed final spec from engineering. The version I have is marked draft. Can someone confirm which one is current before I commit us?\n\nTomasz",
+        "flagOnAsk": "read_email_tomasz"
+      }
+    ]
+  },
+  "RISK_INVESTIGATION_ACT1_TEAMS": {
+    "riskId": "act1_teams",
+    "sourceScene": "ACT1_SCENE02_TEAMS",
+    "askTarget": "project_channel",
+    "maxQuestions": 4,
+    "visualStyle": "teams_thread",
+    "questions": [
+      {
+        "id": "q_teams_1",
+        "dimension": "Vaughn Kessler",
+        "questionText": "",
+        "answerText": "Has anyone actually confirmed the go-live date with QA? I keep hearing different numbers.",
+        "flagOnAsk": "read_teams_1"
+      },
+      {
+        "id": "q_teams_2",
+        "dimension": "Camille Okafor",
+        "questionText": "",
+        "answerText": "Not from me. Nobody's asked.",
+        "flagOnAsk": "read_teams_2"
+      },
+      {
+        "id": "q_teams_3",
+        "dimension": "Daniel Atwell",
+        "questionText": "Vaughn Kessler: Has anyone actually confirmed the go-live date with QA?",
+        "answerText": "Can we get everyone on a call this week? This channel isn't cutting it.",
+        "flagOnAsk": "read_teams_3"
+      },
+      {
+        "id": "q_teams_4",
+        "dimension": "Daniel Atwell",
+        "questionText": "",
+        "answerText": "Has anyone updated the PID?",
+        "flagOnAsk": "read_teams_4"
+      }
+    ]
+  },
+  "RISK_INVESTIGATION_ACT1_SHAREPOINT": {
+    "riskId": "act1_sharepoint",
+    "sourceScene": "ACT1_SCENE02_DRIVE",
+    "askTarget": "sharepoint",
+    "maxQuestions": 6,
+    "visualStyle": "sharepoint_browser",
+    "questions": [
+      {
+        "id": "q_drive_meeting_notes",
+        "dimension": "Meeting Notes",
+        "questionText": "",
+        "answerText": "Minutes from three months ago. Nobody's touched them since.",
+        "flagOnAsk": "browsed_meeting_notes"
+      },
+      {
+        "id": "q_drive_archive",
+        "dimension": "Archive",
+        "questionText": "",
+        "answerText": "Old versions, half of them named \"FINAL_v2_reallyfinal.\"",
+        "flagOnAsk": "browsed_archive"
+      },
+      {
+        "id": "q_drive_kickoff",
+        "dimension": "Kickoff_Deck_v2.pptx",
+        "questionText": "",
+        "answerText": "The kickoff deck. The objectives slide still has placeholder text on it.",
+        "flagOnAsk": "browsed_kickoff_deck"
+      },
+      {
+        "id": "q_drive_budget",
+        "dimension": "Budget_Tracker.xlsx",
+        "questionText": "",
+        "answerText": "A budget tracker. Half the formulas reference a tab that isn't there anymore.",
+        "flagOnAsk": "browsed_budget_tracker"
+      },
+      {
+        "id": "q_drive_raid",
+        "dimension": "RAID_Log.xlsx",
+        "questionText": "",
+        "answerText": "Three risks logged, all from month one. Nothing added since.",
+        "flagOnAsk": "browsed_raid_log"
+      },
+      {
+        "id": "q_drive_pid",
+        "dimension": "Project_Initiation_Document.docx",
+        "questionText": "",
+        "answerText": "",
+        "flagOnAsk": "found_pid",
+        "revealsArtefactId": "pid",
+        "revealsArtefactStatus": "incomplete"
+      }
+    ]
+  },
   "RISK_INVESTIGATION_CONTRACTOR": {
     "riskId": "contractor",
     "sourceScene": "ACT2_SCENE04",

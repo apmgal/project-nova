@@ -232,6 +232,8 @@ const KNOWN_REAL_ASSETS = new Set([
   "camille.jpg",
   "priya.jpg",
   "vaughn.jpg",
+  "benneutral.png",
+  "bensmile.png",
 ]);
 
 export interface ResolvedPortrait {

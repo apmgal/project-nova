@@ -8,6 +8,12 @@ import { ARTEFACT_REGISTRY } from "@/lib/nova/artefacts";
 
 interface ArtefactsDrawerProps {
   gameState: GameState;
+  /** Which artefact's full-size viewer is showing, controlled by the
+   * parent so callers outside this component (e.g. SharePointBrowserPanel's
+   * DocumentDiscoveredCard, via GameRoot) can jump straight to the viewer
+   * without waiting for the player to open the drawer list themselves. */
+  viewingId: string | null;
+  onViewingChange: (id: string | null) => void;
 }
 
 /**
@@ -22,9 +28,8 @@ interface ArtefactsDrawerProps {
  * setArtefactStatus in lib/nova/state.ts) without ever becoming a second
  * drawer entry.
  */
-export default function ArtefactsDrawer({ gameState }: ArtefactsDrawerProps) {
+export default function ArtefactsDrawer({ gameState, viewingId, onViewingChange }: ArtefactsDrawerProps) {
   const [open, setOpen] = useState(false);
-  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const foundIds = Object.keys(gameState.artefacts);
   if (foundIds.length === 0) return null;
@@ -38,10 +43,10 @@ export default function ArtefactsDrawer({ gameState }: ArtefactsDrawerProps) {
         {open && (
           <div className="w-72 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950/95 shadow-xl">
             <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-2">
-              <span className="font-semibold text-zinc-300">Documents</span>
+              <span className="font-semibold text-zinc-300">Investigation Board</span>
               <button
                 onClick={() => setOpen(false)}
-                aria-label="Close documents drawer"
+                aria-label="Close investigation board"
                 className="text-zinc-500 hover:text-zinc-300"
               >
                 <X size={14} />
@@ -55,7 +60,7 @@ export default function ArtefactsDrawer({ gameState }: ArtefactsDrawerProps) {
                 return (
                   <li key={id}>
                     <button
-                      onClick={() => setViewingId(id)}
+                      onClick={() => onViewingChange(id)}
                       className="flex w-full flex-col items-start gap-0.5 rounded-md px-2 py-2 text-left hover:bg-zinc-800"
                     >
                       <span className="text-[13px] font-medium text-zinc-100">{def.title}</span>
@@ -81,14 +86,14 @@ export default function ArtefactsDrawer({ gameState }: ArtefactsDrawerProps) {
           className="flex items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-900 px-3 py-2 font-semibold text-zinc-300 shadow hover:bg-zinc-800"
         >
           <FolderOpen size={14} />
-          {open ? "Close" : `Documents (${foundIds.length})`}
+          {open ? "Close" : `Investigation Board (${foundIds.length})`}
         </button>
       </div>
 
       {viewing && viewingStatus && (
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-6"
-          onClick={() => setViewingId(null)}
+          onClick={() => onViewingChange(null)}
         >
           <div
             className="flex max-h-full w-full max-w-2xl flex-col items-center gap-3"
@@ -107,7 +112,7 @@ export default function ArtefactsDrawer({ gameState }: ArtefactsDrawerProps) {
               {viewing.caption[viewingStatus]}
             </p>
             <button
-              onClick={() => setViewingId(null)}
+              onClick={() => onViewingChange(null)}
               className="rounded-full border border-zinc-700 bg-zinc-900 px-4 py-1.5 text-[12px] font-semibold text-zinc-300 hover:bg-zinc-800"
             >
               Close

@@ -192,6 +192,12 @@ export interface RiskInvestigationQuestion {
   /** Flag set true the moment this question is asked. Never set false —
    * an unasked question just leaves it absent. */
   flagOnAsk: string;
+  /** If set, asking this question reveals (or updates) an artefact on the
+   * Investigation Board, e.g. finding the PID in the SharePoint browser. */
+  revealsArtefactId?: string;
+  /** Status to set the revealed artefact to. Defaults to "incomplete" if
+   * `revealsArtefactId` is set but this is omitted. */
+  revealsArtefactStatus?: ArtefactStatus;
 }
 
 export interface RiskInvestigationBank {
@@ -203,6 +209,10 @@ export interface RiskInvestigationBank {
   maxQuestions: number;
   instructions?: string;
   questions: RiskInvestigationQuestion[];
+  /** Opts this bank into bespoke chrome (Outlook inbox, Teams thread,
+   * SharePoint file browser) instead of the default risk-investigation
+   * panel UI, mirroring ToolScreenBlock's visualStyle pattern. */
+  visualStyle?: "outlook_inbox" | "teams_thread" | "sharepoint_browser";
 }
 
 export interface Character {

@@ -48,7 +48,103 @@
       "previousScene": "ACT1_SCENE01"
     },
     "nextScenes": [
-      "ACT1_SCENE03"
+      "ACT1_SCENE02_EMAIL",
+      "ACT1_SCENE02_TEAMS",
+      "ACT1_SCENE02_DRIVE"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02_EMAIL": {
+    "sceneId": "ACT1_SCENE02_EMAIL",
+    "title": "The Inbox",
+    "act": "Act 1",
+    "screenRange": "3–5",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Evidence-based diagnostics",
+    "contentSummary": "Player browses the project inbox for anything Ellis or the team left behind.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_EMAIL",
+    "choicesId": "CHOICE_ACT1_SCENE02_EMAIL",
+    "trigger": {
+      "previousScene": "ACT1_SCENE02"
+    },
+    "nextScenes": [
+      "ACT1_SCENE02_BEN"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02_TEAMS": {
+    "sceneId": "ACT1_SCENE02_TEAMS",
+    "title": "The Channel",
+    "act": "Act 1",
+    "screenRange": "3–5",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [
+      "vaughn",
+      "camille",
+      "daniel"
+    ],
+    "pmConcept": "Evidence-based diagnostics",
+    "contentSummary": "Player scrolls the project's Teams channel and finds it's gone quiet.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_TEAMS",
+    "choicesId": "CHOICE_ACT1_SCENE02_TEAMS",
+    "trigger": {
+      "previousScene": "ACT1_SCENE02"
+    },
+    "nextScenes": [
+      "ACT1_SCENE02_BEN"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02_BEN": {
+    "sceneId": "ACT1_SCENE02_BEN",
+    "title": "A Nudge",
+    "act": "Act 1",
+    "screenRange": "3–5",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [
+      "ben"
+    ],
+    "pmConcept": "Evidence-based diagnostics",
+    "contentSummary": "Ben points the player toward the SharePoint folder where the real documentation lives.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_BEN",
+    "choicesId": "CHOICE_ACT1_SCENE02_BEN",
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT1_SCENE02_DRIVE"
+    ],
+    "needsWriting": false
+  },
+  "ACT1_SCENE02_DRIVE": {
+    "sceneId": "ACT1_SCENE02_DRIVE",
+    "title": "The SharePoint Folder",
+    "act": "Act 1",
+    "screenRange": "3–5",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Evidence-based diagnostics",
+    "contentSummary": "Player browses Project NOVA's SharePoint folder and finds the PID.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT1_SCENE02_DRIVE",
+    "choicesId": "CHOICE_ACT1_SCENE02_DRIVE",
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT1_SCENE02R"
     ],
     "needsWriting": false
   },
