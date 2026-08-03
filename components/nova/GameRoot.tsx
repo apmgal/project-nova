@@ -46,6 +46,7 @@ import {
   foldBackground,
   resolveBackground,
   PANORAMA_GROUPS,
+  BACKGROUND_KEN_BURNS_OVERRIDES,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -875,7 +876,11 @@ export default function GameRoot() {
         <PanoramaBackground key="panorama" src={panorama.src} focusPercent={panorama.focusPercent} />
       ) : (
         resolvedBackground?.src && (
-          <SceneBackground key={resolvedBackground.src} src={resolvedBackground.src} />
+          <SceneBackground
+            key={resolvedBackground.src}
+            src={resolvedBackground.src}
+            kenBurns={backgroundKey ? BACKGROUND_KEN_BURNS_OVERRIDES[backgroundKey] : undefined}
+          />
         )
       )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">

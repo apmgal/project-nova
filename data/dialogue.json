@@ -23,7 +23,8 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either."
+        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
+        "background": "hallway_stairs"
       },
       {
         "speaker": "priya",

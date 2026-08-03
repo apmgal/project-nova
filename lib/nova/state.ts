@@ -8,6 +8,7 @@ import type {
   ArtefactStatus,
 } from "./types";
 import { getCharacter, getDefaultGameState } from "./data";
+import type { KenBurnsConfig } from "./narrative/kenBurns";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
 
@@ -354,6 +355,28 @@ const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
   bg_reception: "bg_reception_v2.png",
   bg_marcus_office: "bg_marcus_office.jpg",
   bg_hallway: "bg_hallway_a.png",
+  bg_hallway_stairs: "bg_hallway_stairs.png",
+};
+
+/**
+ * Per-background-key Ken Burns tuning, for a specific shot that needs a
+ * stronger push than SceneBackground's own gentle ambient default —
+ * checked by GameRoot ahead of that default whenever it renders a plain
+ * (non-panorama) background. "hallway_stairs" (the shot right as Joan
+ * sends the player up to Mike E.'s office) wants to read as "a sideways
+ * glance, then the stairs coming closer" — a more noticeable horizontal
+ * drift plus a tighter, faster zoom-in than the default's barely-there
+ * one, tuned for the pace of a couple of dialogue lines rather than a
+ * long static scene.
+ */
+export const BACKGROUND_KEN_BURNS_OVERRIDES: Record<string, KenBurnsConfig> = {
+  hallway_stairs: {
+    scaleFrom: 1.1,
+    scaleTo: 1.32,
+    xToPercent: 5,
+    yToPercent: -1.5,
+    durationMs: 9000,
+  },
 };
 
 function stripExtension(filename: string): string {
