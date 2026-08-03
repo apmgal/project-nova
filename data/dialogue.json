@@ -244,7 +244,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "You go looking for the original Business Case to check it against what you've found. The main document opens fine. The appendices don't exist.",
-        "background": "player_desk"
+        "background": "player_desk",
+        "ambient": "sharepoint_browsing"
       },
       {
         "speaker": "narrator",
@@ -259,7 +260,8 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Tucked behind it, a single scanned page — handwriting, not typed. A notebook page, out of place among the spreadsheets."
+        "text": "Tucked behind it, a single scanned page — handwriting, not typed. A notebook page, out of place among the spreadsheets.",
+        "ambient": "none"
       },
       {
         "speaker": "ellis",
