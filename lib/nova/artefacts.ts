@@ -40,9 +40,20 @@ export const ARTEFACT_REGISTRY: Record<string, ArtefactDefinition> = {
       // the previous line's already-drawn text — fixed via an erase-then-
       // draw two-pass patch) and filled in the Stakeholders table's
       // Project Sponsor row (was blank "[Name TBC]"/"[Insert Title]") with
-      // Mike Elloian / VP of Tax. Renamed rather than overwritten per
-      // project convention — _v2 is already live.
-      incomplete: "/assets/documents/pid_incomplete_v3.png",
+      // Mike Elloian / VP of Tax.
+      // _v4 (on top of _v3): replaced the generic Objectives/Scope
+      // placeholder bullets with real (still appropriately half-finished)
+      // Project NOVA content — budget/ROI tied to the £12M figure from
+      // Ellis's kickoff email and the Act 3 Benefits Register, NHS
+      // contract framed around the 24-week first-production gate, and a
+      // proper Scope + out-of-scope line. Steering Group row intentionally
+      // left as "[Names TBC]" — the shaded table row has no vertical room
+      // left between the Sponsor row and the Project Manager row (torn
+      // page edge sits right below it) to fit all 6 names + titles at a
+      // legible size; revisit only with a wider layout change. Renamed
+      // rather than overwritten per project convention — _v2 and _v3 are
+      // already live.
+      incomplete: "/assets/documents/pid_incomplete_v4.png",
       complete: "/assets/documents/pid_complete.png",
     },
     caption: {
