@@ -348,7 +348,10 @@ export function foldBackground(
  * same pattern as portraits' KNOWN_REAL_ASSETS.
  */
 const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
-  bg_reception: "bg_reception.jpg",
+  // _v2: replaced with a brighter, more on-brand lobby shot. Renamed
+  // rather than overwriting bg_reception.jpg per project convention —
+  // that file stays on disk, just unreferenced.
+  bg_reception: "bg_reception_v2.png",
   bg_marcus_office: "bg_marcus_office.jpg",
   bg_hallway: "bg_hallway_a.png",
 };
