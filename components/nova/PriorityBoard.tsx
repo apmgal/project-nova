@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { User } from "lucide-react";
 import type { ToolScreenBlock } from "@/lib/nova/types";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
@@ -104,6 +105,71 @@ const FALLBACK_MOSCOW_STYLE: MoscowQuadrantStyle = {
   chipText: "text-zinc-100",
 };
 
+interface PowerInterestQuadrantStyle {
+  cardBg: string;
+  labelText: string;
+  subtitleText: string;
+  placeholderText: string;
+  chipBg: string;
+  chipText: string;
+}
+
+/**
+ * Stakeholder Grid's own color per quadrant, keyed by the exact bucket
+ * strings TOOL_ACT2_SCENE03_STAKEHOLDER_GRID carries ("Keep Satisfied"/
+ * "Manage Closely"/"Monitor"/"Keep Informed"). Unlike MoSCoW, quadrant
+ * names don't collapse to a single letter, so each box shows its full
+ * name plus quadrantDefinitions' "High power, Low interest" subtitle
+ * directly, rather than a corner badge. Colors are a fourth distinct
+ * rose/violet/zinc/cyan set — not reused from MoSCoW's green/sky/indigo/
+ * blue — since these two tools can never be on screen at the same time
+ * but share the same component, and picking visually distinct palettes
+ * keeps a screenshot instantly identifiable as one or the other.
+ */
+const POWER_INTEREST_QUADRANT_STYLE: Record<string, PowerInterestQuadrantStyle> = {
+  "Keep Satisfied": {
+    cardBg: "bg-rose-300",
+    labelText: "text-rose-950",
+    subtitleText: "text-rose-900",
+    placeholderText: "text-rose-900",
+    chipBg: "bg-rose-950/25",
+    chipText: "text-rose-950",
+  },
+  "Manage Closely": {
+    cardBg: "bg-violet-500",
+    labelText: "text-violet-50",
+    subtitleText: "text-violet-100",
+    placeholderText: "text-violet-100",
+    chipBg: "bg-black/25",
+    chipText: "text-violet-50",
+  },
+  Monitor: {
+    cardBg: "bg-zinc-600",
+    labelText: "text-zinc-100",
+    subtitleText: "text-zinc-300",
+    placeholderText: "text-zinc-300",
+    chipBg: "bg-black/25",
+    chipText: "text-zinc-100",
+  },
+  "Keep Informed": {
+    cardBg: "bg-cyan-400",
+    labelText: "text-cyan-950",
+    subtitleText: "text-cyan-900",
+    placeholderText: "text-cyan-900",
+    chipBg: "bg-cyan-950/25",
+    chipText: "text-cyan-950",
+  },
+};
+
+const FALLBACK_POWER_INTEREST_STYLE: PowerInterestQuadrantStyle = {
+  cardBg: "bg-zinc-700",
+  labelText: "text-zinc-100",
+  subtitleText: "text-zinc-300",
+  placeholderText: "text-zinc-300",
+  chipBg: "bg-black/25",
+  chipText: "text-zinc-100",
+};
+
 /**
  * Generic "assign every card to a bucket, optionally at a real cost"
  * interaction — covers both MoSCoW prioritisation (costed) and the
@@ -113,11 +179,14 @@ const FALLBACK_MOSCOW_STYLE: MoscowQuadrantStyle = {
  * placed can be reselected and moved to a different bucket, refunding
  * its old cost if it had one. Driven entirely by a tool_screens.json
  * entry; nothing here knows which specific board it's rendering — except
- * for one visual fork: toolScreen.visualStyle === "moscow_quadrant"
- * (set only on TOOL_ACT2_SCENE02_MOSCOW) swaps the plain dashed bucket
- * grid for the four-corner-badge quadrant layout. The Stakeholder Grid
- * has no visualStyle set, so it always gets the plain grid — its bucket
- * names don't map to single letters the way Must/Should/Could/Won't do.
+ * for two visual forks on toolScreen.visualStyle: "moscow_quadrant" (set
+ * only on TOOL_ACT2_SCENE02_MOSCOW) swaps the plain dashed bucket grid
+ * for the four-corner-badge quadrant layout, and
+ * "power_interest_quadrant" (set only on
+ * TOOL_ACT2_SCENE03_STAKEHOLDER_GRID) swaps it for a 2x2 grid with real
+ * power (vertical)/interest (horizontal) axes and person-icon stakeholder
+ * chips. Neither visualStyle set falls back to the original plain
+ * dashed-bucket grid.
  */
 export default function PriorityBoard({
   toolScreen,
@@ -142,6 +211,7 @@ export default function PriorityBoard({
   const buckets = toolScreen.buckets ?? [];
   const unplacedCards = cards.filter((card) => !placements[card.id]);
   const isMoscowQuadrant = toolScreen.visualStyle === "moscow_quadrant";
+  const isPowerInterestQuadrant = toolScreen.visualStyle === "power_interest_quadrant";
 
   function handleSelectCard(cardId: string) {
     setSelectedCardId((current) => (current === cardId ? null : cardId));
@@ -231,6 +301,114 @@ export default function PriorityBoard({
             );
           })}
         </div>
+      ) : isPowerInterestQuadrant ? (
+        <div className="relative">
+          {/* Axis lines/arrowheads — one SVG so the vertical (power) and
+             horizontal (interest) strokes always meet at the exact same
+             corner point rather than two independently-positioned CSS
+             elements that could drift apart. viewBox coordinates are a
+             fixed design reference (matches the approved mockup);
+             preserveAspectRatio="none" lets it stretch to the real
+             rendered box without needing to recompute exact pixels here. */}
+          <svg
+            viewBox="0 0 700 302"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full"
+          >
+            <defs>
+              <marker id="pi-axis-arrow-up" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
+                <path d="M0,6 L4,0 L8,6 Z" className="fill-zinc-400" />
+              </marker>
+              <marker id="pi-axis-arrow-right" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" className="fill-zinc-400" />
+              </marker>
+            </defs>
+            {/* Power: points UP — higher on the axis means more power. */}
+            <line
+              x1="20"
+              y1="272"
+              x2="20"
+              y2="14"
+              className="stroke-zinc-400"
+              strokeWidth="2"
+              markerEnd="url(#pi-axis-arrow-up)"
+            />
+            {/* Interest: points RIGHT — further right means more interest. */}
+            <line
+              x1="20"
+              y1="272"
+              x2="666"
+              y2="272"
+              className="stroke-zinc-400"
+              strokeWidth="2"
+              markerEnd="url(#pi-axis-arrow-right)"
+            />
+          </svg>
+
+          <div className="pointer-events-none absolute left-0 top-0 flex h-[272px] w-5 items-center justify-center">
+            <span className="[writing-mode:vertical-rl] rotate-180 text-[11px] font-bold tracking-wide text-zinc-400">
+              POWER
+            </span>
+          </div>
+          <div className="pointer-events-none absolute bottom-0 left-5 right-0 flex h-[30px] items-center justify-center">
+            <span className="text-[11px] font-bold tracking-wide text-zinc-400">INTEREST</span>
+          </div>
+
+          <div className="ml-7 pb-[30px]">
+            <div className="grid grid-cols-2 gap-3">
+              {buckets.map((bucket) => {
+                const style = POWER_INTEREST_QUADRANT_STYLE[bucket] ?? FALLBACK_POWER_INTEREST_STYLE;
+                const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+                const definition = toolScreen.quadrantDefinitions?.[bucket];
+                return (
+                  <button
+                    key={bucket}
+                    onClick={() => handleAssign(bucket)}
+                    aria-label={bucket}
+                    className={`flex min-h-[130px] flex-col gap-1.5 rounded-2xl p-3 text-left transition-all ${style.cardBg} ${
+                      selectedCardId ? "ring-2 ring-white/60" : ""
+                    }`}
+                  >
+                    <span className={`text-[11px] font-bold uppercase tracking-wide ${style.labelText}`}>
+                      {bucket}
+                    </span>
+                    {definition && (
+                      <span className={`text-[10px] ${style.subtitleText} opacity-90`}>{definition}</span>
+                    )}
+                    {cardsHere.length === 0 ? (
+                      <span className={`mt-auto text-[11px] ${style.placeholderText} opacity-70`}>
+                        Drop stakeholders here
+                      </span>
+                    ) : (
+                      <div className="mt-auto flex flex-wrap gap-1.5">
+                        {cardsHere.map((card) => {
+                          const isSelected = selectedCardId === card.id;
+                          return (
+                            <span
+                              key={card.id}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleSelectCard(card.id);
+                              }}
+                              className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+                                isSelected
+                                  ? "bg-white text-zinc-900 ring-2 ring-white"
+                                  : `${style.chipBg} ${style.chipText} hover:brightness-110`
+                              }`}
+                            >
+                              {card.text}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {buckets.map((bucket) => {
@@ -287,6 +465,38 @@ export default function PriorityBoard({
         <div className="flex flex-wrap gap-2">
           {unplacedCards.map((card) => {
             const isSelected = selectedCardId === card.id;
+            if (isPowerInterestQuadrant) {
+              // Person-icon avatar + name underneath, rather than a plain
+              // text chip — stakeholders read as people to place, not
+              // items to sort, matching the approved reference mockup.
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => handleSelectCard(card.id)}
+                  className="flex w-16 flex-col items-center gap-1 text-center"
+                >
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] transition-colors ${
+                      isSelected
+                        ? "border-emerald-400 bg-emerald-800 ring-2 ring-emerald-400/40"
+                        : "border-zinc-600 bg-zinc-800 hover:border-zinc-500"
+                    }`}
+                  >
+                    <User
+                      className={`h-5 w-5 ${isSelected ? "text-emerald-100" : "text-zinc-400"}`}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span
+                    className={`text-[10px] leading-tight ${
+                      isSelected ? "font-semibold text-white" : "text-zinc-300"
+                    }`}
+                  >
+                    {card.text}
+                  </span>
+                </button>
+              );
+            }
             return (
               <button
                 key={card.id}

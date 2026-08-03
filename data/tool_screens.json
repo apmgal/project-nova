@@ -232,6 +232,7 @@
     "toolId": "TOOL_ACT2_SCENE03_STAKEHOLDER_GRID",
     "sourceScene": "ACT2_SCENE03",
     "type": "power_interest_grid",
+    "visualStyle": "power_interest_quadrant",
     "instructions": "Place each stakeholder on the grid by power and interest. There is no correct placement — this is a judgement call, not a graded exercise.",
     "quadrants": [
       "Manage Closely",
@@ -261,7 +262,7 @@
     "selectionBehavior": "tap_to_select_then_tap_quadrant",
     "selectedCardStyle": "Card visibly recolors/highlights while selected, same as PESTLE/SWOT.",
     "completionCondition": "All 7 stakeholders placed in some quadrant",
-    "buckets": ["Manage Closely", "Keep Satisfied", "Keep Informed", "Monitor"],
+    "buckets": ["Keep Satisfied", "Manage Closely", "Monitor", "Keep Informed"],
     "cards": [
       { "id": "marcus", "text": "Mike Elloian" },
       {

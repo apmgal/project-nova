@@ -215,7 +215,12 @@ export interface Character {
 //     Stakeholder Grid (below) still gets the plain grid since its bucket
 //     names don't map to single letters.
 //   - "power_interest_grid" (Stakeholder Grid): a free-placement variant of
-//     priority_assignment with no cost.
+//     priority_assignment with no cost. Sets its own
+//     visualStyle: "power_interest_quadrant" for a 2x2 quadrant
+//     presentation with real power/interest axes (arrows + labels) instead
+//     of the plain dashed bucket grid — same placement/completion logic
+//     underneath, and a third consumer of the shared visualStyle field
+//     alongside WBS's warehouse_blueprint and MoSCoW's moscow_quadrant.
 //   - "cost_review_with_descope" (CBS): auto-summed costs, cut one task if
 //     over threshold.
 //   - "pick_n_of_m_swipeable" (Team Selection): browse via swipe, toggle
@@ -310,6 +315,11 @@ export interface ToolScreenBlock {
   selectionBehavior?: string;
   selectedCardStyle?: string;
   completionCondition?: string;
+  /** power_interest_grid + visualStyle: "power_interest_quadrant" only —
+   * the "High power, Low interest" style subtitle shown under each
+   * quadrant's name, keyed by the exact bucket string. Purely descriptive;
+   * placement/completion logic never reads this. */
+  quadrantDefinitions?: Record<string, string>;
   /** priority_assignment only: which ProjectMetrics key placements deduct
    * from/refund to. Defaults to "budgetRemaining" if unset. */
   budgetVariable?: string;
@@ -326,9 +336,14 @@ export interface ToolScreenBlock {
     reactionFlag: string;
     note?: string;
   };
-  /** sort_into_buckets only: an alternate presentation (e.g. a background
-   * image with clickable zone outlines instead of a plain card grid).
-   * Placement/completion logic is identical either way. */
+  /** An alternate presentation for the same underlying placement/
+   * completion logic — never changes what counts as a valid placement or
+   * when the tool is complete, only how it renders. Three known values:
+   * sort_into_buckets' "warehouse_blueprint" (WBS — background image with
+   * clickable zone outlines), priority_assignment's "moscow_quadrant"
+   * (MoSCoW — 2x2 corner-badge grid), and power_interest_grid's
+   * "power_interest_quadrant" (Stakeholder Grid — 2x2 grid with real
+   * power/interest axes). Unset means the plain card/dashed-bucket grid. */
   visualStyle?: string;
   /** sort_into_buckets + visualStyle only: filename hint for the
    * background image to show behind the zones, following a "bg_<assets.
