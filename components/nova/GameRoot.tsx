@@ -792,21 +792,34 @@ export default function GameRoot() {
         />
       )}
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col justify-end px-4 py-6">
-        {isAnnouncement ? (
-          <AnnouncementCard lines={displayLines} actionContent={actionContent} />
-        ) : (
-          <DialogueTranscript
-            sceneAct={scene.act}
-            sceneTitle={scene.title}
-            lines={displayLines}
-            revealedCount={revealedCount}
-            relationships={gameState.relationships}
-            inDialogue={inDialogue}
-            onAdvance={handleAdvanceLine}
-            actionContent={actionContent}
-          />
-        )}
+      <main className="relative z-10 flex-1 overflow-y-auto px-4 py-6">
+        {/* min-h-full + justify-end keeps short scenes anchored to the
+           bottom (the usual look — dialogue/tool sitting just above the
+           header, not stranded at the top of an empty page). Once actual
+           content is taller than the viewport (a long tool board, a long
+           dialogue backlog), min-height just becomes a floor: the wrapper
+           grows past 100% instead of clipping, justify-end has nothing
+           left to push against, and this <main>'s own overflow-y-auto is
+           what actually scrolls — previously that overflow lived on the
+           parent, which also had overflow-hidden, so anything past the
+           bottom of the viewport (e.g. a tall MoSCoW board's Submit
+           button) was silently cut off with no way to reach it. */}
+        <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-end">
+          {isAnnouncement ? (
+            <AnnouncementCard lines={displayLines} actionContent={actionContent} />
+          ) : (
+            <DialogueTranscript
+              sceneAct={scene.act}
+              sceneTitle={scene.title}
+              lines={displayLines}
+              revealedCount={revealedCount}
+              relationships={gameState.relationships}
+              inDialogue={inDialogue}
+              onAdvance={handleAdvanceLine}
+              actionContent={actionContent}
+            />
+          )}
+        </div>
       </main>
 
       <DebugDrawer gameState={gameState} onRestart={handleRestart} />
