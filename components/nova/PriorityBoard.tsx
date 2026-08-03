@@ -302,111 +302,91 @@ export default function PriorityBoard({
           })}
         </div>
       ) : isPowerInterestQuadrant ? (
-        <div className="relative">
-          {/* Axis lines/arrowheads — one SVG so the vertical (power) and
-             horizontal (interest) strokes always meet at the exact same
-             corner point rather than two independently-positioned CSS
-             elements that could drift apart. viewBox coordinates are a
-             fixed design reference (matches the approved mockup);
-             preserveAspectRatio="none" lets it stretch to the real
-             rendered box without needing to recompute exact pixels here. */}
-          <svg
-            viewBox="0 0 700 302"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full"
-          >
-            <defs>
-              <marker id="pi-axis-arrow-up" markerWidth="8" markerHeight="8" refX="4" refY="0" orient="auto">
-                <path d="M0,6 L4,0 L8,6 Z" className="fill-zinc-400" />
-              </marker>
-              <marker id="pi-axis-arrow-right" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-                <path d="M0,0 L8,4 L0,8 Z" className="fill-zinc-400" />
-              </marker>
-            </defs>
-            {/* Power: points UP — higher on the axis means more power. */}
-            <line
-              x1="20"
-              y1="272"
-              x2="20"
-              y2="14"
-              className="stroke-zinc-400"
-              strokeWidth="2"
-              markerEnd="url(#pi-axis-arrow-up)"
-            />
-            {/* Interest: points RIGHT — further right means more interest. */}
-            <line
-              x1="20"
-              y1="272"
-              x2="666"
-              y2="272"
-              className="stroke-zinc-400"
-              strokeWidth="2"
-              markerEnd="url(#pi-axis-arrow-right)"
-            />
-          </svg>
-
-          <div className="pointer-events-none absolute left-0 top-0 flex h-[272px] w-5 items-center justify-center">
-            <span className="[writing-mode:vertical-rl] rotate-180 text-[11px] font-bold tracking-wide text-zinc-400">
+        // A single CSS grid — [axis column, grid column] x [content row,
+        // axis row] — rather than absolutely-positioned/SVG-overlay axes.
+        // Real column/row gaps (gap-x-4/gap-y-3) give the axes genuine
+        // breathing room from the quadrant grid instead of touching it,
+        // and native grid alignment means the vertical axis always
+        // matches the grid's actual rendered height and the horizontal
+        // axis always matches its actual rendered width — no manual pixel
+        // math or viewBox scaling to get wrong at odd container widths
+        // (which is what produced misaligned/duplicated arrowheads in an
+        // earlier SVG-based version of this).
+        <div className="grid grid-cols-[28px_1fr] grid-rows-[1fr_auto] items-stretch gap-x-4 gap-y-3">
+          {/* Power: points UP — higher on the axis means more power. */}
+          <div className="flex gap-1">
+            <span className="flex w-4 items-center justify-center text-[11px] font-bold tracking-wide text-zinc-400 [writing-mode:vertical-rl] rotate-180">
               POWER
             </span>
-          </div>
-          <div className="pointer-events-none absolute bottom-0 left-5 right-0 flex h-[30px] items-center justify-center">
-            <span className="text-[11px] font-bold tracking-wide text-zinc-400">INTEREST</span>
+            <div className="flex w-4 flex-col items-center">
+              <div className="h-0 w-0 border-x-[5px] border-x-transparent border-b-[7px] border-b-zinc-400" />
+              <div className="w-0.5 flex-1 bg-zinc-400" />
+            </div>
           </div>
 
-          <div className="ml-7 pb-[30px]">
-            <div className="grid grid-cols-2 gap-3">
-              {buckets.map((bucket) => {
-                const style = POWER_INTEREST_QUADRANT_STYLE[bucket] ?? FALLBACK_POWER_INTEREST_STYLE;
-                const cardsHere = cards.filter((card) => placements[card.id] === bucket);
-                const definition = toolScreen.quadrantDefinitions?.[bucket];
-                return (
-                  <button
-                    key={bucket}
-                    onClick={() => handleAssign(bucket)}
-                    aria-label={bucket}
-                    className={`flex min-h-[130px] flex-col gap-1.5 rounded-2xl p-3 text-left transition-all ${style.cardBg} ${
-                      selectedCardId ? "ring-2 ring-white/60" : ""
-                    }`}
-                  >
-                    <span className={`text-[11px] font-bold uppercase tracking-wide ${style.labelText}`}>
-                      {bucket}
+          <div className="grid grid-cols-2 gap-3">
+            {buckets.map((bucket) => {
+              const style = POWER_INTEREST_QUADRANT_STYLE[bucket] ?? FALLBACK_POWER_INTEREST_STYLE;
+              const cardsHere = cards.filter((card) => placements[card.id] === bucket);
+              const definition = toolScreen.quadrantDefinitions?.[bucket];
+              return (
+                <button
+                  key={bucket}
+                  onClick={() => handleAssign(bucket)}
+                  aria-label={bucket}
+                  className={`flex min-h-[130px] flex-col gap-1.5 rounded-2xl p-3 text-left transition-all ${style.cardBg} ${
+                    selectedCardId ? "ring-2 ring-white/60" : ""
+                  }`}
+                >
+                  <span className={`text-[11px] font-bold uppercase tracking-wide ${style.labelText}`}>
+                    {bucket}
+                  </span>
+                  {definition && (
+                    <span className={`text-[10px] ${style.subtitleText} opacity-90`}>{definition}</span>
+                  )}
+                  {cardsHere.length === 0 ? (
+                    <span className={`mt-auto text-[11px] ${style.placeholderText} opacity-70`}>
+                      Drop stakeholders here
                     </span>
-                    {definition && (
-                      <span className={`text-[10px] ${style.subtitleText} opacity-90`}>{definition}</span>
-                    )}
-                    {cardsHere.length === 0 ? (
-                      <span className={`mt-auto text-[11px] ${style.placeholderText} opacity-70`}>
-                        Drop stakeholders here
-                      </span>
-                    ) : (
-                      <div className="mt-auto flex flex-wrap gap-1.5">
-                        {cardsHere.map((card) => {
-                          const isSelected = selectedCardId === card.id;
-                          return (
-                            <span
-                              key={card.id}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                handleSelectCard(card.id);
-                              }}
-                              className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
-                                isSelected
-                                  ? "bg-white text-zinc-900 ring-2 ring-white"
-                                  : `${style.chipBg} ${style.chipText} hover:brightness-110`
-                              }`}
-                            >
-                              {card.text}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+                  ) : (
+                    <div className="mt-auto flex flex-wrap gap-1.5">
+                      {cardsHere.map((card) => {
+                        const isSelected = selectedCardId === card.id;
+                        return (
+                          <span
+                            key={card.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleSelectCard(card.id);
+                            }}
+                            className={`cursor-pointer rounded px-2 py-1 text-[11px] font-medium transition-colors ${
+                              isSelected
+                                ? "bg-white text-zinc-900 ring-2 ring-white"
+                                : `${style.chipBg} ${style.chipText} hover:brightness-110`
+                            }`}
+                          >
+                            {card.text}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Empty corner spacer — keeps the axis column's width
+             consistent between the power row and the interest row. */}
+          <div />
+
+          {/* Interest: points RIGHT — further right means more interest. */}
+          <div className="flex flex-col gap-1">
+            <div className="flex h-3 items-center">
+              <div className="h-0.5 flex-1 bg-zinc-400" />
+              <div className="h-0 w-0 border-y-[5px] border-y-transparent border-l-[7px] border-l-zinc-400" />
             </div>
+            <span className="text-center text-[11px] font-bold tracking-wide text-zinc-400">INTEREST</span>
           </div>
         </div>
       ) : (
