@@ -355,7 +355,16 @@ const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
   bg_reception: "bg_reception_v2.png",
   bg_marcus_office: "bg_marcus_office.jpg",
   bg_hallway: "bg_hallway_a.png",
-  bg_hallway_stairs: "bg_hallway_stairs.png",
+  // _v2: same corridor/staircase as the reception shot (same wall art +
+  // signage), so the cut from reception reads as continuing space rather
+  // than a jump to a new location. Renamed, not overwritten — the
+  // original bg_hallway_stairs.png stays on disk, just unreferenced.
+  bg_hallway_stairs: "bg_hallway_stairs_v2.png",
+  // Third beat: top-of-stairs vantage looking back over the open-plan
+  // office, reception's "Welcome" screen tiny through the railing below —
+  // the vantage change itself is what sells "you just climbed" better
+  // than any zoom on a static shot could.
+  bg_upstairs_landing: "bg_upstairs_landing.png",
 };
 
 /**
@@ -376,6 +385,17 @@ export const BACKGROUND_KEN_BURNS_OVERRIDES: Record<string, KenBurnsConfig> = {
     xToPercent: 5,
     yToPercent: -1.5,
     durationMs: 9000,
+  },
+  // Arrival beat: the vantage change already does most of the "we
+  // climbed" work, so this stays gentler than hallway_stairs — a slow
+  // settle/push rather than another aggressive drift, letting the player
+  // register the new view before the next line lands.
+  upstairs_landing: {
+    scaleFrom: 1.06,
+    scaleTo: 1.16,
+    xToPercent: -2,
+    yToPercent: 1,
+    durationMs: 10000,
   },
 };
 
