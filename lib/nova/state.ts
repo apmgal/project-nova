@@ -405,6 +405,11 @@ const REAL_BACKGROUND_FILES_BY_STEM: Record<string, string> = {
   // the vantage change itself is what sells "you just climbed" better
   // than any zoom on a static shot could.
   bg_upstairs_landing: "bg_upstairs_landing.png",
+  // Player's own desk — the backdrop for the email/Teams/SharePoint
+  // investigation beats (ACT1_SCENE02_EMAIL/TEAMS/DRIVE etc). Same
+  // AstraZeneca branding (mug, "Curious Brave Together" poster) as the
+  // reception/hallway shots, so it reads as the same building.
+  bg_player_desk: "bg_player_desk.png",
 };
 
 /**
