@@ -764,7 +764,7 @@ export default function GameRoot() {
             );
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden bg-zinc-950">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-zinc-950">
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (
           <div />
@@ -792,7 +792,7 @@ export default function GameRoot() {
         />
       )}
 
-      <main className="relative z-10 flex-1 overflow-y-auto px-4 py-6">
+      <main className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-6">
         {/* min-h-full + justify-end keeps short scenes anchored to the
            bottom (the usual look — dialogue/tool sitting just above the
            header, not stranded at the top of an empty page). Once actual
