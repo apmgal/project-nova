@@ -322,10 +322,14 @@ export default function PriorityBoard({
             aria-hidden="true"
             className="pointer-events-none absolute left-6 top-2 h-0 w-0 -translate-x-1/2 -translate-y-full border-x-[5px] border-b-[7px] border-x-transparent border-b-zinc-400"
           />
-          {/* Interest arrowhead: points RIGHT. */}
+          {/* Interest arrowhead: points RIGHT. "bottom-9" anchors this
+             box's own BOTTOM edge to the line's y (not its center), so
+             centering the triangle on the line needs a downward shift of
+             half its height — translate-y-1/2, not -translate-y-1/2 (that
+             sign was backwards, which is why it sat too high). */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-9 right-2 h-0 w-0 -translate-y-1/2 translate-x-full border-y-[5px] border-l-[7px] border-y-transparent border-l-zinc-400"
+            className="pointer-events-none absolute bottom-9 right-2 h-0 w-0 translate-x-full translate-y-1/2 border-y-[5px] border-l-[7px] border-y-transparent border-l-zinc-400"
           />
           <div className="pointer-events-none absolute bottom-9 left-0 top-2 flex w-6 items-center justify-center">
             <span className="text-[11px] font-bold tracking-wide text-zinc-400 [writing-mode:vertical-rl] rotate-180">
