@@ -207,6 +207,10 @@ export interface Character {
 //     correctBucket; wrong placements bounce back with no penalty. WBS adds
 //     an optional visualStyle for a background-image presentation instead
 //     of the plain card grid — same placement/completion logic underneath.
+//     PESTLE sets its own visualStyle: "pestle_category_list" for a
+//     collapsible per-category list (icon + name + count per row, expands
+//     once a card lands there) instead of the plain dashed bucket grid —
+//     same placement/completion logic underneath; SWOT keeps the plain grid.
 //   - "priority_assignment" (MoSCoW): every bucket is a valid placement —
 //     each card has a costByBucket instead, and an optional flagsByBucket.
 //     MoSCoW's own tool screen sets visualStyle: "moscow_quadrant" for a
@@ -338,12 +342,14 @@ export interface ToolScreenBlock {
   };
   /** An alternate presentation for the same underlying placement/
    * completion logic — never changes what counts as a valid placement or
-   * when the tool is complete, only how it renders. Three known values:
+   * when the tool is complete, only how it renders. Four known values:
    * sort_into_buckets' "warehouse_blueprint" (WBS — background image with
-   * clickable zone outlines), priority_assignment's "moscow_quadrant"
-   * (MoSCoW — 2x2 corner-badge grid), and power_interest_grid's
-   * "power_interest_quadrant" (Stakeholder Grid — 2x2 grid with real
-   * power/interest axes). Unset means the plain card/dashed-bucket grid. */
+   * clickable zone outlines) and "pestle_category_list" (PESTLE —
+   * collapsible icon-per-category list), priority_assignment's
+   * "moscow_quadrant" (MoSCoW — 2x2 corner-badge grid), and
+   * power_interest_grid's "power_interest_quadrant" (Stakeholder Grid —
+   * 2x2 grid with real power/interest axes). Unset means the plain
+   * card/dashed-bucket grid. */
   visualStyle?: string;
   /** sort_into_buckets + visualStyle only: filename hint for the
    * background image to show behind the zones, following a "bg_<assets.

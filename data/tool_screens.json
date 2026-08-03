@@ -3,6 +3,7 @@
     "toolId": "TOOL_ACT1_SCENE03B_PESTLE",
     "sourceScene": "ACT1_SCENE03B",
     "type": "sort_into_buckets",
+    "visualStyle": "pestle_category_list",
     "instructions": "Sort each factor into the category it belongs to.",
     "buckets": [
       "Political",
