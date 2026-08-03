@@ -31,7 +31,12 @@ export const ARTEFACT_REGISTRY: Record<string, ArtefactDefinition> = {
     title: "Project Initiation Document",
     subtitle: "Project NOVA",
     images: {
-      incomplete: "/assets/documents/pid_incomplete.png",
+      // _v2: the original incomplete render had leftover placeholder text
+      // from an unrelated corporate template (a tax-close-process PID, not
+      // Project NOVA) still sitting in the Objectives/Scope bullets —
+      // patched to read as genuinely half-finished Nova content instead.
+      // Renamed rather than overwritten per project convention.
+      incomplete: "/assets/documents/pid_incomplete_v2.png",
       complete: "/assets/documents/pid_complete.png",
     },
     caption: {
