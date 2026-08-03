@@ -35,8 +35,14 @@ export const ARTEFACT_REGISTRY: Record<string, ArtefactDefinition> = {
       // from an unrelated corporate template (a tax-close-process PID, not
       // Project NOVA) still sitting in the Objectives/Scope bullets —
       // patched to read as genuinely half-finished Nova content instead.
-      // Renamed rather than overwritten per project convention.
-      incomplete: "/assets/documents/pid_incomplete_v2.png",
+      // _v3 (on top of _v2): fixed a text-clipping bug in the Objectives/
+      // Scope bullets (an overlapping erase box was clipping the bottom of
+      // the previous line's already-drawn text — fixed via an erase-then-
+      // draw two-pass patch) and filled in the Stakeholders table's
+      // Project Sponsor row (was blank "[Name TBC]"/"[Insert Title]") with
+      // Mike Elloian / VP of Tax. Renamed rather than overwritten per
+      // project convention — _v2 is already live.
+      incomplete: "/assets/documents/pid_incomplete_v3.png",
       complete: "/assets/documents/pid_complete.png",
     },
     caption: {
