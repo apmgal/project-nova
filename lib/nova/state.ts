@@ -442,17 +442,20 @@ export interface PanoramaFocus {
  * resolveBackground path (see GameRoot) so a transition between two keys
  * in the same group renders as one continuous PanoramaBackground sliding
  * sideways, instead of two separate SceneBackground instances crossfading.
- * _v2: swapped for a cleaner render of the same reception-into-hallway
- * shot (staircase visible on the right instead of a second doorway).
- * Renamed rather than overwritten per project convention — the original
- * stays on disk, just unreferenced. Shows the reception desk on its left
- * third and the hallway receding on its right two-thirds; focusPercent is
- * each key's horizontal object-position crop within that single image (0
- * = leftmost, 100 = rightmost) — tuned by eye, not derived from anything.
+ * _v3: swapped to the widest of the reception/hallway/stairs photo set —
+ * same physical corridor, but framed to also include the base of the
+ * staircase on its right edge, so the hallway crop already leans toward
+ * the stairs. That makes the eventual hard cut into the hallway_stairs
+ * beat (a different, tighter photo of the same staircase) land as a
+ * near-seamless continuation instead of a jump. Renamed rather than
+ * overwritten per project convention — bg_reception_hallway_pano_v2.png
+ * stays on disk, just unreferenced. focusPercent is each key's horizontal
+ * object-position crop within that single image (0 = leftmost, 100 =
+ * rightmost) — tuned by eye, not derived from anything.
  */
 export const PANORAMA_GROUPS: Record<string, PanoramaFocus> = {
-  reception: { src: "/assets/backgrounds/bg_reception_hallway_pano_v2.png", focusPercent: 12 },
-  hallway: { src: "/assets/backgrounds/bg_reception_hallway_pano_v2.png", focusPercent: 78 },
+  reception: { src: "/assets/backgrounds/bg_reception_hallway_pano_v3.png", focusPercent: 10 },
+  hallway: { src: "/assets/backgrounds/bg_reception_hallway_pano_v3.png", focusPercent: 75 },
 };
 
 // ---------------------------------------------------------------------------
