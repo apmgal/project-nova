@@ -88,5 +88,36 @@
         "flagOnAsk": "asked_contingency_mitigation"
       }
     ]
+  },
+  "INVESTIGATION_ACT1_APPENDICES": {
+    "riskId": "act1_appendices",
+    "sourceScene": "ACT1_SCENE05",
+    "askTarget": "ellis's old accounts and the shared drive",
+    "maxQuestions": 3,
+    "instructions": "Dig through what Ellis left behind.",
+    "questions": [
+      {
+        "id": "q_appendices_email",
+        "dimension": "Email",
+        "questionText": "Check Ellis's old inbox.",
+        "answerText": "A month before he resigned, from Mike Elloian: \"Board's approved the £12M. NHS wants first delivery inside 24 weeks — that's the number that matters now.\" Ellis's reply was one word: \"Understood.\"",
+        "flagOnAsk": "act1_appendices_checked_email"
+      },
+      {
+        "id": "q_appendices_teams",
+        "dimension": "Teams",
+        "questionText": "Scroll back through Teams.",
+        "answerText": "A steering group call, rescheduled four times in six weeks. The last message, from Camille Okafor: \"Can we please lock a date. Validation doesn't fix itself.\" Ellis never replied.",
+        "flagOnAsk": "act1_appendices_checked_teams"
+      },
+      {
+        "id": "q_appendices_drive",
+        "dimension": "Shared Drive",
+        "questionText": "Open the shared drive.",
+        "answerText": "Further in than you'd been before. A folder marked \"NOVA — Initiation.\" One file inside.",
+        "flagOnAsk": "act1_appendices_checked_drive",
+        "revealsArtefactId": "pid"
+      }
+    ]
   }
 }
