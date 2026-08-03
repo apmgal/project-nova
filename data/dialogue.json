@@ -12,7 +12,8 @@
       {
         "speaker": "joan",
         "emotion": "neutral",
-        "text": "Morning. You'll be the new project manager? Mike E. is expecting you — go on up."
+        "text": "Morning. You'll be the new project manager? Mike E. is expecting you — go on up.",
+        "background": "hallway"
       },
       {
         "speaker": "narrator",
@@ -22,8 +23,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
-        "background": "hallway"
+        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either."
       },
       {
         "speaker": "priya",
