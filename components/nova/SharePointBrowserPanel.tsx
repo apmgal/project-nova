@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronRight, File, FileSpreadsheet, Folder, Presentation } from "lucide-react";
+import { Fragment, useState } from "react";
+import { ChevronRight, File, FileSpreadsheet, FileText, Folder, Presentation } from "lucide-react";
 import type { Flags, RiskInvestigationBank, RiskInvestigationQuestion } from "@/lib/nova/types";
 import DocumentDiscoveredCard from "./DocumentDiscoveredCard";
 
@@ -19,22 +19,29 @@ interface SharePointBrowserPanelProps {
 
 const BREADCRUMB = ["Group Tax Innovation & Change", "4. Managed Projects", "11. Project NOVA"];
 
-function iconFor(fileName: string) {
-  if (!fileName.includes(".")) return Folder;
-  if (fileName.endsWith(".xlsx")) return FileSpreadsheet;
-  if (fileName.endsWith(".pptx")) return Presentation;
-  return File;
-}
+// Cosmetic-only per-row chrome (icon, colour, Modified/Modified by columns)
+// matching the approved SharePoint-list mockup. Kept local rather than
+// added to the content schema since nothing else reads it.
+const FILE_META: Record<
+  string,
+  { icon: typeof File; color: string; modified: string; modifiedBy: string }
+> = {
+  q_drive_meeting_notes: { icon: Folder, color: "text-[#eab308]", modified: "June 2026", modifiedBy: "C. Okafor" },
+  q_drive_archive: { icon: Folder, color: "text-[#eab308]", modified: "March 2026", modifiedBy: "M. Elloian" },
+  q_drive_kickoff: { icon: Presentation, color: "text-[#c2410c]", modified: "April 2026", modifiedBy: "E. Grant" },
+  q_drive_budget: { icon: FileSpreadsheet, color: "text-[#15803d]", modified: "May 2026", modifiedBy: "D. Atwell" },
+  q_drive_raid: { icon: FileSpreadsheet, color: "text-[#15803d]", modified: "June 2026", modifiedBy: "T. Nowak" },
+  q_drive_pid: { icon: FileText, color: "text-[#1d4ed8]", modified: "April 2026", modifiedBy: "E. Grant" },
+};
 
 /**
  * Bespoke chrome for risk_investigation.json banks with
- * visualStyle: "sharepoint_browser" — a light-touch file list mirroring a
- * real SharePoint document library breadcrumb + row layout, re-themed into
- * the game's dark palette. Field mapping: dimension is the file/folder
- * name, questionText is unused, answerText is the one-line flavour shown
- * when a non-document row is tapped. The one row with revealsArtefactId
- * (the PID) skips straight to DocumentDiscoveredCard instead of an inline
- * one-liner.
+ * visualStyle: "sharepoint_browser" — mirrors a real SharePoint document
+ * library (banner, breadcrumb, Name/Modified/Modified by table) matching
+ * the approved mockup. Field mapping: dimension is the file/folder name,
+ * answerText is the one-line flavour shown when a non-document row is
+ * tapped. The one row with revealsArtefactId (the PID) skips straight to
+ * DocumentDiscoveredCard instead of an inline one-liner.
  */
 export default function SharePointBrowserPanel({
   bank,
@@ -69,51 +76,79 @@ export default function SharePointBrowserPanel({
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/90">
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-zinc-800 px-4 py-2.5 text-[11px] text-zinc-500">
-        {BREADCRUMB.map((crumb, i) => (
-          <span key={crumb} className="flex items-center gap-1 whitespace-nowrap">
-            {i > 0 && <ChevronRight size={11} className="text-zinc-700" />}
-            <span className={i === BREADCRUMB.length - 1 ? "font-semibold text-zinc-300" : ""}>
-              {crumb}
-            </span>
-          </span>
-        ))}
-      </div>
-      {bank.instructions && <p className="px-4 pt-2 text-sm text-zinc-300">{bank.instructions}</p>}
-      <ul className="flex h-72 flex-col overflow-y-auto px-2 py-2">
-        {bank.questions.map((question) => {
-          const Icon = iconFor(question.dimension);
-          const read = Boolean(flags[question.flagOnAsk]);
-          const expanded = expandedId === question.id;
-          return (
-            <li key={question.id} className="rounded-md">
-              <button
-                onClick={() => handleRowTap(question)}
-                className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-zinc-800/60 ${
-                  expanded ? "bg-zinc-800/60" : ""
-                }`}
+    <div className="flex flex-col gap-3 rounded-lg bg-zinc-950 p-3">
+      <div className="flex max-h-[420px] flex-col overflow-hidden rounded-md border border-zinc-300 bg-[#fafafa] text-zinc-900">
+        <div className="shrink-0 bg-[#0f4c81] px-4 py-3">
+          <p className="mb-0.5 text-[11px] text-[#bfdbfe]">SharePoint</p>
+          <p className="text-[14px] font-semibold text-white">Group Tax Innovation &amp; Change</p>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b border-zinc-200 px-4 py-2.5">
+          {BREADCRUMB.map((crumb, i) => (
+            <span key={crumb} className="flex items-center gap-1.5 whitespace-nowrap">
+              {i > 0 && <ChevronRight size={12} className="text-zinc-400" />}
+              <span
+                className={`text-[12px] ${i === BREADCRUMB.length - 1 ? "font-semibold text-zinc-900" : "text-zinc-600"}`}
               >
-                <Icon size={15} className="shrink-0 text-zinc-500" />
-                <span className={`flex-1 truncate text-[13px] ${read ? "text-zinc-400" : "text-zinc-100"}`}>
-                  {question.dimension}
-                </span>
-                {question.revealsArtefactId && read && (
-                  <span className="rounded-full bg-emerald-900/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-                    Found
-                  </span>
-                )}
-              </button>
-              {expanded && !question.revealsArtefactId && (
-                <p className="px-9 pb-2.5 text-[12px] leading-relaxed text-zinc-400">
-                  {question.answerText}
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <div className="flex justify-end border-t border-zinc-800 px-4 py-3">
+                {crumb}
+              </span>
+            </span>
+          ))}
+        </div>
+        {bank.instructions && <p className="px-4 pt-2 text-[13px] text-zinc-600">{bank.instructions}</p>}
+        <div className="overflow-y-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-200">
+                <td className="w-8 px-4 py-2" />
+                <td className="py-2 text-[11px] text-zinc-500">Name</td>
+                <td className="px-4 py-2 text-[11px] text-zinc-500">Modified</td>
+                <td className="px-4 py-2 text-[11px] text-zinc-500">Modified by</td>
+              </tr>
+            </thead>
+            <tbody>
+              {bank.questions.map((question) => {
+                const meta = FILE_META[question.id];
+                const Icon = meta?.icon ?? File;
+                const expanded = expandedId === question.id;
+                const isPid = Boolean(question.revealsArtefactId);
+                const read = Boolean(flags[question.flagOnAsk]);
+                return (
+                  <Fragment key={question.id}>
+                    <tr
+                      onClick={() => handleRowTap(question)}
+                      className={`cursor-pointer border-b border-zinc-100 ${
+                        isPid ? "bg-[#fef3c7]" : expanded ? "bg-zinc-100" : "hover:bg-zinc-100"
+                      }`}
+                    >
+                      <td className="px-4 py-2.5">
+                        <Icon size={16} className={meta?.color ?? "text-zinc-500"} />
+                      </td>
+                      <td className={`py-2.5 text-[13px] ${isPid ? "font-semibold" : ""}`}>
+                        {question.dimension}
+                        {isPid && read && (
+                          <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Found
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-[12px] text-zinc-500">{meta?.modified}</td>
+                      <td className="px-4 py-2.5 text-[12px] text-zinc-500">{meta?.modifiedBy}</td>
+                    </tr>
+                    {expanded && !isPid && (
+                      <tr>
+                        <td colSpan={4} className="px-4 pb-2.5 text-[12px] leading-relaxed text-zinc-500">
+                          {question.answerText}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="flex justify-end">
         <button
           onClick={onContinue}
           className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500"

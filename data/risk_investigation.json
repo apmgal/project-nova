@@ -10,22 +10,22 @@
       {
         "id": "q_email_ellis",
         "dimension": "Ellis Grant",
-        "questionText": "Handover notes — Project NOVA",
-        "answerText": "Hi — sorry for the short notice on this. I've had to step away from NOVA earlier than planned. I didn't get as far as I wanted to on the documentation side. Apologies for leaving it mid-stream.\n\nEllis",
+        "questionText": "Kicking off — Project NOVA",
+        "answerText": "Team —\n\nOfficially underway as of today. Quick summary for anyone catching up: we're standing up a new manufacturing facility for the medicine, with an NHS supply contract riding on hitting first production inside 24 weeks. Budget's £12M, MHRA's given provisional approval so validation is on us to keep moving.\n\nMore detail to follow once the PID's finalised.\n\nGood to be working with all of you.\n— E",
         "flagOnAsk": "read_email_ellis"
       },
       {
         "id": "q_email_camille",
         "dimension": "Camille Okafor",
-        "questionText": "Following up — validation timeline",
-        "answerText": "Hi, following up again as I haven't heard back. Our validation slots are booked around the dates in the last plan I saw, but nobody's confirmed whether that's still accurate. If it's changed, I need to know before we lose the slot.\n\nCamille",
+        "questionText": "Validation timeline — flagging now",
+        "answerText": "Ellis — wanted to get ahead of this rather than raise it in the room. If cleanroom install slips even two weeks, MHRA validation slips with it, and we lose the buffer to Board's 24-week promise. I don't think anyone's accounted for that risk yet. Can we talk before Thursday?\n— Camille",
         "flagOnAsk": "read_email_camille"
       },
       {
         "id": "q_email_tomasz",
         "dimension": "Tomasz Nowak",
-        "questionText": "Re: Equipment order — need a confirmed spec",
-        "answerText": "Hi, we're ready to place the order but I still don't have a confirmed final spec from engineering. The version I have is marked draft. Can someone confirm which one is current before I commit us?\n\nTomasz",
+        "questionText": "FW: Isolator delivery — supplier chasing sign-off",
+        "answerText": "Ellis — PharmaCraft's chasing again, they need a decision on the isolator spec by Friday or they can't hold the slot. This is the third reminder. Can you or someone confirm which way we're going?\n— Tomasz",
         "flagOnAsk": "read_email_tomasz"
       }
     ]
@@ -41,21 +41,21 @@
         "id": "q_teams_1",
         "dimension": "Vaughn Kessler",
         "questionText": "",
-        "answerText": "Has anyone actually confirmed the go-live date with QA? I keep hearing different numbers.",
+        "answerText": "Steering call moved again — new time TBC. Fourth time this month.",
         "flagOnAsk": "read_teams_1"
       },
       {
         "id": "q_teams_2",
         "dimension": "Camille Okafor",
         "questionText": "",
-        "answerText": "Not from me. Nobody's asked.",
+        "answerText": "Can we please lock a date. Validation doesn't fix itself.",
         "flagOnAsk": "read_teams_2"
       },
       {
         "id": "q_teams_3",
         "dimension": "Daniel Atwell",
-        "questionText": "Vaughn Kessler: Has anyone actually confirmed the go-live date with QA?",
-        "answerText": "Can we get everyone on a call this week? This channel isn't cutting it.",
+        "questionText": "Camille Okafor: Can we please lock a date. Validation doesn't fix itself.",
+        "answerText": "Agreed — can we make this the first item next time, not the last?",
         "flagOnAsk": "read_teams_3"
       },
       {

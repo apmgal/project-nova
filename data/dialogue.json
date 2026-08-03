@@ -131,7 +131,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You open the project inbox Marcus forwarded you access to.",
+        "text": "You get read access to Ellis's old inbox — nobody's reassigned it yet.",
         "background": "player_desk"
       }
     ],
@@ -144,7 +144,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You open the project's Teams channel.",
+        "text": "You get added to the Steering Group channel Ellis used to be in.",
         "background": "player_desk"
       }
     ],
