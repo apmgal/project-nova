@@ -45,6 +45,7 @@ import {
   setArtefactStatus,
   foldBackground,
   resolveBackground,
+  PANORAMA_GROUPS,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -76,6 +77,7 @@ import ArtefactsDrawer from "./ArtefactsDrawer";
 import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
 import SceneBackground from "./narrative/SceneBackground";
+import PanoramaBackground from "./narrative/PanoramaBackground";
 import { RECEPTION_INTRO_SCENE } from "@/data/narrative/receptionIntro";
 
 /**
@@ -714,6 +716,12 @@ export default function GameRoot() {
     revealedCount - 1
   );
   const resolvedBackground = resolveBackground(backgroundKey, getBackgroundFile(backgroundKey));
+  // Reception <-> hallway are crops of one panoramic photo (see
+  // PANORAMA_GROUPS) — checked ahead of resolvedBackground so that
+  // transition renders as a single PanoramaBackground instance sliding
+  // sideways (stable key below) rather than SceneBackground's normal
+  // remount-and-fade between two separate images.
+  const panorama = backgroundKey ? PANORAMA_GROUPS[backgroundKey] : undefined;
 
   const hudActive = isHudActiveForScene(scene);
   const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
@@ -855,9 +863,20 @@ export default function GameRoot() {
           under the header/HUD/main content below, which already render at
           z-10. No src (an unmapped key, or no key set yet at all) just
           means no backdrop, same plain look every scene had before this.
-          No audio here by design — this is a visual-only layer. */}
-      {resolvedBackground?.src && (
-        <SceneBackground key={resolvedBackground.src} src={resolvedBackground.src} />
+          No audio here by design — this is a visual-only layer.
+          Panorama takes priority: a stable key ("panorama") keeps the
+          SAME PanoramaBackground instance mounted across e.g.
+          reception -> hallway, so it receives a new focusPercent and
+          slides rather than remounting/fading like SceneBackground does.
+          Leaving the group entirely (e.g. into marcus_office, not in
+          PANORAMA_GROUPS) falls through to the normal branch below,
+          which mounts fresh as usual. */}
+      {panorama ? (
+        <PanoramaBackground key="panorama" src={panorama.src} focusPercent={panorama.focusPercent} />
+      ) : (
+        resolvedBackground?.src && (
+          <SceneBackground key={resolvedBackground.src} src={resolvedBackground.src} />
+        )
       )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (

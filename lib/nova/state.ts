@@ -388,6 +388,27 @@ export function resolveBackground(
   return { src: null, key, file };
 }
 
+export interface PanoramaFocus {
+  src: string;
+  focusPercent: number;
+}
+
+/**
+ * Background keys that are actually crops of the same wide panoramic
+ * photo, rather than independent shots — checked BEFORE the normal
+ * resolveBackground path (see GameRoot) so a transition between two keys
+ * in the same group renders as one continuous PanoramaBackground sliding
+ * sideways, instead of two separate SceneBackground instances crossfading.
+ * bg_reception_hallway_pano.png shows the reception desk on its left third
+ * and the hallway receding on its right two-thirds; focusPercent is each
+ * key's horizontal object-position crop within that single image (0 =
+ * leftmost, 100 = rightmost) — tuned by eye, not derived from anything.
+ */
+export const PANORAMA_GROUPS: Record<string, PanoramaFocus> = {
+  reception: { src: "/assets/backgrounds/bg_reception_hallway_pano.png", focusPercent: 12 },
+  hallway: { src: "/assets/backgrounds/bg_reception_hallway_pano.png", focusPercent: 78 },
+};
+
 // ---------------------------------------------------------------------------
 // Tool screen progress — generic "sort into buckets" persistence
 // ---------------------------------------------------------------------------
