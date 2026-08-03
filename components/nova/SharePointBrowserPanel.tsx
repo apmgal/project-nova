@@ -4,7 +4,6 @@ import { Fragment, useState } from "react";
 import { ChevronRight, File, FileSpreadsheet, FileText, Folder, Presentation } from "lucide-react";
 import type { Flags, RiskInvestigationBank, RiskInvestigationQuestion } from "@/lib/nova/types";
 import DocumentDiscoveredCard from "./DocumentDiscoveredCard";
-import SceneAudio from "./narrative/SceneAudio";
 
 interface SharePointBrowserPanelProps {
   bank: RiskInvestigationBank;
@@ -78,13 +77,6 @@ export default function SharePointBrowserPanel({
 
   return (
     <div className="flex flex-col gap-3 rounded-lg bg-zinc-950 p-3">
-      {/* Scoped to this panel's own mount/unmount rather than routed
-          through the dialogue-line ambient system in GameRoot — this loop
-          only ever means one thing ("the player is browsing SharePoint
-          right now"), so tying its lifecycle directly to the component
-          that IS that browsing UI is simpler than threading a key through
-          the scene data for a sound that's never reused elsewhere. */}
-      <SceneAudio src="/assets/sfx/sharepoint_browsing.mp3" volume={0.35} fadeInMs={400} fadeOutMs={500} />
       <div className="flex max-h-[420px] flex-col overflow-hidden rounded-md border border-zinc-300 bg-[#fafafa] text-zinc-900">
         <div className="shrink-0 bg-[#0f4c81] px-4 py-3">
           <p className="mb-0.5 text-[11px] text-[#bfdbfe]">SharePoint</p>

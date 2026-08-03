@@ -32,6 +32,12 @@ export interface GameState {
    * explicitly sets a new one. Persisted so a reload can show the right
    * backdrop before the resumed scene's first line even renders. */
   currentBackground: string | null;
+  /** Key into assets.json's `ambientSounds` map for whatever looping
+   * ambience bed is currently in effect, carried forward across
+   * lines/scenes the same way currentBackground is — needed because some
+   * ambience (e.g. the SharePoint browsing loop) starts in one scene and
+   * is only meant to cut off on a specific line several scenes later. */
+  currentAmbient: string | null;
   /** Per-tool-screen record of which card ids have been correctly placed
    * so far, keyed by toolId. An entry existing (even empty) means the
    * player has reached that tool screen's action phase. */

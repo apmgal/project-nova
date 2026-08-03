@@ -52,6 +52,8 @@ import {
   foldFootsteps,
   resolveAmbientSound,
   FOOTSTEPS_SFX_SRC,
+  ambientVolumeForBackground,
+  footstepsVolumeForBackground,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -269,13 +271,19 @@ export default function GameRoot() {
     // and "the scene being entered" are the same scene and there's
     // nothing to fold yet.
     let currentBackground = state.currentBackground;
+    // Same carry-forward for the ambient sound bed as the backdrop above —
+    // needed because some ambience (the SharePoint browsing loop) starts
+    // in one scene and is only meant to cut off on a specific line in a
+    // later one (see foldAmbient's own doc comment).
+    let currentAmbient = state.currentAmbient;
     if (state.currentScene !== sceneId) {
       const prevScene = getScene(state.currentScene);
       const prevLines = prevScene ? getDialogue(prevScene.dialogueId)?.lines ?? [] : [];
       currentBackground = foldBackground(currentBackground, prevLines, state.flags, prevLines.length - 1);
+      currentAmbient = foldAmbient(currentAmbient, prevLines, state.flags, prevLines.length - 1);
     }
     const scene = getScene(sceneId);
-    let next: GameState = { ...state, currentScene: sceneId, currentBackground };
+    let next: GameState = { ...state, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
     return next;
   }
@@ -731,13 +739,20 @@ export default function GameRoot() {
   const panorama = backgroundKey ? PANORAMA_GROUPS[backgroundKey] : undefined;
 
   // Ambient sound bed + footstep overlay, folded the same way as the
-  // backdrop but scoped to just this scene's own lines (baseline null/
-  // false every render, not carried in via GameState) — see foldAmbient's
-  // doc comment for why ambience doesn't need cross-scene persistence the
-  // way the backdrop does.
-  const ambientKey = foldAmbient(null, displayLines, gameState.flags, revealedCount - 1);
+  // backdrop — including carrying forward across scene boundaries via
+  // gameState.currentAmbient (see enterScene above), since some ambience
+  // (the SharePoint browsing loop) starts in one scene and is only meant
+  // to cut off on a specific line several scenes later.
+  const ambientKey = foldAmbient(gameState.currentAmbient, displayLines, gameState.flags, revealedCount - 1);
   const ambientSrc = resolveAmbientSound(ambientKey, getAmbientSoundFile(ambientKey));
   const footstepsOn = foldFootsteps(false, displayLines, gameState.flags, revealedCount - 1);
+  // Both volumes are keyed off backgroundKey (see ambientVolumeForBackground's
+  // doc comment) so they ramp louder-to-quieter across the reception ->
+  // hallway -> stairs -> landing beats without needing a per-line volume
+  // field — SceneAudio smoothly ramps to a changed volume prop rather than
+  // jumping, so this reads as a fade as the player approaches Mike's office.
+  const ambientVolume = ambientVolumeForBackground(backgroundKey);
+  const footstepsVolume = footstepsVolumeForBackground(backgroundKey);
 
   const hudActive = isHudActiveForScene(scene);
   const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
@@ -907,9 +922,17 @@ export default function GameRoot() {
           footstep loop fades in/out independently on top of whichever
           ambience is currently playing. No key clash with the background
           layer above — SceneAudio renders nothing to the DOM. */}
-      {ambientSrc && <SceneAudio key="ambient" src={ambientSrc} volume={0.4} fadeInMs={1200} fadeOutMs={1500} />}
+      {ambientSrc && (
+        <SceneAudio key="ambient" src={ambientSrc} volume={ambientVolume} fadeInMs={1200} fadeOutMs={1500} />
+      )}
       {footstepsOn && (
-        <SceneAudio key="footsteps" src={FOOTSTEPS_SFX_SRC} volume={0.5} fadeInMs={300} fadeOutMs={500} />
+        <SceneAudio
+          key="footsteps"
+          src={FOOTSTEPS_SFX_SRC}
+          volume={footstepsVolume}
+          fadeInMs={300}
+          fadeOutMs={700}
+        />
       )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (

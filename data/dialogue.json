@@ -33,8 +33,7 @@
         "emotion": null,
         "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
         "background": "upstairs_landing",
-        "ambient": "none",
-        "footsteps": false
+        "ambient": "none"
       },
       {
         "speaker": "priya",
@@ -50,7 +49,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "Mike E. is waiting, door open. He doesn't get up.",
-        "background": "marcus_office"
+        "background": "marcus_office",
+        "footsteps": false
       },
       {
         "speaker": "marcus",
@@ -192,7 +192,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "You navigate to the project's SharePoint folder.",
-        "background": "player_desk"
+        "background": "player_desk",
+        "ambient": "sharepoint_browsing"
       }
     ],
     "needsWriting": false
@@ -1756,7 +1757,8 @@
         "speaker": "narrator",
         "emotion": null,
         "text": "The PID. Half-finished, but finally in your hands.",
-        "condition": "investigated_drive"
+        "condition": "investigated_drive",
+        "ambient": "none"
       },
       {
         "speaker": "marcus",

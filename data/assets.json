@@ -93,8 +93,9 @@
     "main_menu": "main_menu_theme.mp3"
   },
   "ambientSounds": {
-    "note": "Looping ambience bed keyed by DialogueLine.ambient — carried forward like backgrounds until a line explicitly changes it. \"none\" is a real, intentional value (explicit silence), not a placeholder.",
-    "reception": "reception_ambience.mp3"
+    "note": "Looping ambience bed keyed by DialogueLine.ambient — carried forward like backgrounds until a line explicitly changes it, across scene boundaries too (see GameState.currentAmbient). \"none\" is a real, intentional value (explicit silence), not a placeholder.",
+    "reception": "reception_ambience.mp3",
+    "sharepoint_browsing": "sharepoint_browsing.mp3"
   },
   "backgrounds": {
     "note": "Placeholder — assign real background art per act/location. Engine carries forward the last background shown; only lines that CHANGE the background need this field set.",

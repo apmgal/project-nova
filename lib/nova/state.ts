@@ -483,6 +483,7 @@ export function resolveBackground(
  * returns a null src for any key with no entry here. */
 const REAL_AMBIENT_SOUND_FILES_BY_STEM: Record<string, string> = {
   reception_ambience: "reception_ambience.mp3",
+  sharepoint_browsing: "sharepoint_browsing.mp3",
 };
 
 /** Resolves an ambient sound key to a real audio src if one exists, else
@@ -499,6 +500,46 @@ export function resolveAmbientSound(key: string | null, file: string | null): st
  * ambient/background, so it's a plain constant rather than routed through
  * assets.json's map-and-resolve machinery. */
 export const FOOTSTEPS_SFX_SRC = "/assets/sfx/footsteps_loop.mp3";
+
+/**
+ * Per-background-key target volume for the ambient bed and footstep
+ * overlay — keyed by whatever `backgroundKey` GameRoot already computes
+ * for the visuals, since that reliably tracks which beat of the walk
+ * we're on without needing a separate per-line volume field. SceneAudio
+ * ramps to a new `volume` prop smoothly (see its own [volume] effect)
+ * rather than jumping, so listing a lower number at a later beat reads as
+ * a fade rather than a cut — loud at reception, easing down through the
+ * stairs climb, then either an explicit "none"/false cut (a full
+ * SceneAudio unmount, which fades via fadeOutMs) or, for footsteps, one
+ * more quiet step at the top of the stairs before the final cut in
+ * Mike's office. An unlisted key falls back to the DEFAULT_* constant —
+ * this only ever matters for reception's fallback (its own volume before
+ * any beat-specific number applies) and for ambient keys that aren't part
+ * of this walk at all (e.g. sharepoint_browsing, whose backgroundKey is
+ * always "player_desk" and never appears here).
+ */
+const AMBIENT_VOLUME_BY_BACKGROUND: Record<string, number> = {
+  reception: 0.65,
+  hallway: 0.65,
+  hallway_stairs: 0.45,
+};
+const DEFAULT_AMBIENT_VOLUME = 0.4;
+
+export function ambientVolumeForBackground(backgroundKey: string | null): number {
+  if (!backgroundKey) return DEFAULT_AMBIENT_VOLUME;
+  return AMBIENT_VOLUME_BY_BACKGROUND[backgroundKey] ?? DEFAULT_AMBIENT_VOLUME;
+}
+
+const FOOTSTEPS_VOLUME_BY_BACKGROUND: Record<string, number> = {
+  hallway_stairs: 0.7,
+  upstairs_landing: 0.35,
+};
+const DEFAULT_FOOTSTEPS_VOLUME = 0.5;
+
+export function footstepsVolumeForBackground(backgroundKey: string | null): number {
+  if (!backgroundKey) return DEFAULT_FOOTSTEPS_VOLUME;
+  return FOOTSTEPS_VOLUME_BY_BACKGROUND[backgroundKey] ?? DEFAULT_FOOTSTEPS_VOLUME;
+}
 
 export interface PanoramaFocus {
   src: string;

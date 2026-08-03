@@ -134,6 +134,7 @@ export function getDefaultGameState(): GameState {
   // game_state.json predates these fields — backfill defensively rather
   // than requiring the content team to edit the schema file by hand.
   if (state.currentBackground === undefined) state.currentBackground = null;
+  if (state.currentAmbient === undefined) state.currentAmbient = null;
   if (!state.toolProgress) state.toolProgress = {};
   if (!state.toolPlacements) state.toolPlacements = {};
   if (!state.toolSelections) state.toolSelections = {};
