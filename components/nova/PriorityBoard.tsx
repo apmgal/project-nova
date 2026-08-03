@@ -317,19 +317,31 @@ export default function PriorityBoard({
             aria-hidden="true"
             className="pointer-events-none absolute bottom-9 left-6 right-2 top-2 border-b-2 border-l-2 border-zinc-400"
           />
-          {/* Power arrowhead: points UP. */}
+          {/* Power arrowhead: points UP. Positioned with fixed pixel
+             offsets rather than percentage translate — percentage
+             transforms on a 0-size-plus-border triangle box were
+             resolving unpredictably (that's what left both arrowheads
+             misaligned before). The vertical line (border-l-2 of the box
+             above) sits at x:[24,26] (from left-6), centre x=25, starting
+             at y=8 (top-2). This 10px-wide/7px-tall triangle needs its
+             base (bottom edge, full 10px width) centred on x=25 and
+             sitting exactly at y=8 — so left = 25 - 10/2 = 20, top = 8 -
+             7 = 1. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-6 top-2 h-0 w-0 -translate-x-1/2 -translate-y-full border-x-[5px] border-b-[7px] border-x-transparent border-b-zinc-400"
+            className="pointer-events-none absolute left-[20px] top-[1px] h-0 w-0 border-x-[5px] border-b-[7px] border-x-transparent border-b-zinc-400"
           />
-          {/* Interest arrowhead: points RIGHT. "bottom-9" anchors this
-             box's own BOTTOM edge to the line's y (not its center), so
-             centering the triangle on the line needs a downward shift of
-             half its height — translate-y-1/2, not -translate-y-1/2 (that
-             sign was backwards, which is why it sat too high). */}
+          {/* Interest arrowhead: points RIGHT, same fixed-pixel approach.
+             The horizontal line (border-b-2 of the box above) sits at
+             y:[bottom_edge-2, bottom_edge] where bottom_edge is bottom-9
+             (36px from the container's bottom), centre y = 37px up, and
+             ends at right-2 (8px from the right edge). This 7px-wide/
+             10px-tall triangle needs its base (left edge, full 10px
+             height) centred on that y and sitting exactly at that x — so
+             right = 8 - 7 = 1, bottom = 37 - 10/2 = 32. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-9 right-2 h-0 w-0 translate-x-full translate-y-1/2 border-y-[5px] border-l-[7px] border-y-transparent border-l-zinc-400"
+            className="pointer-events-none absolute bottom-8 right-[1px] h-0 w-0 border-y-[5px] border-l-[7px] border-y-transparent border-l-zinc-400"
           />
           <div className="pointer-events-none absolute bottom-9 left-0 top-2 flex w-6 items-center justify-center">
             <span className="text-[11px] font-bold tracking-wide text-zinc-400 [writing-mode:vertical-rl] rotate-180">
