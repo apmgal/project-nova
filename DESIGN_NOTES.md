@@ -129,3 +129,63 @@ treats ACT4_SCENE06's shorter, more specific list as authoritative for
 what's Late-only, so no event can ever fire in both waves — but the two
 engineNotes themselves still disagree in the source data and neither has
 been edited to match the other.
+
+---
+
+## Monthly Status Report — actual-state RAG formulas (Budget/Scope/Resource/Milestone)
+
+**Status:** Implemented (`computeActualStatusReport` in `lib/nova/state.ts`,
+Task #182). Logged here since the formulas were deliberately designed to
+answer a narrow question each, not to "score how well the player is
+doing" — worth reading this before changing any of them.
+
+**Budget / Milestone Plan:** direct — `metricBand` on % of starting budget
+remaining, and on `scheduleHealth`, same bands the HUD's own chips use.
+Nothing subtle here.
+
+**Scope:** answers "is the agreed scope under formal control", not "how
+much scope was accepted". The only red trigger is `big01Response ===
+"phase_b_quietly"` — scope that grew without ever going through a real
+re-plan. A big, formally re-planned scope (`"full_replan"`) can reach
+green; it only drops to amber if descoping is *also* under strain (2+ of
+the CBS cut-task/MoSCoW-"Won't" items). Earlier drafts of this formula
+scored "how much scope was accepted" instead, which penalized BIG-01's
+"full re-plan" response — the most transparent, best-governed of its
+three options — the same as its most-hidden one. Corrected before
+implementation.
+
+**Resource:** answers "what's the CURRENT capacity position", not "was
+the EV-NP2 resourcing decision good". Only `teamMorale` (a live,
+recoverable number) and whether Ravi+Elin are both hired (the two
+candidates later content — EV-07/EV-14's own dialogue conditions — already
+treats as consequential) drive the RAG. `validationResourcing`
+("protect_a"/"split_thin"/"premium_contract") is evidence text only,
+deliberately excluded from the rule itself: it's a one-time categorical
+choice from EV-NP2 that can never become "current" state again the way a
+metric can, so basing the RAG on it would have meant a single early
+decision permanently capping Resource at red for the rest of the game
+even if the player later recovered morale and hired everyone. Earlier
+draft did exactly that; corrected before implementation.
+
+**Critical-role list (`ravi`, `elin`) and every numeric threshold** live in
+`CRITICAL_HIRE_IDS`/`STATUS_REPORT_THRESHOLDS` — deliberately centralized
+and named rather than inlined, since these are first-pass numbers expected
+to get retuned once report #1 is actually playtested (see the wider Act 4
+report-redesign discussion this task came out of).
+
+**Two small data additions this required:** `big01Response` and
+`validationResourcing` are stored in a new `GameState.decisions: Record
+<string, string>` bag rather than `flags` — flags stayed boolean-only
+except for one pre-existing exception (`supplier_chosen`, read via
+`getFlagString`'s escape hatch); rather than repeat that workaround twice
+more, `decisions` is now the real home for categorical choice outcomes.
+`supplier_chosen` could migrate over for consistency later; not required,
+just the obvious next candidate.
+
+**Bug found and fixed in passing:** EV-R2's eligibility depended on a
+`filling_line_deferred_or_rejected` flag that nothing in the game ever
+actually set — only the individual `filling_line_deferred` and
+`filling_line_rejected` flags were ever set, never their combination. EV-R2
+could never have fired before this fix. Resolved by evaluating `flags.
+filling_line_deferred || flags.filling_line_rejected` inline instead of
+depending on a derived flag that has to be kept in sync by hand.

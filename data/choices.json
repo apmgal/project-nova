@@ -394,6 +394,9 @@
           "scheduleHealth": 10,
           "boardConfidence": -10
         },
+        "decisions": {
+          "big01Response": "renegotiate"
+        },
         "nextScene": "ACT4_SCENE04"
       },
       {
@@ -403,6 +406,9 @@
           "budgetRemaining": -1000000,
           "scheduleHealth": -10
         },
+        "decisions": {
+          "big01Response": "full_replan"
+        },
         "nextScene": "ACT4_SCENE04"
       },
       {
@@ -411,10 +417,14 @@
           "riskExposure": 10,
           "benefitsRealisationScore": -5
         },
+        "decisions": {
+          "big01Response": "phase_b_quietly"
+        },
         "nextScene": "ACT4_SCENE04"
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "big01Response ('renegotiate'/'full_replan'/'phase_b_quietly') is read by computeScopeDimension in lib/nova/state.ts to derive the Monthly Status Report's Scope RAG — see STATUS_REPORT_THRESHOLDS' section comment for the formula."
   },
   "CHOICE_ACT4_SCENE01": {
     "choiceId": "CHOICE_ACT4_SCENE01",
@@ -1001,6 +1011,9 @@
           "scheduleHealth": -5,
           "benefitsRealisationScore": -10
         },
+        "decisions": {
+          "validationResourcing": "protect_a"
+        },
         "nextScene": null
       },
       {
@@ -1008,6 +1021,9 @@
         "effects": {
           "scheduleHealth": -10,
           "regulatoryReadiness": -10
+        },
+        "decisions": {
+          "validationResourcing": "split_thin"
         },
         "nextScene": null
       },
@@ -1017,10 +1033,14 @@
           "budgetRemaining": -600000,
           "scheduleHealth": -3
         },
+        "decisions": {
+          "validationResourcing": "premium_contract"
+        },
         "nextScene": null
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "validationResourcing ('protect_a'/'split_thin'/'premium_contract') is evidence-only for the Monthly Status Report's Resource dimension (lib/nova/state.ts computeResourceDimension) — deliberately does NOT drive the RAG itself, since a one-time categorical choice can never become 'current' state again the way team morale can."
   },
   "CHOICE_ACT5_SCENE01": {
     "choiceId": "CHOICE_ACT5_SCENE01",

@@ -98,6 +98,13 @@ export interface GameState {
    * has moved on to the last event and that original target would
    * otherwise be lost. Cleared back to null alongside eventQueue. */
   eventQueueExitScene: string | null;
+  /** Categorical (non-boolean) choice outcomes — e.g. big01Response:
+   * "full_replan", validationResourcing: "split_thin". Kept separate from
+   * `flags` (which is genuinely boolean-only apart from one legacy
+   * exception, supplier_chosen, read via getFlagString's escape hatch)
+   * rather than repeating that pattern every time new content needs to
+   * remember which of several named options a choice picked. */
+  decisions: Record<string, string>;
 }
 
 /** Which version of a found document is currently on file. See the
@@ -193,6 +200,10 @@ export interface ChoiceOption {
   text: string;
   effects?: Record<string, number>;
   flags?: Flags;
+  /** Categorical outcome(s) this option records — merged into
+   * GameState.decisions on select. See GameState.decisions' own doc
+   * comment for why this is a separate bag from flags. */
+  decisions?: Record<string, string>;
   nextScene: string | null;
   reaction?: string;
 }
@@ -268,6 +279,36 @@ export interface RiskInvestigationBank {
 // helpers and state.ts's isEventEligible. See DESIGN_NOTES.md for how
 // eligibility per event is derived from this design prose.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Monthly Status Report — actual-vs-reported dashboard (see
+// computeActualStatusReport in state.ts for how these get derived, and
+// DESIGN_NOTES.md for the reasoning behind each dimension's formula).
+// ---------------------------------------------------------------------------
+
+export type RagStatus = "green" | "amber" | "red";
+
+/** One RAG dimension's computed truth. `reasonCodes` is the small, fixed
+ * set of machine-checkable reasons behind `rag` (for later game logic —
+ * dialogue conditions, Act 5 callbacks — to key off, so nothing has to
+ * fuzzy-match `evidence`'s free text). `evidence` is that same reasoning
+ * in player/dialogue-facing prose. */
+export interface StatusReportDimension {
+  rag: RagStatus;
+  reasonCodes: string[];
+  evidence: string[];
+}
+
+/** The project's real position at the moment a report is opened — never
+ * shown directly to the player. What they see and choose to submit is a
+ * separate, independent RAG per dimension (the report UI's own state,
+ * not modeled here). */
+export interface ActualStatusReport {
+  budget: StatusReportDimension;
+  scope: StatusReportDimension;
+  resource: StatusReportDimension;
+  milestone: StatusReportDimension;
+}
 
 export interface EventEntry {
   eventId: string;

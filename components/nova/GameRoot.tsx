@@ -62,6 +62,7 @@ import {
   getEffectString,
   applyHonestyReport,
   applyDeferredHonestyPenalty,
+  applyDecisions,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -634,6 +635,7 @@ export default function GameRoot() {
       : option.effects;
     next = applyEffects(next, remainingEffects);
     next = applyFlags(next, option.flags);
+    next = applyDecisions(next, option.decisions);
     next = {
       ...next,
       choiceHistory: [

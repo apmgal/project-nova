@@ -248,5 +248,6 @@ export function getDefaultGameState(): GameState {
   if (state.eventQueue === undefined) state.eventQueue = null;
   if (state.eventQueueIndex === undefined) state.eventQueueIndex = 0;
   if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
+  if (!state.decisions) state.decisions = {};
   return state;
 }

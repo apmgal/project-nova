@@ -6,6 +6,9 @@ import type {
   ToolScreenBlock,
   RiskInvestigationBank,
   ArtefactStatus,
+  RagStatus,
+  StatusReportDimension,
+  ActualStatusReport,
 } from "./types";
 import { getCharacter, getDefaultGameState, getEvent, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
@@ -42,6 +45,7 @@ export function loadGame(): GameState | null {
     if (state.eventQueue === undefined) state.eventQueue = null;
     if (state.eventQueueIndex === undefined) state.eventQueueIndex = 0;
     if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
+    if (!state.decisions) state.decisions = {};
     return state;
   } catch {
     return null;
@@ -106,6 +110,14 @@ export function applyEffects(
 export function applyFlags(state: GameState, flags: Flags | undefined): GameState {
   if (!flags || Object.keys(flags).length === 0) return state;
   return { ...state, flags: { ...state.flags, ...flags } };
+}
+
+/** Merges a choice option's `decisions` object into state.decisions — the
+ * categorical-outcome counterpart to applyFlags, see GameState.decisions'
+ * own doc comment for why these are kept separate. */
+export function applyDecisions(state: GameState, decisions: Record<string, string> | undefined): GameState {
+  if (!decisions || Object.keys(decisions).length === 0) return state;
+  return { ...state, decisions: { ...state.decisions, ...decisions } };
 }
 
 /** Reads an `effects` entry whose value is a string rather than the usual
@@ -221,6 +233,166 @@ export function applyDeferredHonestyPenalty(state: GameState, sceneId: string): 
   if (!HONESTY_REPORT_SCENES.has(sceneId) || !state.flags.honesty_penalty_pending) return state;
   const withPenalty = applyEffects(state, { marcusTrust: HONESTY_DEFERRED_TRUST_PENALTY });
   return applyFlags(withPenalty, { honesty_penalty_pending: false });
+}
+
+// ---------------------------------------------------------------------------
+// Monthly Status Report — actual state (computeActualStatusReport). This is
+// the project's real position, computed fresh every time a report screen
+// opens — never shown directly to the player. What they choose to submit
+// (a separate, independently-picked RAG per dimension) is the report UI's
+// own concern, not modeled here.
+//
+// Every threshold lives in STATUS_REPORT_THRESHOLDS, nothing inline — these
+// are first-pass numbers, expected to get retuned after the first report
+// is actually playtested, and centralizing them is what makes that cheap.
+//
+// Each dimension's formula is deliberately built from signals that
+// already exist (or, for big01Response/validationResourcing, a single
+// small decisions-bag entry — see CHOICE_BIG-01/CHOICE_EV-NP2), and each
+// is meant to answer one specific, narrow question rather than score
+// "how well is the player doing":
+//   - Budget: what fraction of the original budget is left.
+//   - Milestone Plan: schedule health, same banding the HUD's Delivery
+//     Pace already uses.
+//   - Scope: is the agreed scope under formal control, not how much of it
+//     there is. A big, formally re-planned scope can be green; scope that
+//     grew without ever going through a real re-plan is the one thing
+//     that's red.
+//   - Resource: current capacity position, not a permanent verdict on any
+//     one past choice. Only genuinely live signals (team morale, whether
+//     the two roles later content treats as consequential — Ravi/Elin —
+//     are both filled) drive the RAG; validationResourcing shows up only
+//     as evidence text, since a one-time categorical choice can never
+//     become "current" again the way a metric can.
+// ---------------------------------------------------------------------------
+
+export const STATUS_REPORT_THRESHOLDS = {
+  BUDGET_GREEN_AT: 60, // % of STARTING_BUDGET remaining
+  BUDGET_RED_BELOW: 30,
+  SCHEDULE_GREEN_AT: 60, // scheduleHealth
+  SCHEDULE_RED_BELOW: 30,
+  MORALE_GREEN_AT: 60, // teamMorale
+  MORALE_RED_BELOW: 40,
+  /** Descoped items (CBS cut + MoSCoW "Won't") at/above this count is what
+   * tips an otherwise-controlled Scope from green to amber — never red on
+   * its own; see SCOPE_UNCONTROLLED_GROWTH below for the one red trigger. */
+  SCOPE_DESCOPE_STRAIN_AT: 2,
+};
+
+/** The two candidates later content already treats as consequential — the
+ * EV-07/EV-14 dialogue's own compound condition is keyed on exactly these
+ * two names — reused here rather than counting raw headcount, so five
+ * well-chosen hires can outscore six poorly-chosen ones the way the Team
+ * Selection tool's own design clearly intends. */
+const CRITICAL_HIRE_IDS = ["ravi", "elin"];
+
+const CBS_TOOL_ID = "TOOL_ACT3_SCENE02_CBS";
+const MOSCOW_TOOL_ID = "TOOL_ACT2_SCENE02_MOSCOW";
+const MOSCOW_WONT_BUCKET = "Won't";
+
+function ragFromBand(band: MetricBand): RagStatus {
+  return band === "yellow" ? "amber" : band;
+}
+
+/** CBS's single descoped task (0 or 1 — see descopeTask) plus every
+ * MoSCoW card that ended up in "Won't" (state.toolPlacements persists the
+ * final bucket per card, confirmed against placePriorityCard itself
+ * rather than assumed). */
+function countDescopedItems(state: GameState): number {
+  const cbsCount = (state.toolProgress[CBS_TOOL_ID] ?? []).length;
+  const moscowWontCount = Object.values(state.toolPlacements[MOSCOW_TOOL_ID] ?? {}).filter(
+    (bucket) => bucket === MOSCOW_WONT_BUCKET
+  ).length;
+  return cbsCount + moscowWontCount;
+}
+
+function hasCriticalRoleCoverage(flags: Flags): boolean {
+  return CRITICAL_HIRE_IDS.every((id) => Boolean(flags[`${id}_hired`]));
+}
+
+function computeBudgetDimension(state: GameState): StatusReportDimension {
+  const T = STATUS_REPORT_THRESHOLDS;
+  const pctRemaining = (state.projectMetrics.budgetRemaining / STARTING_BUDGET) * 100;
+  const band = metricBand(pctRemaining, true, T.BUDGET_GREEN_AT, T.BUDGET_RED_BELOW);
+  const reasonCodes = [band === "red" ? "BUDGET_CRITICAL" : band === "yellow" ? "BUDGET_TIGHT" : "BUDGET_HEALTHY"];
+  return {
+    rag: ragFromBand(band),
+    reasonCodes,
+    evidence: [`${Math.round(pctRemaining)}% of original budget remaining`],
+  };
+}
+
+function computeMilestoneDimension(state: GameState): StatusReportDimension {
+  const T = STATUS_REPORT_THRESHOLDS;
+  const schedule = state.projectMetrics.scheduleHealth;
+  const band = metricBand(schedule, true, T.SCHEDULE_GREEN_AT, T.SCHEDULE_RED_BELOW);
+  const reasonCodes = [
+    band === "red" ? "SCHEDULE_SEVERE_OVERRUN" : band === "yellow" ? "SCHEDULE_SLIPPING" : "SCHEDULE_ON_TRACK",
+  ];
+  const forecastWeek = computeWeeksRemaining(schedule);
+  return {
+    rag: ragFromBand(band),
+    reasonCodes,
+    evidence: [`Forecast completion: Week ${forecastWeek} (baseline Week 24)`],
+  };
+}
+
+function computeScopeDimension(state: GameState): StatusReportDimension {
+  const T = STATUS_REPORT_THRESHOLDS;
+  const big01Response = state.decisions.big01Response;
+  const descopedCount = countDescopedItems(state);
+
+  if (big01Response === "phase_b_quietly") {
+    return {
+      rag: "red",
+      reasonCodes: ["SCOPE_UNCONTROLLED_GROWTH"],
+      evidence: ["Product B absorbed without a formal re-plan"],
+    };
+  }
+  if (descopedCount >= T.SCOPE_DESCOPE_STRAIN_AT) {
+    return {
+      rag: "amber",
+      reasonCodes: ["SCOPE_STRAINED_BY_DESCOPING"],
+      evidence: [`${descopedCount} requirements descoped under pressure`],
+    };
+  }
+  const evidence =
+    big01Response === "full_replan"
+      ? ["Scope formally re-planned after BIG-01"]
+      : big01Response === "renegotiate"
+        ? ["Timeline renegotiated before absorbing new scope"]
+        : ["No uncontrolled scope growth so far"];
+  return { rag: "green", reasonCodes: ["SCOPE_CONTROLLED"], evidence };
+}
+
+function computeResourceDimension(state: GameState): StatusReportDimension {
+  const T = STATUS_REPORT_THRESHOLDS;
+  const morale = state.projectMetrics.teamMorale;
+  const criticalCovered = hasCriticalRoleCoverage(state.flags);
+  const evidence = [
+    `Team morale: ${morale}`,
+    criticalCovered ? "Critical roles covered" : "Critical role gap — not both of Ravi/Elin hired",
+  ];
+
+  const reasonCodes: string[] = [];
+  if (morale < T.MORALE_RED_BELOW) reasonCodes.push("MORALE_COLLAPSE");
+  if (!criticalCovered) reasonCodes.push("CRITICAL_ROLE_GAP");
+  if (reasonCodes.length > 0) {
+    return { rag: "red", reasonCodes, evidence };
+  }
+  if (morale >= T.MORALE_GREEN_AT && criticalCovered) {
+    return { rag: "green", reasonCodes: ["RESOURCE_HEALTHY"], evidence };
+  }
+  return { rag: "amber", reasonCodes: ["RESOURCE_STRAINED"], evidence };
+}
+
+export function computeActualStatusReport(state: GameState): ActualStatusReport {
+  return {
+    budget: computeBudgetDimension(state),
+    scope: computeScopeDimension(state),
+    resource: computeResourceDimension(state),
+    milestone: computeMilestoneDimension(state),
+  };
 }
 
 /** Adds or upgrades an entry in the player's artefacts drawer. Never
@@ -1287,12 +1459,17 @@ export function isEventEligible(eventId: string, state: GameState): boolean {
     case "EV-NP2":
       return true;
     // "Conditional — fires if the player deferred or rejected the
-    // automated inspection camera change request." DIALOGUE_EV-R2's own
-    // (only) line is itself gated on this same flag — checked here too so
-    // an ineligible EV-R2 is skipped from the queue entirely rather than
+    // automated inspection camera change request." CHOICE_ACT4_SCENE02's
+    // three options set filling_line_approved/deferred/rejected
+    // individually — evaluated inline here rather than depending on a
+    // separate filling_line_deferred_or_rejected flag, since nothing ever
+    // actually sets that combined flag (a real gap: EV-R2 could never
+    // have fired before this fix). DIALOGUE_EV-R2's own (only) line is
+    // itself gated on the same pair of flags — checked here too so an
+    // ineligible EV-R2 is skipped from the queue entirely rather than
     // materializing as an empty scene.
     case "EV-R2":
-      return Boolean(state.flags.filling_line_deferred_or_rejected);
+      return Boolean(state.flags.filling_line_deferred || state.flags.filling_line_rejected);
     // "Conditional (Regulatory Readiness < 60 at trigger)."
     case "EV-02":
       return metrics.regulatoryReadiness < 60;
