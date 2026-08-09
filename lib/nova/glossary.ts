@@ -73,4 +73,9 @@ export const GLOSSARY: Record<string, GlossaryEntry> = {
     definition:
       "Identifies the outcomes a project is actually meant to deliver and how they'll be measured, then tracks them through to realisation — since on time and on budget doesn't count for much if the intended benefit never materialises.",
   },
+  "Status reporting / governance": {
+    term: "Status Reporting & Governance",
+    definition:
+      "Gives sponsors and steering committees a regular, honest read on RAG status, risks, and progress so decisions get made on real information — the report is only as useful as the judgement behind it, since nothing forces any of these ratings to be correct.",
+  },
 };

@@ -47,7 +47,7 @@
     ],
     "wrongPlacementBehavior": {
       "penalty": "none",
-      "reaction": "Card gently bounces back to the pool. No trust or score penalty — player can pick it up and try again immediately."
+      "reaction": "Card gently bounces back to the pool. No trust or score penalty \u2014 player can pick it up and try again immediately."
     },
     "selectionBehavior": "tap_to_select_then_tap_bucket",
     "selectedCardStyle": "Card visibly recolors/highlights while selected, reverts once placed or deselected.",
@@ -92,7 +92,7 @@
     ],
     "wrongPlacementBehavior": {
       "penalty": "none",
-      "reaction": "Card gently bounces back to the pool. No trust or score penalty — player can pick it up and try again immediately."
+      "reaction": "Card gently bounces back to the pool. No trust or score penalty \u2014 player can pick it up and try again immediately."
     },
     "selectionBehavior": "tap_to_select_then_tap_bucket",
     "selectedCardStyle": "Card visibly recolors/highlights while selected, reverts once placed or deselected.",
@@ -106,7 +106,7 @@
     "sourceScene": "ACT2_SCENE02",
     "type": "priority_assignment",
     "visualStyle": "moscow_quadrant",
-    "instructions": "Drag each requirement into Must, Should, Could, or Won't. Unlike PESTLE/SWOT, there is no single correct answer here — every placement is a real trade-off against budget.",
+    "instructions": "Drag each requirement into Must, Should, Could, or Won't. Unlike PESTLE/SWOT, there is no single correct answer here \u2014 every placement is a real trade-off against budget.",
     "buckets": [
       "Must",
       "Should",
@@ -135,7 +135,7 @@
           "Could": {},
           "Won't": {}
         },
-        "engineNote": "Only positive flags are ever set here. filling_line_committed_act2 and automation_marked_must default to false/absent in game_state.json until explicitly set true by a Must/Should placement. Dialogue conditions named 'automation_not_marked_must' and 'filling_line_not_committed_act2' are NOT separately-stored flags — they mean 'the positive flag is false or absent', evaluated at render time, same as the camilleTrust_high/_not_high pattern used elsewhere."
+        "engineNote": "Only positive flags are ever set here. filling_line_committed_act2 and automation_marked_must default to false/absent in game_state.json until explicitly set true by a Must/Should placement. Dialogue conditions named 'automation_not_marked_must' and 'filling_line_not_committed_act2' are NOT separately-stored flags \u2014 they mean 'the positive flag is false or absent', evaluated at render time, same as the camilleTrust_high/_not_high pattern used elsewhere."
       },
       {
         "id": "card_validation_protocol",
@@ -216,14 +216,14 @@
       }
     ],
     "budgetVariable": "budgetRemaining",
-    "effectApplication": "On placement (or scene completion, engine's choice), deduct the card's costByBucket[chosenBucket] from budgetRemaining. Re-placing a card into a different bucket should refund the old cost and apply the new one — not stack both.",
+    "effectApplication": "On placement (or scene completion, engine's choice), deduct the card's costByBucket[chosenBucket] from budgetRemaining. Re-placing a card into a different bucket should refund the old cost and apply the new one \u2014 not stack both.",
     "overcommitRule": {
       "condition": "6 or more of the 8 cards placed in Must",
       "bucket": "Must",
       "minCount": 6,
       "trigger": "EV-E3",
       "reactionFlag": "moscow_overcommitted",
-      "note": "EV-E3 already exists in events.json — fire it as an interrupting reaction before the scene continues, per its existing design (Mike E.'s dry 'you've just doubled the budget' line)."
+      "note": "EV-E3 already exists in events.json \u2014 fire it as an interrupting reaction before the scene continues, per its existing design (Mike E.'s dry 'you've just doubled the budget' line)."
     },
     "completionCondition": "All 8 cards placed in some bucket (Won't counts as placed)",
     "onComplete": {
@@ -235,7 +235,7 @@
     "sourceScene": "ACT2_SCENE03",
     "type": "power_interest_grid",
     "visualStyle": "power_interest_quadrant",
-    "instructions": "Place each stakeholder on the grid by power and interest. There is no correct placement — this is a judgement call, not a graded exercise.",
+    "instructions": "Place each stakeholder on the grid by power and interest. There is no correct placement \u2014 this is a judgement call, not a graded exercise.",
     "quadrants": [
       "Manage Closely",
       "Keep Satisfied",
@@ -259,40 +259,68 @@
     ],
     "wrongPlacementBehavior": {
       "penalty": "none",
-      "reaction": "None — every quadrant is a legitimate placement, no bounce-back."
+      "reaction": "None \u2014 every quadrant is a legitimate placement, no bounce-back."
     },
     "selectionBehavior": "tap_to_select_then_tap_quadrant",
     "selectedCardStyle": "Card visibly recolors/highlights while selected, same as PESTLE/SWOT.",
     "completionCondition": "All 7 stakeholders placed in some quadrant",
-    "buckets": ["Keep Satisfied", "Manage Closely", "Monitor", "Keep Informed"],
+    "buckets": [
+      "Keep Satisfied",
+      "Manage Closely",
+      "Monitor",
+      "Keep Informed"
+    ],
     "cards": [
-      { "id": "marcus", "text": "Mike Elloian" },
+      {
+        "id": "marcus",
+        "text": "Mike Elloian"
+      },
       {
         "id": "camille",
         "text": "Camille Okafor",
         "flagsByBucket": {
-          "Manage Closely": { "camille_power_recognized": true },
-          "Keep Satisfied": { "camille_power_recognized": true },
+          "Manage Closely": {
+            "camille_power_recognized": true
+          },
+          "Keep Satisfied": {
+            "camille_power_recognized": true
+          },
           "Keep Informed": {},
           "Monitor": {}
         }
       },
-      { "id": "vaughn", "text": "Vaughn Kessler" },
+      {
+        "id": "vaughn",
+        "text": "Vaughn Kessler"
+      },
       {
         "id": "daniel",
         "text": "Daniel Atwell",
         "flagsByBucket": {
-          "Manage Closely": { "daniel_power_recognized": true },
-          "Keep Satisfied": { "daniel_power_recognized": true },
+          "Manage Closely": {
+            "daniel_power_recognized": true
+          },
+          "Keep Satisfied": {
+            "daniel_power_recognized": true
+          },
           "Keep Informed": {},
           "Monitor": {}
         }
       },
-      { "id": "priya", "text": "Priya Anand" },
-      { "id": "tomasz", "text": "Tomasz Nowak" },
-      { "id": "aisha", "text": "Aisha Bello" }
+      {
+        "id": "priya",
+        "text": "Priya Anand"
+      },
+      {
+        "id": "tomasz",
+        "text": "Tomasz Nowak"
+      },
+      {
+        "id": "aisha",
+        "text": "Aisha Bello"
+      }
     ],
-    "buckets_note": "buckets/cards are engine-added aliases of quadrants/stakeholders, in the shape the priority_assignment/power_interest_grid engine reads (no cost — every quadrant is free). See cards[].flagsByBucket for how daniel_power_recognized/camille_power_recognized actually get set, matching onComplete.setFlags below.",
+    "buckets_note": "buckets/cards are engine-added aliases of quadrants/stakeholders, in the shape the priority_assignment/power_interest_grid engine reads (no cost \u2014 every quadrant is free). See cards[].flagsByBucket for how daniel_power_recognized/camille_power_recognized actually get set, matching onComplete.setFlags below.",
     "onComplete": {
       "setFlags": {
         "daniel_power_recognized": "true if daniel placed in 'Manage Closely' or 'Keep Satisfied' (High Power quadrants), else false/absent",
@@ -300,7 +328,7 @@
       },
       "nextScene": "ACT2_SCENE03"
     },
-    "engineNote": "These two flags drive the reactive closing narration in DIALOGUE_ACT2_SCENE03 (lines 6a-6d) — see that scene's engineNote for the four-way combination."
+    "engineNote": "These two flags drive the reactive closing narration in DIALOGUE_ACT2_SCENE03 (lines 6a-6d) \u2014 see that scene's engineNote for the four-way combination."
   },
   "TOOL_ACT3_SCENE01_WBS": {
     "toolId": "TOOL_ACT3_SCENE01_WBS",
@@ -309,7 +337,7 @@
     "visualStyle": "warehouse_blueprint",
     "instructions": "Sort each task into the correct zone of the warehouse.",
     "backgroundAsset": "warehouse_week1_empty.png",
-    "note": "Reuses the SAME background image as ACT1_SCENE01's reception->office establishing shot and Facility Progress Shot #1 (Week 1, empty warehouse) — do not create a separate image. This scene overlays 6 clickable zone outlines on top of that existing background as an interactive layer. As each zone's tasks are correctly placed, that zone should visually fill in (outline -> solid), foreshadowing the Facility Progress payoff.",
+    "note": "Reuses the SAME background image as ACT1_SCENE01's reception->office establishing shot and Facility Progress Shot #1 (Week 1, empty warehouse) \u2014 do not create a separate image. This scene overlays 6 clickable zone outlines on top of that existing background as an interactive layer. As each zone's tasks are correctly placed, that zone should visually fill in (outline -> solid), foreshadowing the Facility Progress payoff.",
     "buckets": [
       "Construction",
       "Utilities",
@@ -406,20 +434,20 @@
     "type": "pick_n_of_m_swipeable",
     "instructions": "Swipe through all 9 candidates. Tap Hire to select up to 6. You can swipe back and change your mind at any time.",
     "maxHires": 6,
-    "interactionNote": "Swipe left/right navigates between cards WITHOUT committing anything. A separate 'Hire' toggle button on each card is the only thing that selects/deselects. Selection state persists regardless of navigation direction. A persistent 'Hired: X/6' counter is visible on every card. Once 6 are hired, the Hire button on all remaining un-hired cards greys out — player must explicitly un-hire someone first to free a slot (no silent auto-replacement).",
+    "interactionNote": "Swipe left/right navigates between cards WITHOUT committing anything. A separate 'Hire' toggle button on each card is the only thing that selects/deselects. Selection state persists regardless of navigation direction. A persistent 'Hired: X/6' counter is visible on every card. Once 6 are hired, the Hire button on all remaining un-hired cards greys out \u2014 player must explicitly un-hire someone first to free a slot (no silent auto-replacement).",
     "candidates": [
       {
         "id": "ravi",
         "name": "Ravi Chandra",
         "role": "Automation Engineer",
-        "description": "Brilliant, technically the strongest candidate by a clear margin. Known to be a flight risk — he's interviewed elsewhere twice this year.",
+        "description": "Brilliant, technically the strongest candidate by a clear margin. Known to be a flight risk \u2014 he's interviewed elsewhere twice this year.",
         "budgetEffect": -250000,
         "otherEffects": {
           "teamMorale": 5
         },
         "flagOnHire": "ravi_hired",
         "portrait": "ravi_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "elin",
@@ -432,7 +460,7 @@
         },
         "flagOnHire": "elin_hired",
         "portrait": "elin_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "priti",
@@ -446,7 +474,7 @@
         },
         "flagOnHire": "priti_hired",
         "portrait": "priti_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "jonas",
@@ -460,7 +488,7 @@
         },
         "flagOnHire": "jonas_hired",
         "portrait": "jonas_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "declan",
@@ -473,7 +501,7 @@
         },
         "flagOnHire": "declan_hired",
         "portrait": "declan_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "sam",
@@ -486,7 +514,7 @@
         },
         "flagOnHire": "sam_hired",
         "portrait": "sam_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "naomi",
@@ -500,7 +528,7 @@
         },
         "flagOnHire": "naomi_hired",
         "portrait": "naomi_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "ben",
@@ -514,7 +542,7 @@
         },
         "flagOnHire": "ben_hired",
         "portrait": "ben_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       },
       {
         "id": "yuki",
@@ -527,7 +555,7 @@
         },
         "flagOnHire": "yuki_hired",
         "portrait": "yuki_neutral.png",
-        "portraitStatus": "placeholder — no real art yet"
+        "portraitStatus": "placeholder \u2014 no real art yet"
       }
     ],
     "onSkippedCandidateNote": {
@@ -600,10 +628,10 @@
       "penalty": "none",
       "reaction": "Bar bounces back. Show inline note: 'Error: Dependency'."
     },
-    "note": "ms_utilities and ms_training have no hard prerequisite — free placement, can overlap other bars.",
+    "note": "ms_utilities and ms_training have no hard prerequisite \u2014 free placement, can overlap other bars.",
     "completionCondition": "All 6 milestones placed without an active dependency violation",
     "onComplete": {
-      "note": "This scene's final Gantt layout becomes the data source for the HUD's 'Current Objective' line for the rest of the game — whichever milestone's bar the current week falls inside.",
+      "note": "This scene's final Gantt layout becomes the data source for the HUD's 'Current Objective' line for the rest of the game \u2014 whichever milestone's bar the current week falls inside.",
       "nextScene": "ACT3_SCENE05"
     }
   },
@@ -656,7 +684,7 @@
         "correctBucket": "Async dashboard"
       }
     ],
-    "note": "Multiple stakeholders can share a bucket (Mike E.+Daniel both Monthly report, Camille+Tomasz both Decision-triggered) — not one-to-one. Mike E.'s placement here is the setup for ACT4_SCENE05's monthly status report mechanic — same system, paid off later.",
+    "note": "Multiple stakeholders can share a bucket (Mike E.+Daniel both Monthly report, Camille+Tomasz both Decision-triggered) \u2014 not one-to-one. Mike E.'s placement here is the setup for ACT4_SCENE05's monthly status report mechanic \u2014 same system, paid off later.",
     "wrongPlacementBehavior": {
       "penalty": "none",
       "reaction": "Card bounces back. No penalty."
@@ -690,7 +718,7 @@
           "wrongOption": "Mike E.'s monthly status report",
           "correctOption": "Procurement records",
           "reaction": "A status report says the deal's coming. Procurement's paperwork says it's done.",
-          "note": "Deliberately tempting: Mike E.'s monthly written report is a real mechanic set up in ACT3_SCENE05 and paid off in ACT4_SCENE05, so a player who's been paying attention may reach for it here — it's a real artifact, just not the primary source. Procurement's own signed records are."
+          "note": "Deliberately tempting: Mike E.'s monthly written report is a real mechanic set up in ACT3_SCENE05 and paid off in ACT4_SCENE05, so a player who's been paying attention may reach for it here \u2014 it's a real artifact, just not the primary source. Procurement's own signed records are."
         }
       },
       {
@@ -712,12 +740,12 @@
           "wrongOption": "Validation certificate",
           "correctOption": "Manufacturing dashboard",
           "reaction": "The validation certificate says the line works. It doesn't say anyone's used it yet.",
-          "note": "Tempting because the player just spent an entire earlier scene (IQ/OQ, in the WBS) earning this artifact — it's real, it's just evidence the equipment functions, not evidence patients are being treated."
+          "note": "Tempting because the player just spent an entire earlier scene (IQ/OQ, in the WBS) earning this artifact \u2014 it's real, it's just evidence the equipment functions, not evidence patients are being treated."
         }
       },
       {
         "id": "benefit_roi",
-        "text": "£12M Investment Justified",
+        "text": "\u00a312M Investment Justified",
         "correctMeasure": "ROI",
         "correctEvidence": "Finance report",
         "correctOwner": "daniel",
@@ -732,7 +760,7 @@
           "wrongOption": "Sales pipeline forecast",
           "correctOption": "Finance report",
           "reaction": "A forecast is a guess about what might happen. Daniel wants what actually did.",
-          "note": "Projected vs. actual, echoing correctWhen's '12 months after go-live' — a forecast is exactly the kind of thing that would be available too early and wouldn't hold up to Daniel's question."
+          "note": "Projected vs. actual, echoing correctWhen's '12 months after go-live' \u2014 a forecast is exactly the kind of thing that would be available too early and wouldn't hold up to Daniel's question."
         }
       }
     ],
@@ -748,10 +776,59 @@
       "penalty": "none",
       "reaction": "Bounces back, no penalty."
     },
-    "note": "This becomes a living artifact, not a one-off puzzle: BIG-01 (Act 4) should surface a new HUD line 'Second Product Benefits: Undefined' once it resolves, and ACT6_SCENE03's world memory reel should be patched to show this Register's actual ✓/⚠/✗ status per benefit instead of generic callback lines — both are flagged as follow-up patches, not yet applied to those scenes' existing content.",
+    "note": "This becomes a living artifact, not a one-off puzzle: BIG-01 (Act 4) should surface a new HUD line 'Second Product Benefits: Undefined' once it resolves, and ACT6_SCENE03's world memory reel should be patched to show this Register's actual \u2713/\u26a0/\u2717 status per benefit instead of generic callback lines \u2014 both are flagged as follow-up patches, not yet applied to those scenes' existing content.",
     "completionCondition": "All 3 benefits' Measure and Evidence fields correctly built",
     "onComplete": {
       "nextScene": "ACT3_SCENE06B"
+    }
+  },
+  "TOOL_ACT4_SCENE05_STATUS_REPORT": {
+    "toolId": "TOOL_ACT4_SCENE05_STATUS_REPORT",
+    "sourceScene": "ACT4_SCENE05",
+    "type": "status_report_builder",
+    "instructions": "Fill out this period's Monthly Status Report. Ratings, risks, and evidence are your own call \u2014 nothing here is pre-filled or graded for you.",
+    "ganttToolId": "TOOL_ACT3_SCENE04_MILESTONES",
+    "projectManagerLabel": "You",
+    "projectSponsorLabel": "Mike Elloian",
+    "taxTower": "Governance, Digital and Change",
+    "projectDescription": "Helix BioPharma is building a new sterile fill-finish suite to expand manufacturing capacity ahead of a planned MHRA pre-approval inspection. Scope covers construction, utilities and equipment installation, and full process validation, delivered against the baseline agreed with the steering committee.",
+    "accomplishmentCandidates": [
+      {
+        "id": "acc_baseline_approved",
+        "text": "Baseline approved by steering committee"
+      },
+      {
+        "id": "acc_supplier_contracted",
+        "text": "Preferred supplier contracted"
+      },
+      {
+        "id": "acc_critical_hires",
+        "text": "Critical hires onboarded"
+      },
+      {
+        "id": "acc_wbs_cbs_baselined",
+        "text": "WBS and CBS baselined, no unresolved gaps"
+      }
+    ],
+    "upcomingActivityCandidates": [
+      {
+        "id": "act_validation_review",
+        "text": "Complete validation master plan review"
+      },
+      {
+        "id": "act_electrical_replacement",
+        "text": "Close out electrical contractor replacement"
+      },
+      {
+        "id": "act_cleanroom_requal",
+        "text": "Run cleanroom requalification"
+      }
+    ],
+    "maxRiskSlots": 4,
+    "completionCondition": "Overall status and all four RAG dimensions chosen (risks/accomplishments/upcoming activities are optional)",
+    "note": "Upcoming Milestones and completed-milestone accomplishment candidates are both derived at render time from TOOL_ACT3_SCENE04_MILESTONES's real placements (see ganttToolId) split against the current week \u2014 never hardcoded here. See StatusReportBuilder.tsx.",
+    "onComplete": {
+      "nextScene": "ACT4_SCENE05B"
     }
   }
 }

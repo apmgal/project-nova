@@ -334,12 +334,14 @@ export interface ActualStatusReport {
 
 /** One risk the player chose to surface in a submitted report, and how
  * they chose to characterize it — independent of (and possibly different
- * from) that risk's entry in the same report's `actualSnapshot.risks`. */
+ * from) that risk's entry in the same report's `actualSnapshot.risks`.
+ * `mitigationText` is free text the player types in the report-builder UI
+ * (not a reference into any fixed mitigation catalog — there isn't one). */
 export interface SelectedRiskReport {
   riskId: string;
   reportedRag: RagStatus;
   outlook: "worsening" | "stable" | "improving";
-  mitigationId?: string;
+  mitigationText?: string;
 }
 
 /** A single submitted Monthly Status Report, as stored on
@@ -473,6 +475,17 @@ export interface ToolMilestone {
   wbsCategory?: string;
 }
 
+/** status_report_builder checklist entry (Key Accomplishments / Upcoming
+ * Activities) — a single authored, selectable line. The Key Accomplishments
+ * list the player actually sees is this authored set PLUS one synthesized
+ * entry per Gantt milestone that's already complete as of the report's
+ * current week (see StatusReportBuilder.tsx) — never hand-authored, since
+ * that has to reflect the player's own Milestone Timeline placement. */
+export interface StatusReportChecklistItem {
+  id: string;
+  text: string;
+}
+
 /** proof_chain_builder's embedded no-penalty choice moment (e.g. Mike E. vs
  * Camille disagreeing on how "More Patients Treated" should be measured). */
 export interface BenefitTensionMoment {
@@ -575,6 +588,19 @@ export interface ToolScreenBlock {
   benefits?: ToolBenefit[];
   fieldsPlayerBuilds?: string[];
   fieldsRevealedByDialogue?: string[];
+
+  // status_report_builder (Monthly Status Report)
+  /** toolId of the gantt_placement tool whose milestones/placements this
+   * report should read for its Upcoming Milestones table and completed-
+   * milestone accomplishment candidates. */
+  ganttToolId?: string;
+  projectManagerLabel?: string;
+  projectSponsorLabel?: string;
+  taxTower?: string;
+  projectDescription?: string;
+  accomplishmentCandidates?: StatusReportChecklistItem[];
+  upcomingActivityCandidates?: StatusReportChecklistItem[];
+  maxRiskSlots?: number;
 
   onComplete: {
     nextScene: string;

@@ -64,6 +64,7 @@ import {
   applyDeferredHonestyPenalty,
   applyDecisions,
   HONESTY_MECHANIC_DEPRECATED_SCENES,
+  submitStatusReport,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -72,6 +73,7 @@ import type {
   GameState,
   RiskInvestigationQuestion,
   Scene,
+  StatusReportRecord,
   ToolScreenBlock,
 } from "@/lib/nova/types";
 import TitleScreen from "./TitleScreen";
@@ -85,6 +87,7 @@ import CBSReview from "./CBSReview";
 import TeamSelector from "./TeamSelector";
 import GanttBoard from "./GanttBoard";
 import BenefitsBuilder from "./BenefitsBuilder";
+import StatusReportBuilder from "./StatusReportBuilder";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -749,6 +752,29 @@ export default function GameRoot() {
     }
   }
 
+  // The Monthly Status Report's own explicit submit action. Unlike every
+  // other tool, this one gathers its whole submission (overall/dimension
+  // RAGs, selected risks, accomplishments, upcoming activities) from
+  // StatusReportBuilder's own local component state rather than
+  // toolProgress/toolPlacements/toolSelections — there's no single
+  // "correct" completion condition to check the way placement tools have,
+  // so the builder gates its own Submit button and only calls this once
+  // the player has actually filled in an overall status + all four RAG
+  // dimensions. submitStatusReport appends the record (with a fresh
+  // actualSnapshot) before submitTool flips the generic toolSubmitted
+  // flag, mirroring handleSubmitTool's own advance-if-no-postLines logic.
+  function handleSubmitStatusReport(submission: Omit<StatusReportRecord, "actualSnapshot">) {
+    if (!gameState || !scene || !toolScreen) return;
+    let next = submitStatusReport(gameState, submission);
+    next = submitTool(next, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
@@ -919,6 +945,13 @@ export default function GameRoot() {
                 onReset={handleResetTool}
                 canSubmit={toolComplete}
                 onSubmit={handleSubmitTool}
+              />
+            ) : atToolBreak && toolScreen && toolType === "status_report_builder" ? (
+              <StatusReportBuilder
+                toolScreen={toolScreen}
+                gameState={gameState}
+                pmConcept={scene.pmConcept}
+                onSubmitReport={handleSubmitStatusReport}
               />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint

@@ -241,3 +241,102 @@ ever fires on entry to ACT4_SCENE05B/05C (never ACT4_SCENE05 itself), and
 with report #1 no longer setting `honesty_penalty_pending`, entering
 ACT4_SCENE05B simply finds nothing pending — a clean no-op, not an orphaned
 penalty.
+
+---
+
+## Monthly Status Report — the real report-builder UI (report #1)
+
+**Status:** Implemented (Task #184). ACT4_SCENE05 now runs the actual
+`StatusReportBuilder.tsx` component instead of `CHOICE_ACT4_SCENE05_M1`'s
+3-option honestyTone choice — the choice block still exists in
+`choices.json` (unreferenced, kept per the project's don't-delete
+convention) but `ACT4_SCENE05.choicesId` is now `null`. `DIALOGUE_ACT4_SCENE05`
+gained a trailing `[Player fills out the Monthly Status Report.]` marker
+line so the tool screen opens right after Marcus's "How's my project?".
+
+**New tool type `status_report_builder`:** a new `ToolScreenBlock` field
+block (`ganttToolId`, `projectManagerLabel`, `projectSponsorLabel`,
+`taxTower`, `projectDescription`, `accomplishmentCandidates`,
+`upcomingActivityCandidates`, `maxRiskSlots`) backs
+`TOOL_ACT4_SCENE05_STATUS_REPORT` in `tool_screens.json`. Deliberately
+doesn't need a `computeToolComplete`/`resetTool` case: the default
+branches of both already behave harmlessly for a tool with no `cards`
+(`isToolComplete(state, toolId, 0)` is trivially true), and
+`StatusReportBuilder` never uses the generic canSubmit/onReset wiring
+anyway — see next point.
+
+**Deliberately NOT using `toolProgress`/`toolPlacements`/`toolSelections`:**
+every other tool persists its in-progress state into `GameState` so
+completion can be computed centrally and progress survives a reload
+mid-activity. The report builder instead keeps its whole draft (overall
+status, the four dimension RAGs, each risk slot's id/mitigation/RAG/
+outlook, which accomplishments/upcoming activities are checked) in local
+React state, because there's no single "correct" completion condition to
+check the way placement tools have — a real status report is "done" when
+the player decides it is. The only two engine calls that happen are on
+submit: `submitStatusReport` (appends the record, computing a fresh
+`actualSnapshot` from live state) then `submitTool` (flips the generic
+`toolSubmitted` flag so `atToolBreak` clears and the scene advances,
+exactly like every other tool). Trade-off accepted: navigating away
+mid-fill-out (there's no way to today, but if one existed) would lose an
+in-progress draft rather than resume it — acceptable since nothing else in
+the engine currently allows leaving a tool screen before submitting.
+
+**No pre-filled RAGs, anywhere:** every RAG control (the Overall Status
+pill, the four dimension cells, each risk's RAG cell) starts neutral/off
+and cycles off → green → amber → red on tap. This reconciles a tension
+flagged during the mockup phase — the approved visual mockup showed RAG
+cells pre-colored by default for demo legibility — in favor of the
+earlier, more fundamental principle established for this feature: the
+player must make their own independent judgement call, never be shown (or
+have to guess) a hidden "correct" colour.
+
+**Risks shown are id + title ONLY, never their real RAG:**
+`computeActualStatusReport(state).risks` (`ActiveRisk[]`) backs the risk
+dropdown's options, but the component only ever reads `.riskId`/`.title`
+from it — `.rag` (the hidden truth) is deliberately never touched, so the
+UI can't leak the answer through option ordering, styling, or any other
+side channel. The player picks their own `reportedRag`/`outlook` and
+types free-text `mitigationText` per risk, up to `maxRiskSlots` (4).
+
+**`SelectedRiskReport.mitigationId` renamed to `mitigationText`:** the
+field was named `mitigationId` when added in Task #183, before the mockup
+had settled on a free-text mitigation input rather than a pick from some
+fixed mitigation catalog (no such catalog exists). Renamed before any
+other code depended on the old name.
+
+**Upcoming Milestones / Key Accomplishments split — real Gantt data, not
+authored:** `StatusReportBuilder` reads `toolScreen.ganttToolId` ->
+`getToolScreen` -> that tool's real `milestones` + the player's own
+`state.toolPlacements[ganttToolId]` (the exact same source HUD's Current
+Objective line reads), resolves each milestone's `{start, end}` the same
+way `computeCurrentObjective` does (`end = start + durationWeeks`), and
+compares against `currentWeek` (`computeWeeksRemaining`, clamped 0-24,
+same forecast-based value the HUD itself uses — see this file's earlier
+"HUD 'current week' is a forecast, not real elapsed time" entry for the
+known caveat that inherits into this feature too). A milestone with
+`end > currentWeek` shows in the read-only Upcoming Milestones table; one
+with `end <= currentWeek` instead becomes an extra, dynamically-labelled
+Key Accomplishments checklist entry (`gantt_<milestoneId>`), appended
+after the authored `accomplishmentCandidates`. Upcoming Activities has no
+equivalent real-data source — it's authored narrative content only, same
+as every other tool's `cards`/`candidates`.
+
+**Visual language is deliberately NOT the dark zinc tool-screen theme:**
+every other bespoke tool (WBS, CBS, Gantt, etc.) uses the
+`rounded-lg border-zinc-800 bg-zinc-900/90` dark card chrome. This one
+uses a white/navy/lavender corporate-report look instead, matching the
+user's real pptx template screenshot pixel-for-pixel (title, meta grid,
+project description band, RAG tables) — direct art direction from several
+rounds of mockup review, because this screen is meant to read as a real
+in-fiction document the player produces, not another game-mechanic puzzle.
+It still uses the shared `ConceptHintButton`/`ConceptHintPanel` (glossary
+entry added: "Status reporting / governance") for consistency with every
+other tool screen's APM-concept reminder.
+
+**Company logo asset:** the user's uploaded logo (fictional "Helix
+BioPharma" mark) was resized to 300x170 and saved to
+`public/assets/branding/helix_biopharma_logo.png`, referenced by a plain
+`<img>` tag — not inlined as base64 in the component source (that pattern
+was only ever a mockup-scratch-file convenience for `show_widget`, never
+meant to ship in real committed code).

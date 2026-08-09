@@ -13,7 +13,7 @@
       {
         "speaker": "joan",
         "emotion": "neutral",
-        "text": "Morning. You'll be the new project manager? Mike E. is expecting you — go on up.",
+        "text": "Morning. You'll be the new project manager? Mike E. is expecting you \u2014 go on up.",
         "background": "hallway"
       },
       {
@@ -31,14 +31,14 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it — half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
+        "text": "Upstairs, the office is quieter than a company mid-crisis has any right to be. A desk near the window still has a mug on it \u2014 half-full, gone cold. Nobody's moved it. Nobody's sitting there either.",
         "background": "upstairs_landing",
         "ambient": "none"
       },
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "You made it. Good — we need every pair of hands we can get right now."
+        "text": "You made it. Good \u2014 we need every pair of hands we can get right now."
       },
       {
         "speaker": "narrator",
@@ -65,12 +65,12 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Sit down. Before you ask me anything—"
+        "text": "Sit down. Before you ask me anything\u2014"
       },
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "—tell me what you think is wrong with this project."
+        "text": "\u2014tell me what you think is wrong with this project."
       },
       {
         "speaker": "narrator",
@@ -115,7 +115,7 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Good. Start wherever you like. Emails, Teams, the shared drive — it's all a mess, take your pick.",
+        "text": "Good. Start wherever you like. Emails, Teams, the shared drive \u2014 it's all a mess, take your pick.",
         "background": "marcus_office"
       },
       {
@@ -131,7 +131,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "He turns back to his screen. The conversation, such as it was, is over — but you notice he still hasn't touched the mug."
+        "text": "He turns back to his screen. The conversation, such as it was, is over \u2014 but you notice he still hasn't touched the mug."
       }
     ],
     "needsWriting": false
@@ -143,7 +143,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You get read access to Ellis's old inbox — nobody's reassigned it yet.",
+        "text": "You get read access to Ellis's old inbox \u2014 nobody's reassigned it yet.",
         "background": "player_desk"
       }
     ],
@@ -174,12 +174,12 @@
       {
         "speaker": "ben",
         "emotion": "neutral",
-        "text": "That's useful, but it's scattered. If you want the full picture, it's in SharePoint — Project NOVA's own folder. I can point you there."
+        "text": "That's useful, but it's scattered. If you want the full picture, it's in SharePoint \u2014 Project NOVA's own folder. I can point you there."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "He drops a link. The breadcrumb at the top reads: Group Tax Innovation & Change › 4. Managed Projects › 11. Project NOVA."
+        "text": "He drops a link. The breadcrumb at the top reads: Group Tax Innovation & Change \u203a 4. Managed Projects \u203a 11. Project NOVA."
       }
     ],
     "needsWriting": false
@@ -211,7 +211,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "He nods at the corkboard behind him — half-empty, waiting."
+        "text": "He nods at the corkboard behind him \u2014 half-empty, waiting."
       },
       {
         "speaker": "marcus",
@@ -250,7 +250,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You search Ellis's old email account. Then Teams. Then the shared drive again — further in this time, past the folder you already found."
+        "text": "You search Ellis's old email account. Then Teams. Then the shared drive again \u2014 further in this time, past the folder you already found."
       },
       {
         "speaker": "narrator",
@@ -260,13 +260,13 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Tucked behind it, a single scanned page — handwriting, not typed. A notebook page, out of place among the spreadsheets.",
+        "text": "Tucked behind it, a single scanned page \u2014 handwriting, not typed. A notebook page, out of place among the spreadsheets.",
         "ambient": "none"
       },
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“They want a plan. What they need is someone who'll tell them the truth before it's too late.”"
+        "text": "\u201cThey want a plan. What they need is someone who'll tell them the truth before it's too late.\u201d"
       },
       {
         "speaker": "narrator",
@@ -296,7 +296,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Monday. The coffee machine is doing that thing again — the one where it decides sugar is optional whether you asked for it or not."
+        "text": "Monday. The coffee machine is doing that thing again \u2014 the one where it decides sugar is optional whether you asked for it or not."
       },
       {
         "speaker": "priya",
@@ -343,12 +343,12 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Right. Let's get this done. Everyone's had the requirements list — today we decide what actually gets built."
+        "text": "Right. Let's get this done. Everyone's had the requirements list \u2014 today we decide what actually gets built."
       },
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "Every automation line on that list is a Must. I'm not being dramatic — the throughput targets don't work without them."
+        "text": "Every automation line on that list is a Must. I'm not being dramatic \u2014 the throughput targets don't work without them."
       },
       {
         "speaker": "daniel",
@@ -363,7 +363,7 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "One thing at a time. You're chairing this — talk us through it."
+        "text": "One thing at a time. You're chairing this \u2014 talk us through it."
       },
       {
         "speaker": "narrator",
@@ -379,13 +379,13 @@
       {
         "speaker": "priya",
         "emotion": "frustrated",
-        "text": "So automation's a \"Should\" now? That's going to hit us in commissioning, not now — when it's expensive to fix.",
+        "text": "So automation's a \"Should\" now? That's going to hit us in commissioning, not now \u2014 when it's expensive to fix.",
         "condition": "automation_not_marked_must"
       },
       {
         "speaker": "priya",
         "emotion": "warm",
-        "text": "Automation as a Must. Thank you — that's going to save us weeks in commissioning.",
+        "text": "Automation as a Must. Thank you \u2014 that's going to save us weeks in commissioning.",
         "condition": "automation_marked_must"
       },
       {
@@ -396,12 +396,12 @@
       {
         "speaker": "camille",
         "emotion": "serious",
-        "text": "Actually — I'd rather we under-build automation than under-build validation. We can automate a working line later. We can't un-fail an inspection."
+        "text": "Actually \u2014 I'd rather we under-build automation than under-build validation. We can automate a working line later. We can't un-fail an inspection."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "The room goes quiet. Mike E. looks between them — this isn't a fight he called."
+        "text": "The room goes quiet. Mike E. looks between them \u2014 this isn't a fight he called."
       },
       {
         "speaker": "marcus",
@@ -429,7 +429,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "Before we go further — I want you to think about something most PMs get wrong. Who's actually going to stop this project if they disagree with it? Not who signs it off. Who can actually kill it."
+        "text": "Before we go further \u2014 I want you to think about something most PMs get wrong. Who's actually going to stop this project if they disagree with it? Not who signs it off. Who can actually kill it."
       },
       {
         "speaker": "narrator",
@@ -449,19 +449,19 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Mike E.'s name at the top. It isn't, not quite. You've already placed Daniel's budget authority and Camille's escalation power correctly — both belong right where you put them.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. You've already placed Daniel's budget authority and Camille's escalation power correctly \u2014 both belong right where you put them.",
         "condition": "daniel_power_recognized_and_camille_power_recognized"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Daniel's budget authority reaches further than you gave him credit for — you'll want to move him. Camille, at least, you read correctly.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Daniel's budget authority reaches further than you gave him credit for \u2014 you'll want to move him. Camille, at least, you read correctly.",
         "condition": "not_daniel_power_recognized_and_camille_power_recognized"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Camille doesn't need permission to escalate anything — she's never used it, yet, but she has it. You'll want to move her. Daniel, at least, you read correctly.",
+        "text": "You expect Mike E.'s name at the top. It isn't, not quite. Camille doesn't need permission to escalate anything \u2014 she's never used it, yet, but she has it. You'll want to move her. Daniel, at least, you read correctly.",
         "condition": "daniel_power_recognized_and_not_camille_power_recognized"
       },
       {
@@ -477,7 +477,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Lines 6a-6d are four mutually exclusive variants covering all combinations of daniel_power_recognized and camille_power_recognized (both set by the stakeholder grid tool). Exactly one should render, matching whichever combination is true. 'not_X' conditions are logical negations (flag false or absent), not separately stored flags — same pattern as camilleTrust_high/_not_high."
+    "engineNote": "Lines 6a-6d are four mutually exclusive variants covering all combinations of daniel_power_recognized and camille_power_recognized (both set by the stakeholder grid tool). Exactly one should render, matching whichever combination is true. 'not_X' conditions are logical negations (flag false or absent), not separately stored flags \u2014 same pattern as camilleTrust_high/_not_high."
   },
   "DIALOGUE_ACT2_SCENE04": {
     "dialogueId": "DIALOGUE_ACT2_SCENE04",
@@ -496,7 +496,7 @@
       {
         "speaker": "camille",
         "emotion": "concerned",
-        "text": "While we're raising things — the validation timeline in the current plan assumes everything goes right first time. Nothing ever goes right first time."
+        "text": "While we're raising things \u2014 the validation timeline in the current plan assumes everything goes right first time. Nothing ever goes right first time."
       },
       {
         "speaker": "daniel",
@@ -559,7 +559,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "This scene now has THREE sequential choices, not one: CHOICE_ACT2_SCENE04 (contractor, existing), then CHOICE_ACT2_SCENE04_VALIDATION, then CHOICE_ACT2_SCENE04_CONTINGENCY — each fires at the dialogue line matching its 'insertAfterLine', in that order. Present each choice's 3 options, apply the result's reaction line, then continue to the next block. Flow per risk: [risk raised] -> [investigation: player picks 2 of 3 questions from risk_investigation.json, sees answers, sets flagOnAsk for each asked] -> [response choice from choices.json, unchanged] -> [reaction line]. The investigation is a NEW step inserted before each existing choice, not a replacement for it."
+    "engineNote": "This scene now has THREE sequential choices, not one: CHOICE_ACT2_SCENE04 (contractor, existing), then CHOICE_ACT2_SCENE04_VALIDATION, then CHOICE_ACT2_SCENE04_CONTINGENCY \u2014 each fires at the dialogue line matching its 'insertAfterLine', in that order. Present each choice's 3 options, apply the result's reaction line, then continue to the next block. Flow per risk: [risk raised] -> [investigation: player picks 2 of 3 questions from risk_investigation.json, sees answers, sets flagOnAsk for each asked] -> [response choice from choices.json, unchanged] -> [reaction line]. The investigation is a NEW step inserted before each existing choice, not a replacement for it."
   },
   "DIALOGUE_ACT2_SCENE05": {
     "dialogueId": "DIALOGUE_ACT2_SCENE05",
@@ -568,7 +568,7 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "One more decision before we start moving dirt. Are we running this like a traditional construction project — staged, sign-off at every gate? Or something with more give in it?"
+        "text": "One more decision before we start moving dirt. Are we running this like a traditional construction project \u2014 staged, sign-off at every gate? Or something with more give in it?"
       },
       {
         "speaker": "narrator",
@@ -590,7 +590,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Late, after everyone's gone, you're still in the site office finishing paperwork when you find it — a folder inside a folder, easy to miss unless you're looking. \"Risk_Register_OLD.xlsx.\" Half-finished. Ellis's initials in the file metadata."
+        "text": "Late, after everyone's gone, you're still in the site office finishing paperwork when you find it \u2014 a folder inside a folder, easy to miss unless you're looking. \"Risk_Register_OLD.xlsx.\" Half-finished. Ellis's initials in the file metadata."
       },
       {
         "speaker": "narrator",
@@ -600,12 +600,12 @@
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“Mike E. doesn't want certainty. He wants confidence.”"
+        "text": "\u201cMike E. doesn't want certainty. He wants confidence.\u201d"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You think about the Board meeting. About Camille's “Actually—”. About the version of this project where somebody told Mike E. what he wanted to hear instead of what was true."
+        "text": "You think about the Board meeting. About Camille's \u201cActually\u2014\u201d. About the version of this project where somebody told Mike E. what he wanted to hear instead of what was true."
       },
       {
         "speaker": "narrator",
@@ -627,12 +627,12 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "He leads you across the concrete floor, boots echoing. Overhead, the first steel frame sections are already up — the building's actual bones, finally visible instead of theoretical."
+        "text": "He leads you across the concrete floor, boots echoing. Overhead, the first steel frame sections are already up \u2014 the building's actual bones, finally visible instead of theoretical."
       },
       {
         "speaker": "vaughn",
         "emotion": "neutral",
-        "text": "Walk me through everything that needs to happen before we can manufacture medicine in this room. Everything. I'm not being polite — if you miss something, we both find out the expensive way, later."
+        "text": "Walk me through everything that needs to happen before we can manufacture medicine in this room. Everything. I'm not being polite \u2014 if you miss something, we both find out the expensive way, later."
       },
       {
         "speaker": "narrator",
@@ -716,7 +716,7 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Budget for six people. Pick wisely — you won't get a seventh if this goes sideways."
+        "text": "Budget for six people. Pick wisely \u2014 you won't get a seventh if this goes sideways."
       },
       {
         "speaker": "narrator",
@@ -748,7 +748,7 @@
       {
         "speaker": "vaughn",
         "emotion": "neutral",
-        "text": "Whiteboard's yours. Whatever you put up here, we're building to it — so don't put anything up you don't believe."
+        "text": "Whiteboard's yours. Whatever you put up here, we're building to it \u2014 so don't put anything up you don't believe."
       },
       {
         "speaker": "narrator",
@@ -763,13 +763,13 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Later, filing your own timeline notes next to Vaughn's old ones, you find a scrap you missed before — half a page, tucked where a completed page should be.",
+        "text": "Later, filing your own timeline notes next to Vaughn's old ones, you find a scrap you missed before \u2014 half a page, tucked where a completed page should be.",
         "condition": "contractor_risk_logged"
       },
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“If Vaughn says a name's gone quiet, that name is already gone.”",
+        "text": "\u201cIf Vaughn says a name's gone quiet, that name is already gone.\u201d",
         "condition": "contractor_risk_logged"
       },
       {
@@ -874,7 +874,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Tension moment (Mike E. vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field — see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].measureTensionMoment. Every Measure/Evidence field across all 3 benefits now has its own tensionMoment (wrongOption/correctOption/reaction); this one is the only pair with marcusLine/camilleLine framing lines."
+    "engineNote": "Tension moment (Mike E. vs Camille) fires specifically on the 'More Patients Treated' benefit's Measure field \u2014 see TOOL_ACT3_SCENE06_BENEFITS.benefits[1].measureTensionMoment. Every Measure/Evidence field across all 3 benefits now has its own tensionMoment (wrongOption/correctOption/reaction); this one is the only pair with marcusLine/camilleLine framing lines."
   },
   "DIALOGUE_ACT3_SCENE07": {
     "dialogueId": "DIALOGUE_ACT3_SCENE07",
@@ -888,7 +888,7 @@
       {
         "speaker": "tomasz",
         "emotion": "neutral",
-        "text": "SteriTech first. Fair warning — they don't do sales pitches, they do specs. Try to keep up."
+        "text": "SteriTech first. Fair warning \u2014 they don't do sales pitches, they do specs. Try to keep up."
       },
       {
         "speaker": "steritech_rep",
@@ -957,7 +957,7 @@
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "Remember the filling line we put through the Board back in week two? I'd like the actual go-ahead now — the room's ready.",
+        "text": "Remember the filling line we put through the Board back in week two? I'd like the actual go-ahead now \u2014 the room's ready.",
         "condition": "filling_line_committed_act2"
       },
       {
@@ -969,18 +969,18 @@
       {
         "speaker": "priya",
         "emotion": "neutral",
-        "text": "Small ask. We squeeze one more filling line into the room — same footprint, better throughput. I've already checked it fits.",
+        "text": "Small ask. We squeeze one more filling line into the room \u2014 same footprint, better throughput. I've already checked it fits.",
         "condition": "filling_line_not_committed_act2"
       },
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "I like it. If it fits, we should—"
+        "text": "I like it. If it fits, we should\u2014"
       },
       {
         "speaker": "camille",
         "emotion": "serious",
-        "text": "Actually — no. Not without a full revalidation of the cleanroom classification. That's not a formality. That's weeks.",
+        "text": "Actually \u2014 no. Not without a full revalidation of the cleanroom classification. That's not a formality. That's weeks.",
         "condition": "camilleTrust_high"
       },
       {
@@ -992,7 +992,7 @@
       {
         "speaker": "marcus",
         "emotion": "frustrated",
-        "text": "Camille—"
+        "text": "Camille\u2014"
       },
       {
         "speaker": "camille",
@@ -1006,7 +1006,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render. ADDITIONALLY: the scene now opens with one of two mutually exclusive framings based on filling_line_committed_act2 (set in the Act 2 MoSCoW tool) — a 'confirming a prior commitment' framing vs. a 'brand new ask' framing. Mike E.'s 'I like it' line and everything from Camille's revalidation concern onward is UNCHANGED and follows either opener."
+    "engineNote": "camilleTrust_high / camilleTrust_not_high are mutually exclusive conditions evaluated once at scene start (threshold: Warm band or above). Only one of the two Camille lines should render. ADDITIONALLY: the scene now opens with one of two mutually exclusive framings based on filling_line_committed_act2 (set in the Act 2 MoSCoW tool) \u2014 a 'confirming a prior commitment' framing vs. a 'brand new ask' framing. Mike E.'s 'I like it' line and everything from Camille's revalidation concern onward is UNCHANGED and follows either opener."
   },
   "DIALOGUE_ACT4_SCENE03": {
     "dialogueId": "DIALOGUE_ACT4_SCENE03",
@@ -1031,7 +1031,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "This scene hands off to the Act 4 Event Library: EV-02 through EV-11, EV-13, EV-15 (standard), plus EV-R1–R4 (reversal events) and EV-NP2 (no-perfect-answer), each triggered per its own condition in events.json. Sequencing/order among triggered events is runtime-conditional, not fixed narrative order — dialogue/choices content for each individual event still needs writing (see events.json entries still needsWriting-equivalent, i.e. missing dialogueId)."
+    "engineNote": "This scene hands off to the Act 4 Event Library: EV-02 through EV-11, EV-13, EV-15 (standard), plus EV-R1\u2013R4 (reversal events) and EV-NP2 (no-perfect-answer), each triggered per its own condition in events.json. Sequencing/order among triggered events is runtime-conditional, not fixed narrative order \u2014 dialogue/choices content for each individual event still needs writing (see events.json entries still needsWriting-equivalent, i.e. missing dialogueId)."
   },
   "DIALOGUE_ACT4_SCENE05": {
     "dialogueId": "DIALOGUE_ACT4_SCENE05",
@@ -1046,6 +1046,11 @@
         "speaker": "marcus",
         "emotion": "neutral",
         "text": "How's my project?"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player fills out the Monthly Status Report.]"
       }
     ],
     "needsWriting": false
@@ -1062,13 +1067,13 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "One evening, Camille catches you still in the office and, unprompted, hands you a photocopy — not from her own notes, but from Ellis's. She's had it a while, she says. She wasn't sure when to give it to you.",
+        "text": "One evening, Camille catches you still in the office and, unprompted, hands you a photocopy \u2014 not from her own notes, but from Ellis's. She's had it a while, she says. She wasn't sure when to give it to you.",
         "condition": "camilleTrust_high"
       },
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“Camille will never be the problem. She'll be the only one still standing when there is one.”",
+        "text": "\u201cCamille will never be the problem. She'll be the only one still standing when there is one.\u201d",
         "condition": "camilleTrust_high"
       },
       {
@@ -1084,7 +1089,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Hands off to late-wave Act 4 events (EV-07, EV-09, EV-10, EV-14, EV-15) per their own conditions — dialogue/choices for those individual events still need writing. Ellis Fragment #5 is conditional on camilleTrust_high and may not be found this playthrough, by design."
+    "engineNote": "Hands off to late-wave Act 4 events (EV-07, EV-09, EV-10, EV-14, EV-15) per their own conditions \u2014 dialogue/choices for those individual events still need writing. Ellis Fragment #5 is conditional on camilleTrust_high and may not be found this playthrough, by design."
   },
   "DIALOGUE_ACT5_SCENE01": {
     "dialogueId": "DIALOGUE_ACT5_SCENE01",
@@ -1113,7 +1118,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Gaps you left earlier — a validation step deferred, a training session compressed to save a day — don't announce themselves. They just don't check out clean."
+        "text": "Gaps you left earlier \u2014 a validation step deferred, a training session compressed to save a day \u2014 don't announce themselves. They just don't check out clean."
       }
     ],
     "needsWriting": false
@@ -1125,12 +1130,12 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You go looking for the paper trail — not because you doubt it exists, but because you're about to be asked to produce it, and “I'm sure it's somewhere” has never satisfied an inspector."
+        "text": "You go looking for the paper trail \u2014 not because you doubt it exists, but because you're about to be asked to produce it, and \u201cI'm sure it's somewhere\u201d has never satisfied an inspector."
       },
       {
         "speaker": "camille",
         "emotion": "neutral",
-        "text": "This is the part nobody enjoys and everybody needs. Validation records, change logs, risk responses — all of it, in order, ready to be read by someone who wasn't in the room when any of it happened."
+        "text": "This is the part nobody enjoys and everybody needs. Validation records, change logs, risk responses \u2014 all of it, in order, ready to be read by someone who wasn't in the room when any of it happened."
       },
       {
         "speaker": "narrator",
@@ -1167,7 +1172,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You produce the Change Control record — cost, schedule, quality impact, all assessed before Mike E. signed off.",
+        "text": "You produce the Change Control record \u2014 cost, schedule, quality impact, all assessed before Mike E. signed off.",
         "condition": "filling_line_approved"
       },
       {
@@ -1196,7 +1201,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You hand over the power/interest map you built in your second week — the one where you first noticed Daniel and Camille had more real leverage than the room let on."
+        "text": "You hand over the power/interest map you built in your second week \u2014 the one where you first noticed Daniel and Camille had more real leverage than the room let on."
       },
       {
         "speaker": "whitfield",
@@ -1206,7 +1211,7 @@
       {
         "speaker": "whitfield",
         "emotion": "neutral",
-        "text": "Third. The isolator delay, early in delivery — how was that resolved, and what did it cost?"
+        "text": "Third. The isolator delay, early in delivery \u2014 how was that resolved, and what did it cost?"
       },
       {
         "speaker": "narrator",
@@ -1233,7 +1238,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Whitfield finds it before you can explain it away — the month you said “on track” while your own risk log said otherwise.",
+        "text": "Whitfield finds it before you can explain it away \u2014 the month you said \u201con track\u201d while your own risk log said otherwise.",
         "condition": "hid_problem_from_marcus"
       },
       {
@@ -1263,7 +1268,7 @@
       {
         "speaker": "whitfield",
         "emotion": "neutral",
-        "text": "For what it's worth — people here describe you fairly consistently. That's not nothing, in an audit.",
+        "text": "For what it's worth \u2014 people here describe you fairly consistently. That's not nothing, in an audit.",
         "condition": "has_reputation_tag"
       },
       {
@@ -1278,7 +1283,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "This scene is fully dynamic, not scripted branching — each condition reads directly from gameState.flags/choiceHistory: filling_line_approved / filling_line_deferred_or_rejected (from ACT4_SCENE02), isolator_expedited / isolator_absorbed (add these flags to ACT4_SCENE01's choice effects — not yet present, needs a small patch), hid_problem_from_marcus (from ACT4_SCENE05 status reports), has_reputation_tag (true if gameState.reputation.tags is non-empty). No dice roll, no hidden randomness — entirely a readout of the player's own decision history, per design intent."
+    "engineNote": "This scene is fully dynamic, not scripted branching \u2014 each condition reads directly from gameState.flags/choiceHistory: filling_line_approved / filling_line_deferred_or_rejected (from ACT4_SCENE02), isolator_expedited / isolator_absorbed (add these flags to ACT4_SCENE01's choice effects \u2014 not yet present, needs a small patch), hid_problem_from_marcus (from ACT4_SCENE05 status reports), has_reputation_tag (true if gameState.reputation.tags is non-empty). No dice roll, no hidden randomness \u2014 entirely a readout of the player's own decision history, per design intent."
   },
   "DIALOGUE_ACT5_SCENE04": {
     "dialogueId": "DIALOGUE_ACT5_SCENE04",
@@ -1312,7 +1317,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Nobody says the word “inspection” out loud for the rest of the day."
+        "text": "Nobody says the word \u201cinspection\u201d out loud for the rest of the day."
       },
       {
         "speaker": "narrator",
@@ -1341,7 +1346,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "No choices, no UI copy, no player input — per Tab 9 UI Copy v2, this screen intentionally has zero text chrome around it. Auto-advance to ACT6_SCENE01 after the cinematic completes."
+    "engineNote": "No choices, no UI copy, no player input \u2014 per Tab 9 UI Copy v2, this screen intentionally has zero text chrome around it. Auto-advance to ACT6_SCENE01 after the cinematic completes."
   },
   "DIALOGUE_ACT6_SCENE01": {
     "dialogueId": "DIALOGUE_ACT6_SCENE01",
@@ -1365,7 +1370,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Inspector Whitfield was never testing your memory. She was testing your paperwork — because paperwork is just decisions, written down so someone else can trust them later."
+        "text": "Inspector Whitfield was never testing your memory. She was testing your paperwork \u2014 because paperwork is just decisions, written down so someone else can trust them later."
       },
       {
         "speaker": "narrator",
@@ -1382,7 +1387,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Everyone who can fit is in the control room. Mike E.. Camille. Vaughn — and, if you did right by him, his daughter, hovering near the back, trying not to look as nervous as she clearly is. Priya. Daniel. Tomasz. Aisha."
+        "text": "Everyone who can fit is in the control room. Mike E.. Camille. Vaughn \u2014 and, if you did right by him, his daughter, hovering near the back, trying not to look as nervous as she clearly is. Priya. Daniel. Tomasz. Aisha."
       },
       {
         "speaker": "narrator",
@@ -1413,7 +1418,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Finally — results."
+        "text": "Finally \u2014 results."
       },
       {
         "speaker": "narrator",
@@ -1424,7 +1429,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Someone — you're not sure who first — starts clapping. Then everyone does.",
+        "text": "Someone \u2014 you're not sure who first \u2014 starts clapping. Then everyone does.",
         "condition": "batch_released"
       },
       {
@@ -1459,7 +1464,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "batch_released / batch_rejected are computed from regulatoryReadiness and riskExposure at this point (thresholds should match whichever ending band is about to trigger — rejected batches feed END-4/END-5, released batches feed END-1/2/3/6/7). vaughnTrust_high gates the daughter cameo, consistent with the plant in ACT3_SCENE01."
+    "engineNote": "batch_released / batch_rejected are computed from regulatoryReadiness and riskExposure at this point (thresholds should match whichever ending band is about to trigger \u2014 rejected batches feed END-4/END-5, released batches feed END-1/2/3/6/7). vaughnTrust_high gates the daughter cameo, consistent with the plant in ACT3_SCENE01."
   },
   "DIALOGUE_ACT6_SCENE03": {
     "dialogueId": "DIALOGUE_ACT6_SCENE03",
@@ -1468,13 +1473,13 @@
       {
         "speaker": "marcus",
         "emotion": "warm",
-        "text": "NHS contract's confirmed. Board's thrilled. For what it's worth — I wasn't sure anyone could actually pull this off. Including you, some weeks.",
+        "text": "NHS contract's confirmed. Board's thrilled. For what it's worth \u2014 I wasn't sure anyone could actually pull this off. Including you, some weeks.",
         "condition": "ending_END-1"
       },
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "Ellis couldn't, in the end. You could. I don't say that to make you feel good. I say it because it's true — and I don't like surprises, remember.",
+        "text": "Ellis couldn't, in the end. You could. I don't say that to make you feel good. I say it because it's true \u2014 and I don't like surprises, remember.",
         "condition": "ending_END-1"
       },
       {
@@ -1498,7 +1503,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "You told me the truth the whole way through, even when it cost you. That's worth more to me than the contract, and I mean that — though I'd rather have had both.",
+        "text": "You told me the truth the whole way through, even when it cost you. That's worth more to me than the contract, and I mean that \u2014 though I'd rather have had both.",
         "condition": "ending_END-3"
       },
       {
@@ -1510,7 +1515,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "The first batch fails on a technicality. Camille has the root cause identified within the day — your documentation made it fast.",
+        "text": "The first batch fails on a technicality. Camille has the root cause identified within the day \u2014 your documentation made it fast.",
         "condition": "ending_END-4"
       },
       {
@@ -1581,27 +1586,27 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "— Joan's greeting, this morning, whatever it was."
+        "text": "\u2014 Joan's greeting, this morning, whatever it was."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "— Vaughn's site crew, waving or not waving, the last time you crossed the floor."
+        "text": "\u2014 Vaughn's site crew, waving or not waving, the last time you crossed the floor."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "— Daniel, auditing your figures or trusting them outright."
+        "text": "\u2014 Daniel, auditing your figures or trusting them outright."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "— A Board member, somewhere, quoting a decision you made months ago back to you as though it were obvious."
+        "text": "\u2014 A Board member, somewhere, quoting a decision you made months ago back to you as though it were obvious."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "— The status report Inspector Whitfield asked about, and whether it held up."
+        "text": "\u2014 The status report Inspector Whitfield asked about, and whether it held up."
       },
       {
         "speaker": "narrator",
@@ -1611,31 +1616,31 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "✓ NHS Contract Secured",
+        "text": "\u2713 NHS Contract Secured",
         "condition": "contract_secured"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "✗ NHS Contract Secured",
+        "text": "\u2717 NHS Contract Secured",
         "condition": "contract_lost"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "✓ More Patients Treated — batch released.",
+        "text": "\u2713 More Patients Treated \u2014 batch released.",
         "condition": "batch_released"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "✗ More Patients Treated — batch rejected.",
+        "text": "\u2717 More Patients Treated \u2014 batch rejected.",
         "condition": "batch_rejected"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "⚠ £12M Investment Justified — not yet demonstrable. ROI isn't measured for another twelve months. Nobody in this room gets to know that answer today."
+        "text": "\u26a0 \u00a312M Investment Justified \u2014 not yet demonstrable. ROI isn't measured for another twelve months. Nobody in this room gets to know that answer today."
       },
       {
         "speaker": "narrator",
@@ -1646,13 +1651,13 @@
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“I thought if I just held the line long enough, it would hold itself. It didn't. Whoever reads this — you'll do better. Or you won't. Either way, nobody does this one perfectly.”",
+        "text": "\u201cI thought if I just held the line long enough, it would hold itself. It didn't. Whoever reads this \u2014 you'll do better. Or you won't. Either way, nobody does this one perfectly.\u201d",
         "condition": "all_ellis_fragments_found"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Ellis Grant wasn't removed for being a bad project manager. They were carrying the exact same pressures you just survived — sponsor expectations, regulation, budget, constant change — alone, for far longer.",
+        "text": "Ellis Grant wasn't removed for being a bad project manager. They were carrying the exact same pressures you just survived \u2014 sponsor expectations, regulation, budget, constant change \u2014 alone, for far longer.",
         "condition": "all_ellis_fragments_found"
       },
       {
@@ -1664,11 +1669,11 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Project management was never about finding the perfect answer. It was about making informed decisions, under real pressure, with people who didn't always agree with you — including the ones who turned out to be right, and the ones who turned out to be wrong, including yourself."
+        "text": "Project management was never about finding the perfect answer. It was about making informed decisions, under real pressure, with people who didn't always agree with you \u2014 including the ones who turned out to be right, and the ones who turned out to be wrong, including yourself."
       }
     ],
     "needsWriting": false,
-    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive — exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Mike E./Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) — check those BEFORE falling through to the score-banded endings 1–5, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1–6 are all in gameState.flags. BENEFITS REGISTER READOUT (new): contract_secured and contract_lost are NOT separately stored flags — they are computed at render time as: contract_secured = (ending_END-1 OR ending_END-2 OR ending_END-4), contract_lost = (ending_END-3 OR ending_END-5 OR ending_END-6 OR ending_END-7), reading the already-set ending band flags from ACT6_SCENE03's ending selection. Do not add them to game_state.flags as stored values. batch_released/batch_rejected reuse the existing flags already set in ACT6_SCENE02. The ROI line always renders unconditionally — by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
+    "engineNote": "ending_END-1 through ending_END-7 are mutually exclusive \u2014 exactly one should be true, computed from the Delivery/Relationship/Outcome composite (see endings.json). END-6 and END-7 are override conditions that can fire regardless of the numeric verdict (Mike E./Camille Cold trust, or Stakeholder Goodwill bottoming out in Act 4) \u2014 check those BEFORE falling through to the score-banded endings 1\u20135, per endings.json's own trigger notes. The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1\u20136 are all in gameState.flags. BENEFITS REGISTER READOUT (new): contract_secured and contract_lost are NOT separately stored flags \u2014 they are computed at render time as: contract_secured = (ending_END-1 OR ending_END-2 OR ending_END-4), contract_lost = (ending_END-3 OR ending_END-5 OR ending_END-6 OR ending_END-7), reading the already-set ending band flags from ACT6_SCENE03's ending selection. Do not add them to game_state.flags as stored values. batch_released/batch_rejected reuse the existing flags already set in ACT6_SCENE02. The ROI line always renders unconditionally \u2014 by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
   },
   "DIALOGUE_BIG-01": {
     "dialogueId": "DIALOGUE_BIG-01",
@@ -1697,7 +1702,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "The Board closed on an acquisition this morning. A generics manufacturer — Corvane Pharma."
+        "text": "The Board closed on an acquisition this morning. A generics manufacturer \u2014 Corvane Pharma."
       },
       {
         "speaker": "narrator",
@@ -1732,11 +1737,11 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
-        "text": "I fought this. I lost. The Board's already told the market — this is happening. The only question left is how."
+        "text": "I fought this. I lost. The Board's already told the market \u2014 this is happening. The only question left is how."
       }
     ],
     "needsWriting": false,
-    "engineNote": "{currentWeek} = the live HUD week number at the moment this scene fires (derived from scheduleHealth via the weeksRemaining formula, NOT a hardcoded value — this is intentionally whatever the player's actual playthrough has produced by this point, same template-substitution pattern as EV-R1's {chosenSupplier}). Also: this scene should set flag second_product_benefits_undefined = true on completion (any of the 3 choices) — read by the HUD to surface a new 'Second Product Benefits: Undefined' line once BIG-01 resolves."
+    "engineNote": "{currentWeek} = the live HUD week number at the moment this scene fires (derived from scheduleHealth via the weeksRemaining formula, NOT a hardcoded value \u2014 this is intentionally whatever the player's actual playthrough has produced by this point, same template-substitution pattern as EV-R1's {chosenSupplier}). Also: this scene should set flag second_product_benefits_undefined = true on completion (any of the 3 choices) \u2014 read by the HUD to surface a new 'Second Product Benefits: Undefined' line once BIG-01 resolves."
   },
   "DIALOGUE_ACT1_SCENE02R": {
     "dialogueId": "DIALOGUE_ACT1_SCENE02R",
@@ -1794,7 +1799,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "So — which lens do you want to look through?"
+        "text": "So \u2014 which lens do you want to look through?"
       }
     ],
     "needsWriting": false
@@ -1835,7 +1840,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "One thing. Never surprise me. Whatever you find from here — however bad — I hear it from you first. Not from the Board. Not from a status report I'm reading in the room."
+        "text": "One thing. Never surprise me. Whatever you find from here \u2014 however bad \u2014 I hear it from you first. Not from the Board. Not from a status report I'm reading in the room."
       },
       {
         "speaker": "narrator",
@@ -1867,7 +1872,7 @@
       {
         "speaker": "ellis",
         "emotion": null,
-        "text": "“Scope only ever grows. Budget for that, not for the plan you were given.”"
+        "text": "\u201cScope only ever grows. Budget for that, not for the plan you were given.\u201d"
       },
       {
         "speaker": "narrator",
@@ -1919,7 +1924,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "A third report follows before commissioning starts in earnest. By now, you've learned whether honesty costs you less than the alternative — or more."
+        "text": "A third report follows before commissioning starts in earnest. By now, you've learned whether honesty costs you less than the alternative \u2014 or more."
       }
     ],
     "needsWriting": false
@@ -1965,7 +1970,7 @@
       {
         "speaker": "marcus",
         "emotion": "concerned",
-        "text": "Investors are coming. Not next quarter — Thursday."
+        "text": "Investors are coming. Not next quarter \u2014 Thursday."
       },
       {
         "speaker": "narrator",
@@ -2048,7 +2053,7 @@
       {
         "speaker": "tomasz",
         "emotion": "concerned",
-        "text": "Problem with the equipment from {chosenSupplier}. Nothing catastrophic — but it's not what we were promised."
+        "text": "Problem with the equipment from {chosenSupplier}. Nothing catastrophic \u2014 but it's not what we were promised."
       },
       {
         "speaker": "narrator",
@@ -2065,7 +2070,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Funny thing about the budget you didn't spend on the extra filling line — turns out it's exactly what's needed now, with everything else that's landed on you since.",
+        "text": "Funny thing about the budget you didn't spend on the extra filling line \u2014 turns out it's exactly what's needed now, with everything else that's landed on you since.",
         "condition": "filling_line_deferred_or_rejected"
       }
     ],
@@ -2078,7 +2083,7 @@
       {
         "speaker": "camille",
         "emotion": "warm",
-        "text": "I know I've pushed back on nearly everything you've proposed. For what it's worth — on this one, I think you're right. I'll back you with the Board if it comes to that."
+        "text": "I know I've pushed back on nearly everything you've proposed. For what it's worth \u2014 on this one, I think you're right. I'll back you with the Board if it comes to that."
       }
     ],
     "needsWriting": false
@@ -2090,12 +2095,12 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "News breaks that one of the suppliers you passed over — the fast, expensive one — has gone into administration after over-promising on a rival's contract."
+        "text": "News breaks that one of the suppliers you passed over \u2014 the fast, expensive one \u2014 has gone into administration after over-promising on a rival's contract."
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Daniel doesn't say “I told you so.” He doesn't have to."
+        "text": "Daniel doesn't say \u201cI told you so.\u201d He doesn't have to."
       },
       {
         "speaker": "daniel",
@@ -2200,7 +2205,7 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "A post is circulating — claims the site is unsafe. It isn't true. It's spreading anyway."
+        "text": "A post is circulating \u2014 claims the site is unsafe. It isn't true. It's spreading anyway."
       }
     ],
     "needsWriting": false
@@ -2212,25 +2217,25 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "RISK REGISTER — REVISITED",
+        "text": "RISK REGISTER \u2014 REVISITED",
         "style": "header"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Electrical Contractor Reliability — not formally logged.",
+        "text": "Electrical Contractor Reliability \u2014 not formally logged.",
         "condition": "not_contractor_risk_logged"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Electrical Contractor Reliability — logged, with a clear early warning sign on record.",
+        "text": "Electrical Contractor Reliability \u2014 logged, with a clear early warning sign on record.",
         "condition": "contractor_risk_logged_and_asked_contractor_likelihood"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Electrical Contractor Reliability — logged.",
+        "text": "Electrical Contractor Reliability \u2014 logged.",
         "condition": "contractor_risk_logged_and_not_asked_contractor_likelihood"
       },
       {
@@ -2247,7 +2252,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Plays immediately before DIALOGUE_EV-06. asked_contractor_likelihood only affects framing tone here, no mechanical effect. asked_contractor_mitigation and asked_contractor_impact affect EV-06's own choice options directly — see events.json EV-06 engineNote."
+    "engineNote": "Plays immediately before DIALOGUE_EV-06. asked_contractor_likelihood only affects framing tone here, no mechanical effect. asked_contractor_mitigation and asked_contractor_impact affect EV-06's own choice options directly \u2014 see events.json EV-06 engineNote."
   },
   "DIALOGUE_REVISITED_VALIDATION": {
     "dialogueId": "DIALOGUE_REVISITED_VALIDATION",
@@ -2256,25 +2261,25 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "RISK REGISTER — REVISITED",
+        "text": "RISK REGISTER \u2014 REVISITED",
         "style": "header"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Validation Timeline — not formally logged.",
+        "text": "Validation Timeline \u2014 not formally logged.",
         "condition": "not_validation_risk_logged"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Validation Timeline — logged, flagged as near-certain to slip.",
+        "text": "Validation Timeline \u2014 logged, flagged as near-certain to slip.",
         "condition": "validation_risk_logged_and_asked_validation_likelihood"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Validation Timeline — logged.",
+        "text": "Validation Timeline \u2014 logged.",
         "condition": "validation_risk_logged_and_not_asked_validation_likelihood"
       },
       {
@@ -2291,7 +2296,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Plays immediately before DIALOGUE_EV-02. asked_validation_mitigation gates the effectiveness of EV-02's 'phase the fix' option — see events.json EV-02 engineNote."
+    "engineNote": "Plays immediately before DIALOGUE_EV-02. asked_validation_mitigation gates the effectiveness of EV-02's 'phase the fix' option \u2014 see events.json EV-02 engineNote."
   },
   "DIALOGUE_REVISITED_CONTINGENCY": {
     "dialogueId": "DIALOGUE_REVISITED_CONTINGENCY",
@@ -2300,25 +2305,25 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "RISK REGISTER — REVISITED",
+        "text": "RISK REGISTER \u2014 REVISITED",
         "style": "header"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Contingency Adequacy — not formally logged.",
+        "text": "Contingency Adequacy \u2014 not formally logged.",
         "condition": "not_contingency_risk_logged"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Contingency Adequacy — logged, with a clear warning this was likely.",
+        "text": "Contingency Adequacy \u2014 logged, with a clear warning this was likely.",
         "condition": "contingency_risk_logged_and_asked_contingency_likelihood"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Contingency Adequacy — logged.",
+        "text": "Contingency Adequacy \u2014 logged.",
         "condition": "contingency_risk_logged_and_not_asked_contingency_likelihood"
       },
       {
@@ -2335,7 +2340,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Plays immediately before DIALOGUE_EV-10. asked_contingency_mitigation gates the effectiveness of EV-10's 'descope a Should' option — see events.json EV-10 engineNote."
+    "engineNote": "Plays immediately before DIALOGUE_EV-10. asked_contingency_mitigation gates the effectiveness of EV-10's 'descope a Should' option \u2014 see events.json EV-10 engineNote."
   },
   "DIALOGUE_ACT3_SCENE06B": {
     "dialogueId": "DIALOGUE_ACT3_SCENE06B",
@@ -2360,6 +2365,6 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' — scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen."
+    "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' \u2014 scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen."
   }
 }
