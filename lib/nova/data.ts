@@ -36,16 +36,18 @@ import type {
 // Currently: the Opening Curveball Wave (ACT4_SCENE01 + its Ellis Fragment
 // #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), THE BIG
 // CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"), and
-// the Main Curveball Wave (ACT4_SCENE04, using the Event Library checkpoint
-// system — see EVENT_WAVE_MEMBERS/computeEventQueue in state.ts, and
+// the Main Curveball Wave (ACT4_SCENE04) and Late Curveball Wave
+// (ACT4_SCENE06), both using the Event Library checkpoint system (see
+// EVENT_WAVE_MEMBERS/computeEventQueue in state.ts, and
 // Scene.eventWaveId/getEvent below), and the Monthly Status Reports
 // (ACT4_SCENE05/05B/05C), which use the honesty-vs-actual-state
 // delayed-consequence mechanic (applyHonestyReport/
-// applyDeferredHonestyPenalty in state.ts). What's still not added: the
-// Late Wave (ACT4_SCENE06) — reuses the same Event Library checkpoint
-// system Main Wave already does, now that ACT4_SCENE05 is reachable. All
-// of that content is itself already written (needsWriting: false
-// throughout) — only the engine support for that last piece is missing.
+// applyDeferredHonestyPenalty in state.ts). That's the whole of Act 4 as
+// currently written — ACT4_SCENE06's own nextScenes points at
+// ACT5_SCENE01, which isn't part of any BUILT_ACTS/OVERRIDES entry, so
+// reaching the end of the Late Wave's queue correctly shows end-of-built-
+// content rather than a broken scene, exactly like every other staged
+// boundary in this build.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
@@ -59,6 +61,7 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT4_SCENE05",
   "ACT4_SCENE05B",
   "ACT4_SCENE05C",
+  "ACT4_SCENE06",
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
