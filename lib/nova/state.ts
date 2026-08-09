@@ -7,7 +7,7 @@ import type {
   RiskInvestigationBank,
   ArtefactStatus,
 } from "./types";
-import { getCharacter, getDefaultGameState } from "./data";
+import { getCharacter, getDefaultGameState, getEvent, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
@@ -39,6 +39,9 @@ export function loadGame(): GameState | null {
     if (!state.toolPlacements) state.toolPlacements = {};
     if (!state.toolSelections) state.toolSelections = {};
     if (!state.toolSubmitted) state.toolSubmitted = {};
+    if (state.eventQueue === undefined) state.eventQueue = null;
+    if (state.eventQueueIndex === undefined) state.eventQueueIndex = 0;
+    if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
     return state;
   } catch {
     return null;
@@ -1080,6 +1083,216 @@ export function computeCurrentObjective(
   if (upcoming.length > 0) return `Next: ${upcoming[0].text}`;
 
   return placed.length > 0 ? "Facility go live" : "";
+}
+
+// ---------------------------------------------------------------------------
+// Event Library checkpoint system (Act 4 curveball waves) — ACT4_SCENE04
+// (Main Wave) and ACT4_SCENE06 (Late Wave) each hand off, via their own
+// Scene.eventWaveId, to a pool of conditionally-triggered events from
+// events.json. computeEventQueue evaluates every member of that wave's
+// pool against live GameState the instant the wave scene's own dialogue
+// finishes, and GameRoot then routes through the eligible ones one at a
+// time — see isActiveQueuedEventScene/advanceEventQueue in GameRoot.tsx,
+// and synthesizeEventScene/synthesizeEventFrameScene in data.ts for how a
+// queued event becomes a real playable "scene".
+//
+// Wave membership below follows the split named explicitly in the game's
+// own content: DIALOGUE_ACT4_SCENE06's engineNote hands Late Wave exactly
+// EV-07/EV-09/EV-10/EV-14/EV-15 ("final pressure events before
+// commissioning"); everything else standard/reversal/no-perfect-answer
+// goes to Main Wave. (DIALOGUE_ACT4_SCENE04's own engineNote lists a
+// broader, looser range — "EV-02 through EV-11, EV-13, EV-15" — that
+// overlaps several of ACT4_SCENE06's five; ACT4_SCENE06's shorter, more
+// deliberate list is treated as authoritative for what's exclusively
+// Late, so no event can ever fire in both waves.) EV-NP1 (=ACT4_SCENE01),
+// EV-12 (=ACT4_SCENE02) and BIG-01 (=ACT4_SCENE03) are already wired as
+// their own standalone scenes, not part of either wave's pool. EV-E1/E2/E3
+// are earlier-act content, also not part of Act 4's pools. EV-01 is a
+// dead v1 stub explicitly superseded by EV-NP1.
+// ---------------------------------------------------------------------------
+
+/** Reads a flag whose value is a string rather than the usual boolean —
+ * e.g. supplier_chosen ("steritech"/"rapidform"/"pharmacraft"), set by a
+ * choice's own `flags` effects exactly like any other flag, just carrying
+ * a value rather than a plain true. Flags is typed as
+ * Record<string, boolean> since that's what almost every flag actually
+ * is; this is the one narrow, explicit escape hatch for the handful that
+ * aren't. */
+export function getFlagString(flags: Flags, key: string): string | undefined {
+  const value = (flags as unknown as Record<string, unknown>)[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+const SUPPLIER_NAMES: Record<string, string> = {
+  steritech: "SteriTech",
+  rapidform: "RapidForm",
+  pharmacraft: "PharmaCraft",
+};
+
+/** {chosenSupplier}/{alternateSupplier} substitution values for EV-R1's
+ * dialogue/choices — see CHOICE_EV-R1's own engineNote. alternateSupplier
+ * deliberately never resolves to RapidForm (reserved as EV-R4's failure
+ * case) unless RapidForm itself was the chosen supplier, in which case
+ * SteriTech — "the option that's still standing" per its own Act 3 pitch
+ * — is the one offered as a fallback instead. */
+export function supplierTemplateValues(
+  state: GameState
+): { chosenSupplier: string; alternateSupplier: string } {
+  const chosen = getFlagString(state.flags, "supplier_chosen") ?? "";
+  const chosenSupplier = SUPPLIER_NAMES[chosen] ?? "the other supplier";
+  const alternateKey = chosen === "steritech" ? "pharmacraft" : chosen === "pharmacraft" ? "steritech" : "steritech";
+  const alternateSupplier = SUPPLIER_NAMES[alternateKey];
+  return { chosenSupplier, alternateSupplier };
+}
+
+export const EVENT_WAVE_MEMBERS: Record<string, string[]> = {
+  MAIN_WAVE: [
+    "EV-NP2",
+    "EV-R2",
+    "EV-02",
+    "EV-06",
+    "EV-03",
+    "EV-13",
+    "EV-04",
+    "EV-08",
+    "EV-11",
+    "EV-05",
+    "EV-R1",
+    "EV-R4",
+    "EV-R3",
+  ],
+  LATE_WAVE: ["EV-07", "EV-14", "EV-09", "EV-10", "EV-15"],
+};
+
+/** Starting budgetRemaining every playthrough begins with (see
+ * game_state.json) — EV-10's "Budget Remaining < 15%" trigger is relative
+ * to this baseline, not a live-recomputed total. */
+const STARTING_BUDGET = 12000000;
+
+/**
+ * Per-event eligibility, straight from each event's own `trigger` prose in
+ * events.json — see the comment on each case for the exact source text.
+ * Deliberately checks only ELIGIBILITY (does this event fire at all this
+ * playthrough), never the dynamic per-flag severity/effect adjustments a
+ * few events' engineNotes also describe (EV-02/EV-06/EV-10's
+ * validation_risk_logged &c. softening, and the "asked_X_impact" /
+ * "asked_X_mitigation" extra-effect modifiers) — those choice options
+ * still apply, unmodified, whatever static effects choices.json lists for
+ * them. That refinement needs a general dynamic-effects resolver (the
+ * same underlying gap blocking the honesty-tracking mechanic, task #178)
+ * and is logged in DESIGN_NOTES.md rather than half-built here.
+ */
+export function isEventEligible(eventId: string, state: GameState): boolean {
+  const metrics = state.projectMetrics;
+  switch (eventId) {
+    // "Conditional — fires only after BIG-01." Main Wave is only ever
+    // reached via ACT4_SCENE03 (BIG-01), so this is always true by the
+    // time eligibility is checked.
+    case "EV-NP2":
+      return true;
+    // "Conditional — fires if the player deferred or rejected the
+    // automated inspection camera change request." DIALOGUE_EV-R2's own
+    // (only) line is itself gated on this same flag — checked here too so
+    // an ineligible EV-R2 is skipped from the queue entirely rather than
+    // materializing as an empty scene.
+    case "EV-R2":
+      return Boolean(state.flags.filling_line_deferred_or_rejected);
+    // "Conditional (Regulatory Readiness < 60 at trigger)."
+    case "EV-02":
+      return metrics.regulatoryReadiness < 60;
+    // "Conditional (contractor risk flagged in Act 2 unresolved)" —
+    // designTag reads "Standard — foreshadowed since Act 2", and its own
+    // engineNote frames contractor_risk_logged as a severity modifier
+    // ("existing severity/softening logic... is unchanged"), not an
+    // existence gate — the contractor collapses either way, just harder
+    // if the risk was never logged. Always eligible.
+    case "EV-06":
+      return true;
+    // "Scheduled."
+    case "EV-03":
+    case "EV-04":
+    case "EV-08":
+    case "EV-11":
+    case "EV-13":
+      return true;
+    // "Conditional (Risk Exposure > 50)."
+    case "EV-05":
+      return metrics.riskExposure > 50;
+    // "Conditional — fires against whichever supplier was NOT chosen in
+    // Act 3." There's always exactly one unchosen supplier once
+    // supplier_chosen is set (Act 3's Procurement Pitch, always played by
+    // Act 4), so this is always true.
+    case "EV-R1":
+      return Boolean(getFlagString(state.flags, "supplier_chosen"));
+    // "Conditional — fires if the player chose the cheapest supplier
+    // (SteriTech) in Act 3." Confirmed by CHOICE_EV-R1's own engineNote:
+    // RapidForm — not SteriTech — is the supplier that goes bankrupt here,
+    // vindicating whichever of the other two the player picked instead.
+    case "EV-R4":
+      return getFlagString(state.flags, "supplier_chosen") === "steritech";
+    // "Conditional — fires if Camille's trust band is Cold/Cool through
+    // Act 2–3." No Cold/Cool banding is tracked historically (relationships
+    // only ever hold a live running total) — reusing the same
+    // WARM_RELATIONSHIP_THRESHOLD the portraits already band mood on: below
+    // it reads as Cold/Cool, at/above it doesn't, checked at the moment
+    // Main Wave's queue is computed.
+    case "EV-R3":
+      return (state.relationships.camille ?? 0) < WARM_RELATIONSHIP_THRESHOLD;
+    // "Conditional (Team Morale < 40)."
+    case "EV-07":
+      return metrics.teamMorale < 40;
+    // "Conditional (Team Morale < 50 OR Mike E. Trust Cold/Cool)."
+    case "EV-14":
+      return metrics.teamMorale < 50 || (state.relationships.marcus ?? 0) < WARM_RELATIONSHIP_THRESHOLD;
+    // "Conditional (BMS flagged as a dependency)" — no flag anywhere in the
+    // codebase ever sets this (searched exhaustively); treated as always
+    // eligible, same as this wave's other "Scheduled" members, rather than
+    // an event that could never fire. Logged in DESIGN_NOTES.md.
+    case "EV-09":
+      return true;
+    // "Conditional (Budget Remaining < 15%)."
+    case "EV-10":
+      return metrics.budgetRemaining < STARTING_BUDGET * 0.15;
+    // "Scheduled."
+    case "EV-15":
+      return true;
+    default:
+      console.warn(`[nova-engine] isEventEligible: unrecognised event id "${eventId}"`);
+      return false;
+  }
+}
+
+/** Every member of `waveId`'s pool that's eligible right now, in the
+ * wave's declared narrative order (see EVENT_WAVE_MEMBERS) — computed
+ * once, the instant the wave scene's own dialogue finishes, and never
+ * recomputed for the rest of that wave (matching "eligibility checked at
+ * trigger", the same semantics events.json's own trigger prose implies). */
+export function computeEventQueue(waveId: string, state: GameState): string[] {
+  return (EVENT_WAVE_MEMBERS[waveId] ?? []).filter((eventId) => isEventEligible(eventId, state));
+}
+
+/** The actual scene id to enter for a given queue slot — the event's own
+ * synthesized scene (see synthesizeEventScene in data.ts), unless it has a
+ * precedingDialogueId, in which case its synthesized lead-in scene plays
+ * first (see synthesizeEventFrameScene). */
+export function resolveEventQueueEntryScene(eventId: string): string {
+  const event = getEvent(eventId);
+  return event?.precedingDialogueId ? `${eventId}${EVENT_FRAME_SUFFIX}` : eventId;
+}
+
+/** True when `state.currentScene` is exactly the queue's current entry's
+ * OWN event scene (never its lead-in beat, if it has one) — the moment
+ * this event's own dialogue/choice concludes and something tries to
+ * transition away from it, that transition should advance the queue
+ * instead of going wherever the event's own (mostly null/placeholder)
+ * static nextScene data says. Deliberately compares against the raw
+ * eventId, not resolveEventQueueEntryScene's result — leaving a lead-in
+ * beat should just flow into its own event normally, not advance the
+ * queue a step early. */
+export function isActiveQueuedEventScene(state: GameState): boolean {
+  const queue = state.eventQueue;
+  if (!queue) return false;
+  return queue[state.eventQueueIndex] === state.currentScene;
 }
 
 // ---------------------------------------------------------------------------

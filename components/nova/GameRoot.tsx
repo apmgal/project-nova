@@ -55,6 +55,10 @@ import {
   FOOTSTEPS_SFX_SRC,
   ambientVolumeForBackground,
   footstepsVolumeForBackground,
+  computeEventQueue,
+  resolveEventQueueEntryScene,
+  isActiveQueuedEventScene,
+  supplierTemplateValues,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -334,8 +338,76 @@ export default function GameRoot() {
   }
 
   /** Transitions to nextSceneId — or shows the end-of-content screen if
-   * that scene isn't part of this build. */
+   * that scene isn't part of this build. This is the ONLY place that
+   * decides whether a transition should instead be intercepted by the
+   * Event Library checkpoint system (see isActiveQueuedEventScene /
+   * EVENT_WAVE_MEMBERS in lib/nova/state.ts) — every call site (choice
+   * selection, tool submission, plain Continue) just says "I'm done, go
+   * here next" the same way it always has; whether "here next" actually
+   * means the next queued event, or the wave's real exit scene, is
+   * resolved entirely inside this function. */
   function goToScene(baseState: GameState, nextSceneId: string | null) {
+    // We're leaving a queued event's own scene (never its lead-in beat,
+    // if it has one — see isActiveQueuedEventScene) — whatever
+    // nextSceneId the caller computed is exactly the event's own mostly-
+    // null/placeholder static data, authored for this system, not a real
+    // destination. Ignore it and advance the queue instead.
+    if (isActiveQueuedEventScene(baseState)) {
+      advanceEventQueue(baseState);
+      return;
+    }
+
+    // The scene we're leaving is a wave's entry point and no queue has
+    // been spun up for it yet this visit — evaluate every member's
+    // eligibility against live state right now (matching each event's own
+    // "at trigger" semantics) and, if anything qualifies, route into the
+    // first eligible one instead of nextSceneId. An empty queue (nothing
+    // eligible this playthrough) just falls through to nextSceneId below,
+    // completely normally.
+    const leavingScene = getScene(baseState.currentScene);
+    if (leavingScene?.eventWaveId && !baseState.eventQueue) {
+      const queue = computeEventQueue(leavingScene.eventWaveId, baseState);
+      if (queue.length > 0) {
+        const withQueue: GameState = {
+          ...baseState,
+          eventQueue: queue,
+          eventQueueIndex: 0,
+          eventQueueExitScene: nextSceneId,
+        };
+        goToRealScene(withQueue, resolveEventQueueEntryScene(queue[0]));
+        return;
+      }
+    }
+
+    goToRealScene(baseState, nextSceneId);
+  }
+
+  /** The current queued event is done — move to the next one, or (once
+   * the queue's exhausted) clear it and fall through to wherever the wave
+   * scene's own nextScenes originally pointed, exactly as if the wave
+   * scene itself had just finished a normal (non-waved) dialogue. */
+  function advanceEventQueue(state: GameState) {
+    const queue = state.eventQueue ?? [];
+    const nextIndex = state.eventQueueIndex + 1;
+    if (nextIndex < queue.length) {
+      const withIndex: GameState = { ...state, eventQueueIndex: nextIndex };
+      goToRealScene(withIndex, resolveEventQueueEntryScene(queue[nextIndex]));
+      return;
+    }
+    const cleared: GameState = {
+      ...state,
+      eventQueue: null,
+      eventQueueIndex: 0,
+      eventQueueExitScene: null,
+    };
+    goToScene(cleared, state.eventQueueExitScene);
+  }
+
+  /** The actual state-transition mechanics — every genuinely new
+   * destination (a wave's first event, each subsequent queued event, the
+   * wave's exit scene once the queue empties, and every ordinary scene
+   * transition outside a wave entirely) ends up here exactly once. */
+  function goToRealScene(baseState: GameState, nextSceneId: string | null) {
     if (!nextSceneId || !isSceneAvailable(nextSceneId)) {
       // Save progress at the last valid (built) scene before showing the
       // end-of-content screen, so a reload resumes here rather than at a
@@ -721,6 +793,7 @@ export default function GameRoot() {
   // authored text.
   const templateValues = {
     currentWeek: String(computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)),
+    ...supplierTemplateValues(gameState),
   };
   const displayLines = combinedLines.map((line) => ({
     ...line,

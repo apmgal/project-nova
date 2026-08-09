@@ -6,6 +6,7 @@ import gameStateRaw from "@/data/game_state.json";
 import assetsRaw from "@/data/assets.json";
 import toolScreensRaw from "@/data/tool_screens.json";
 import riskInvestigationRaw from "@/data/risk_investigation.json";
+import eventsRaw from "@/data/events.json";
 import type {
   Scene,
   DialogueBlock,
@@ -14,6 +15,7 @@ import type {
   GameState,
   ToolScreenBlock,
   RiskInvestigationBank,
+  EventEntry,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -32,17 +34,19 @@ import type {
 // the time) — BUILT_SCENE_OVERRIDES below names the individual Act 4 scene
 // ids that are live even though "Act 4" as a whole isn't yet in BUILT_ACTS.
 // Currently: the Opening Curveball Wave (ACT4_SCENE01 + its Ellis Fragment
-// #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), and THE BIG
-// CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"). All
-// four are plain dialogue+choice scenes needing no new engine mechanic —
-// same shape as everything else this build already runs. What's still not
-// added: the Main Wave (ACT4_SCENE04) and Late Wave (ACT4_SCENE06), each of
-// which hands off to a pool of conditionally-triggered events (events.json)
-// that needs a new "checkpoint" mechanic to evaluate and sequence, and the
-// Monthly Status Reports (ACT4_SCENE05/05B/05C), which need a new
-// honesty-vs-actual-state delayed-consequence mechanic. All of that content
-// is itself already written (needsWriting: false throughout) — only the
-// engine support for those three pieces is still missing.
+// #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), THE BIG
+// CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"), and
+// the Main Curveball Wave (ACT4_SCENE04) — the first consumer of the Event
+// Library checkpoint system (see EVENT_WAVE_MEMBERS/computeEventQueue in
+// state.ts, and Scene.eventWaveId/getEvent below): its own intro dialogue
+// plays first, then GameRoot routes through whichever of MAIN_WAVE's events
+// are eligible right now, one at a time, before continuing on to
+// nextScenes. What's still not added: the Monthly Status Reports
+// (ACT4_SCENE05/05B/05C), which need a new honesty-vs-actual-state
+// delayed-consequence mechanic, and the Late Wave (ACT4_SCENE06) — reuses
+// this same checkpoint system once ACT4_SCENE05 is reachable. All of that
+// content is itself already written (needsWriting: false throughout) —
+// only the engine support for those two pieces is still missing.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
@@ -52,6 +56,7 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT4_SCENE01B",
   "ACT4_SCENE02",
   "ACT4_SCENE03",
+  "ACT4_SCENE04",
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
@@ -84,15 +89,87 @@ const backgroundAssets = (assetsRaw as { backgrounds?: Record<string, string> })
   .backgrounds ?? {};
 const ambientSoundAssets = (assetsRaw as { ambientSounds?: Record<string, string> })
   .ambientSounds ?? {};
+const events = eventsRaw as unknown as Record<string, EventEntry>;
 
-export function getScene(sceneId: string): Scene | null {
-  return BUILT_SCENES[sceneId] ?? null;
+export function getEvent(eventId: string): EventEntry | null {
+  return events[eventId] ?? null;
 }
 
-/** True if a scene id is part of the content this build ships — see
- * BUILT_ACTS/BUILT_SCENE_OVERRIDES above for exactly what that covers. */
+/** Suffix marking a synthesized "lead-in" scene id (e.g. "EV-06__frame")
+ * for an event whose precedingDialogueId needs its own beat before the
+ * event's real dialogueId/choicesId content — see
+ * synthesizeEventFrameScene below and resolveEventQueueEntryScene in
+ * state.ts, which is the only other place this suffix is ever produced or
+ * consumed. Never appears in any authored data file. */
+export const EVENT_FRAME_SUFFIX = "__frame";
+
+/** Builds a full Scene-shaped object on the fly from an events.json entry,
+ * so the Event Library's queued events can flow through GameRoot's
+ * existing dialogue/choice/goToScene machinery completely unchanged —
+ * exactly like every authored scene, just assembled from events.json
+ * instead of scenes.json. nextScenes is deliberately left empty: routing
+ * for a queued event is decided entirely by GameRoot's queue-advance logic
+ * (see isActiveQueuedEventScene/advanceEventQueue), which never actually
+ * reads it. */
+function synthesizeEventScene(eventId: string): Scene | null {
+  const event = getEvent(eventId);
+  if (!event) return null;
+  return {
+    sceneId: eventId,
+    title: event.title,
+    act: event.act === "Act 3→4" ? "Act 4" : event.act,
+    location: null,
+    charactersInvolved: event.participants ?? [],
+    dialogueId: event.dialogueId ?? null,
+    choicesId: event.choicesId ?? null,
+    nextScenes: [],
+  };
+}
+
+/** The synthesized lead-in beat for an event with a precedingDialogueId —
+ * see EVENT_FRAME_SUFFIX. Its nextScenes can be a plain static pointer
+ * (unlike the real event scene's) since "after the lead-in comes the
+ * event itself" is always true, never queue-dependent. */
+function synthesizeEventFrameScene(eventId: string): Scene | null {
+  const event = getEvent(eventId);
+  if (!event?.precedingDialogueId) return null;
+  return {
+    sceneId: `${eventId}${EVENT_FRAME_SUFFIX}`,
+    title: `${event.title} — lead-in`,
+    act: "Act 4",
+    location: null,
+    charactersInvolved: event.participants ?? [],
+    dialogueId: event.precedingDialogueId,
+    choicesId: null,
+    nextScenes: [eventId],
+  };
+}
+
+function isEventSceneId(sceneId: string): boolean {
+  if (sceneId.endsWith(EVENT_FRAME_SUFFIX)) {
+    const baseId = sceneId.slice(0, -EVENT_FRAME_SUFFIX.length);
+    return Boolean(events[baseId]?.precedingDialogueId);
+  }
+  return Boolean(events[sceneId]);
+}
+
+export function getScene(sceneId: string): Scene | null {
+  const built = BUILT_SCENES[sceneId];
+  if (built) return built;
+  if (sceneId.endsWith(EVENT_FRAME_SUFFIX)) {
+    return synthesizeEventFrameScene(sceneId.slice(0, -EVENT_FRAME_SUFFIX.length));
+  }
+  return synthesizeEventScene(sceneId);
+}
+
+/** True if a scene id is part of the content this build ships — every
+ * BUILT_ACTS/BUILT_SCENE_OVERRIDES scene (see above), plus every Event
+ * Library event scene (and its synthesized lead-in, if it has one) —
+ * those aren't gated by BUILT_ACTS/OVERRIDES at all, since which of them
+ * actually gets reached is already fully gated by isEventEligible/
+ * computeEventQueue only ever routing to eligible ones. */
 export function isSceneAvailable(sceneId: string): boolean {
-  return BUILT_SCENE_IDS.has(sceneId);
+  return BUILT_SCENE_IDS.has(sceneId) || isEventSceneId(sceneId);
 }
 
 export function getDialogue(dialogueId: string | null): DialogueBlock | null {
@@ -163,5 +240,8 @@ export function getDefaultGameState(): GameState {
   if (!state.toolSelections) state.toolSelections = {};
   if (!state.toolSubmitted) state.toolSubmitted = {};
   if (!state.artefacts) state.artefacts = {};
+  if (state.eventQueue === undefined) state.eventQueue = null;
+  if (state.eventQueueIndex === undefined) state.eventQueueIndex = 0;
+  if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
   return state;
 }

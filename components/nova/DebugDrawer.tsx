@@ -34,6 +34,21 @@ export default function DebugDrawer({ gameState, onRestart }: DebugDrawerProps) 
             <div className="font-semibold text-zinc-400">currentScene</div>
             <div className="text-emerald-400">{gameState.currentScene}</div>
           </div>
+          {gameState.eventQueue && (
+            <div className="mb-2">
+              <div className="font-semibold text-zinc-400">
+                eventQueue (index {gameState.eventQueueIndex})
+              </div>
+              <div className="text-amber-300">
+                {gameState.eventQueue.map((id, i) => (
+                  <div key={id} className={i === gameState.eventQueueIndex ? "text-emerald-400" : ""}>
+                    {i}. {id}
+                  </div>
+                ))}
+              </div>
+              <div className="text-zinc-500">exit → {gameState.eventQueueExitScene}</div>
+            </div>
+          )}
           <div className="mb-2">
             <div className="font-semibold text-zinc-400">relationships</div>
             <pre className="whitespace-pre-wrap text-zinc-300">

@@ -69,3 +69,63 @@ playthrough as later choices swing schedule health up or down.
   display it's actually suited to. Bigger build: needs a design decision on
   how/when that counter should advance (per scene? authored jumps at
   specific story beats?). Not scoped yet.
+
+---
+
+## Event Library: dynamic per-flag effect adjustments not yet implemented
+
+**Status:** Deliberately out of scope for the Main Wave build (Task #176/177).
+Eligibility (whether an event fires at all) is fully implemented; the
+following is only about *how strong* three events' effects are once they do.
+
+**The issue:** `applyEffects` (`lib/nova/state.ts`) applies a choice
+option's `effects` as a static `Record<string, number>` — the same numbers
+every time, regardless of game state. Three Main Wave events' own
+`engineNote`s in `events.json` ask for more than that:
+
+- **EV-02** (Cleanroom GMP Review Failure): impact should be softened if
+  `validation_risk_logged` is true; option 3's effects change entirely
+  depending on `asked_validation_mitigation`; an extra +5 riskExposure
+  applies on top of whatever's chosen if `asked_validation_impact` is
+  false/absent.
+- **EV-06** (Electrical Contractor Bankrupt): same shape, keyed on
+  `contractor_risk_logged` / `asked_contractor_mitigation` /
+  `asked_contractor_impact`.
+- **EV-10** (Finance Freezes Contingency): same shape, keyed on
+  `contingency_risk_logged` / `asked_contingency_mitigation` /
+  `asked_contingency_impact`.
+
+None of this engine support exists yet. Right now these three events fire
+correctly (eligibility is a straightforward numeric/flag check, unaffected
+by this gap) and their choices apply exactly whatever static effects
+`choices.json` lists — just without the extra softening/hardening nuance
+their own engineNotes describe.
+
+**Why parked:** this is the same underlying gap as the honesty-tracking
+mechanic (Task #178) — a choice's real effects need to be computed from
+live state at selection time, not read straight off a static JSON record.
+Worth solving once, generally, for both rather than three one-off patches
+here plus a fourth bespoke mechanism for status reports.
+
+**EV-09's trigger has no backing flag:** its condition ("BMS flagged as a
+dependency") doesn't correspond to any flag set anywhere in the codebase.
+Implemented as always-eligible (same as this wave's Scheduled events)
+rather than an event that could mathematically never fire. If a real
+"BMS flagged" moment gets written into earlier Act content later, this
+should switch to checking that flag instead.
+
+---
+
+## Event Library wave-membership source conflict
+
+**Status:** Resolved by picking one of two conflicting sources; noting the
+conflict here in case future content edits make it worth reconciling.
+
+`DIALOGUE_ACT4_SCENE04`'s own `engineNote` describes Main Wave broadly as
+"EV-02 through EV-11, EV-13, EV-15" — a range that overlaps four events
+`DIALOGUE_ACT4_SCENE06`'s engineNote claims exclusively for Late Wave
+(EV-07, EV-09, EV-10, EV-15). `EVENT_WAVE_MEMBERS` in `lib/nova/state.ts`
+treats ACT4_SCENE06's shorter, more specific list as authoritative for
+what's Late-only, so no event can ever fire in both waves — but the two
+engineNotes themselves still disagree in the source data and neither has
+been edited to match the other.

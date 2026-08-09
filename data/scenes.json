@@ -699,6 +699,7 @@
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE04",
     "choicesId": null,
+    "eventWaveId": "MAIN_WAVE",
     "trigger": {
       "previousScene": "ACT4_SCENE03"
     },
@@ -751,6 +752,7 @@
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE06",
     "choicesId": null,
+    "eventWaveId": "LATE_WAVE",
     "trigger": {
       "previousScene": "ACT4_SCENE05"
     },

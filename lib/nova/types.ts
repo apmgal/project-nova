@@ -77,6 +77,27 @@ export interface GameState {
    * up, so re-opening the same drawer entry later shows the updated copy
    * rather than a second entry. */
   artefacts: Record<string, ArtefactStatus>;
+  /** The Event Library checkpoint system's live queue — set the moment the
+   * player finishes a wave-triggering scene's own dialogue (see Scene.
+   * eventWaveId), computed once from every wave member's eligibility at
+   * that exact moment (matching each event's own "at trigger" condition
+   * semantics), then never recomputed for the rest of that wave. Null
+   * whenever no wave is currently in progress. Ineligible events are
+   * simply absent from this list, not skipped-at-render — the queue only
+   * ever contains events the player will actually see. */
+  eventQueue: string[] | null;
+  /** Which entry of eventQueue is currently in play. Always 0 the instant
+   * eventQueue is (re)computed; advances by one each time the player
+   * finishes the event currently at this index (see
+   * isActiveQueuedEventScene/advanceEventQueue in GameRoot). Meaningless
+   * (and left at its default 0) whenever eventQueue is null. */
+  eventQueueIndex: number;
+  /** Where to send the player once eventQueue is exhausted — a snapshot of
+   * whatever the wave scene's own nextScenes[0] was at the moment the
+   * queue was spun up, since by the time the queue empties currentScene
+   * has moved on to the last event and that original target would
+   * otherwise be lost. Cleared back to null alongside eventQueue. */
+  eventQueueExitScene: string | null;
 }
 
 /** Which version of a found document is currently on file. See the
@@ -127,6 +148,15 @@ export interface Scene {
    * content's own "Title Card" screenType convention (e.g.
    * ACT3_SCENE06B). Absent/any other value renders normally. */
   displayStyle?: string;
+  /** Marks this scene as the entry point for one of the Event Library's
+   * checkpoint waves (see EVENT_WAVE_MEMBERS in lib/nova/state.ts) — the
+   * value is the wave's own key (e.g. "MAIN_WAVE"). The instant the
+   * player finishes THIS scene's own dialogue, GameRoot computes which of
+   * that wave's events are eligible right now and routes into them one at
+   * a time before finally continuing on to nextScenes, same as every
+   * other scene — see goToScene's interception logic. Absent/undefined on
+   * every scene outside Act 4's two curveball waves. */
+  eventWaveId?: string;
 }
 
 export interface DialogueLine {
@@ -228,6 +258,29 @@ export interface RiskInvestigationBank {
    * SharePoint file browser) instead of the default risk-investigation
    * panel UI, mirroring ToolScreenBlock's visualStyle pattern. */
   visualStyle?: "outlook_inbox" | "teams_thread" | "sharepoint_browser";
+}
+
+// ---------------------------------------------------------------------------
+// Events (events.json) — the Act 4 Event/Curveball Library. Each entry is
+// mostly design documentation (trigger prose, impact list, designTag) that
+// the engine never reads; the fields below are the only ones actually
+// consumed at runtime, by lib/nova/data.ts's synthesized event-scene
+// helpers and state.ts's isEventEligible. See DESIGN_NOTES.md for how
+// eligibility per event is derived from this design prose.
+// ---------------------------------------------------------------------------
+
+export interface EventEntry {
+  eventId: string;
+  title: string;
+  act: string;
+  participants?: string[];
+  dialogueId?: string | null;
+  choicesId?: string | null;
+  /** A framing/narration beat shown immediately before dialogueId, on its
+   * own synthesized "lead-in" scene (see EVENT_FRAME_SUFFIX in
+   * lib/nova/data.ts) — e.g. reopening an artefact/thread from an earlier
+   * act before the event's own content plays. Absent for most events. */
+  precedingDialogueId?: string;
 }
 
 export interface Character {
