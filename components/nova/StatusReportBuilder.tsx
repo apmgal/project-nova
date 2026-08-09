@@ -296,13 +296,15 @@ export default function StatusReportBuilder({
           </tbody>
         </table>
 
-        <InfoBar label="Project description" />
-        <div className="mb-3.5" style={{ background: "#ddd8e6", padding: "6px 8px", fontSize: 10.5, color: "#555" }}>
-          {toolScreen.projectDescription}
-        </div>
+        <div className="grid min-w-0 gap-3.5" style={{ gridTemplateColumns: "0.55fr 1fr" }}>
+          <div className="flex min-w-0 flex-col gap-3">
+            <div>
+              <InfoBar label="Project description" />
+              <div style={{ background: "#ddd8e6", padding: "6px 8px", fontSize: 10.5, color: "#555" }}>
+                {toolScreen.projectDescription}
+              </div>
+            </div>
 
-        <div className="grid gap-3.5" style={{ gridTemplateColumns: "0.55fr 1fr" }}>
-          <div className="flex flex-col gap-3">
             <div>
               <InfoBar
                 label="Key accomplishments"
@@ -349,42 +351,11 @@ export default function StatusReportBuilder({
               </div>
             </div>
 
-            <div>
-              <div className={BAR_CLASS}>Upcoming milestones</div>
-              <table className="w-full border-collapse text-[10.5px]">
-                <thead>
-                  <tr>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "left" }}>Name</th>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>Start</th>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>End</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {upcomingMilestones.length === 0 && (
-                    <tr>
-                      <td colSpan={3} style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center", color: "#888" }}>
-                        None remaining
-                      </td>
-                    </tr>
-                  )}
-                  {upcomingMilestones.map((m) => (
-                    <tr key={m.id}>
-                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>{m.text}</td>
-                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center" }}>
-                        Wk {m.start}
-                      </td>
-                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center" }}>
-                        Wk {m.end}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
 
-          <div className="flex flex-col gap-2.5">
-            <table className="w-full border-collapse text-[10.5px]">
+          <div className="flex min-w-0 flex-col gap-2.5">
+            <div className="w-full min-w-0 overflow-x-auto">
+            <table className="w-full border-collapse text-[10.5px]" style={{ tableLayout: "fixed", minWidth: 320 }}>
               <tbody>
                 <tr>
                   <td className={`${BAR_CLASS} group relative cursor-help`} style={{ width: "22%", border: `1px solid ${LINE}` }}>
@@ -393,16 +364,16 @@ export default function StatusReportBuilder({
                       Tap a box to cycle its colour — green, amber, or red.
                     </span>
                   </td>
-                  <td className={BAR_CLASS} style={{ textAlign: "center", border: `1px solid ${LINE}` }}>
+                  <td className={BAR_CLASS} style={{ width: "19.5%", textAlign: "center", border: `1px solid ${LINE}` }}>
                     Budget
                   </td>
-                  <td className={BAR_CLASS} style={{ textAlign: "center", border: `1px solid ${LINE}` }}>
+                  <td className={BAR_CLASS} style={{ width: "19.5%", textAlign: "center", border: `1px solid ${LINE}` }}>
                     Scope
                   </td>
-                  <td className={BAR_CLASS} style={{ textAlign: "center", border: `1px solid ${LINE}` }}>
+                  <td className={BAR_CLASS} style={{ width: "19.5%", textAlign: "center", border: `1px solid ${LINE}` }}>
                     Resource
                   </td>
-                  <td className={BAR_CLASS} style={{ textAlign: "center", border: `1px solid ${LINE}` }}>
+                  <td className={BAR_CLASS} style={{ width: "19.5%", textAlign: "center", border: `1px solid ${LINE}` }}>
                     Milestone plan
                   </td>
                 </tr>
@@ -421,8 +392,10 @@ export default function StatusReportBuilder({
                 </tr>
               </tbody>
             </table>
+            </div>
 
-            <table className="w-full border-collapse" style={{ tableLayout: "fixed", fontSize: 12 }}>
+            <div className="w-full min-w-0 overflow-x-auto">
+            <table className="w-full border-collapse" style={{ tableLayout: "fixed", fontSize: 12, minWidth: 460 }}>
               <thead>
                 <tr>
                   <th style={{ width: "26%", border: `1px solid ${LINE}`, padding: "7px 8px", textAlign: "left" }}>Risk</th>
@@ -536,6 +509,40 @@ export default function StatusReportBuilder({
                 </tr>
               </tbody>
             </table>
+            </div>
+
+            <div>
+              <div className={BAR_CLASS}>Upcoming milestones</div>
+              <table className="w-full min-w-0 border-collapse text-[10.5px]">
+                <thead>
+                  <tr>
+                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "left" }}>Name</th>
+                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>Start</th>
+                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>End</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {upcomingMilestones.length === 0 && (
+                    <tr>
+                      <td colSpan={3} style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center", color: "#888" }}>
+                        None remaining
+                      </td>
+                    </tr>
+                  )}
+                  {upcomingMilestones.map((m) => (
+                    <tr key={m.id}>
+                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>{m.text}</td>
+                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center" }}>
+                        Wk {m.start}
+                      </td>
+                      <td style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "center" }}>
+                        Wk {m.end}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
