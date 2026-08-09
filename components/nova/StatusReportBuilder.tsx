@@ -209,11 +209,11 @@ export default function StatusReportBuilder({
       ? nearTermMilestones.flatMap((m) => {
           const zoneTasks = wbsCards.filter((c) => c.correctBucket === m.wbsCategory);
           if (zoneTasks.length === 0) {
-            return [{ id: `gantt_activity_${m.id}`, text: `${m.text} (Wk ${m.start}–${m.end})` }];
+            return [{ id: `gantt_activity_${m.id}`, text: m.text }];
           }
           return zoneTasks.map((c) => ({
             id: `wbs_activity_${c.id}`,
-            text: `${c.text} — ${m.text}, Wk ${m.start}–${m.end}`,
+            text: c.text,
           }));
         })
       : (toolScreen.upcomingActivityCandidates ?? []);
