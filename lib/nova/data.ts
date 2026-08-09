@@ -31,17 +31,28 @@ import type {
 // same staged approach Act 3 was built with, tracked as "Stage A/B/C..." at
 // the time) — BUILT_SCENE_OVERRIDES below names the individual Act 4 scene
 // ids that are live even though "Act 4" as a whole isn't yet in BUILT_ACTS.
-// Currently: the Opening Curveball Wave (ACT4_SCENE01) and its Ellis
-// Fragment #4 bridge (ACT4_SCENE01B). The rest of Act 4 — Change Control,
-// THE BIG CURVEBALL, the Main/Late curveball waves — is present in the
-// underlying JSON (all needsWriting: false, content was written ahead of
-// engine work, same "flag exists, consequence designed later" pattern used
-// for the Act 2 risk flags before Act 4 existed) but not yet added here.
+// Currently: the Opening Curveball Wave (ACT4_SCENE01 + its Ellis Fragment
+// #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), and THE BIG
+// CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"). All
+// four are plain dialogue+choice scenes needing no new engine mechanic —
+// same shape as everything else this build already runs. What's still not
+// added: the Main Wave (ACT4_SCENE04) and Late Wave (ACT4_SCENE06), each of
+// which hands off to a pool of conditionally-triggered events (events.json)
+// that needs a new "checkpoint" mechanic to evaluate and sequence, and the
+// Monthly Status Reports (ACT4_SCENE05/05B/05C), which need a new
+// honesty-vs-actual-state delayed-consequence mechanic. All of that content
+// is itself already written (needsWriting: false throughout) — only the
+// engine support for those three pieces is still missing.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
 
-const BUILT_SCENE_OVERRIDES = new Set(["ACT4_SCENE01", "ACT4_SCENE01B"]);
+const BUILT_SCENE_OVERRIDES = new Set([
+  "ACT4_SCENE01",
+  "ACT4_SCENE01B",
+  "ACT4_SCENE02",
+  "ACT4_SCENE03",
+]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
 
