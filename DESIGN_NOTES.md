@@ -523,3 +523,118 @@ started) and Key Accomplishments (correctly, they're not finished) — no
 the only place in-progress work is deliberately still visible (see the
 entry above — its near-term window intentionally includes `start <=
 currentWeek`, by design, unaffected by this change).
+
+## Act 4 roadmap, steps 6–8 — finalized plan (not yet built)
+
+**Status:** Design-only. Nothing in this entry has been implemented;
+recorded so the agreed shape survives until each step is actually
+picked up. Steps 1–5 (truth engine, report persistence, report #1 UI)
+are done — see the Monthly Status Report entries above. This entry is
+the settled scope for what comes after report #1, reached through a
+back-and-forth design review (not a decision made unilaterally by
+Claude).
+
+**Step 6 — playtest report #1 first; it's a genuine go/no-go gate, not
+"we'll definitely build reports 2 and 3."** If the report mechanic
+lands, reports 2/3 should get *harder because project state is
+harder*, not because the UI gains new mechanics: report 1 is mostly
+straightforward interpretation, report 2 (post-BIG-01) introduces
+conflicting signals, report 3 (pre-inspection) forces the player to
+decide what they're willing to put formally on record. This is close
+to free — `computeKnownReportableRisks` and the milestone/activity
+derivation are already state-driven, so difficulty rises automatically
+as more events resolve between reports. The real work is pacing: which
+events land before report 2 vs. report 3, so the risk list grows
+meaningfully rather than turning into clutter (e.g. not 12 reportable
+risks piled up before report 2).
+
+Between reports, add RAID-style / change-impact beats as
+report-adjacent activities, not new minigames — reusing the Act 2 Risk
+Workshop pattern (investigation flags → pre-discovery evidence →
+reportable risk) already built for EV-02/06/10. Loop: event →
+investigate → update artefact → report → consequence.
+
+Two explicit constraints on that RAID work, both firm:
+
+- **The status report does not own risk lifecycle.** No
+  close/resolve-a-risk control on the report screen itself — that
+  would let the player make a problem disappear by unticking it while
+  writing the report. The RAID/change-impact activity is where a risk
+  moves `risk → issue → mitigating → closed`; the status report only
+  *reads* that result. A closed risk should not consume one of the
+  report's 4 fixed risk-row slots — if continuity across reports
+  matters, that's a small "recently closed" strip or something
+  preserved in report history, not a 5th active row.
+- **Don't build a pre-discovery evidence channel for every remaining
+  event.** Some risk-category events are genuinely foreseeable
+  (contractor instability, validation capacity, contingency pressure,
+  supplier lead-time concerns — good RAID candidates). Others should
+  stay real shocks with no warning (extreme weather, cyberattack unless
+  a BMS vulnerability was specifically discovered, investor
+  rescheduling, some regulatory changes) — foreshadowing everything
+  turns Act 4 into a checklist of pre-warned risks instead of reality
+  hitting the plan. Classify each of the 11 currently-undiscoverable
+  events as *discoverable / weak-signal / genuine-surprise* before
+  building its RAID beat, rather than defaulting to "give it a
+  pre-discovery channel."
+
+Also noted, not a blocker: `GameState.eventsResolved` currently means
+"the event's own scene has been played," and `computeKnownReportableRisks`
+maps that directly to `status: "issue"` — which today is semantically
+correct (an issue is something that has *occurred* but isn't
+necessarily *closed* yet; there is no "closed" state yet at all). Worth
+being deliberate about this when the closed/mitigated lifecycle above
+gets built, so "resolved" (scene played) never gets conflated with
+"closed" (issue dealt with) — they need to stay three distinct
+concepts: threat known, event occurred, issue closed.
+
+**Rejected for now: "Suggested Overall Status."** Cheap to build (e.g.
+2+ Red dims → suggest Red, 1 Red or 2+ Amber → suggest Amber, else
+Green, derived only from the player's own selected dimension RAGs,
+never hidden truth) but deliberately not building it before the report
+#1 playtest — it risks quietly undermining the report's own stated
+premise ("Ratings, risks, and evidence are your own call — nothing
+here is pre-filled or graded for you"). Revisit only if the playtest
+shows players are genuinely lost on how to arrive at an overall status,
+not preemptively.
+
+**Step 7 — Act 4 HUD raw-signal pass, only after report #1 exists.**
+Sequenced last among the "cheap" items on purpose: doing it before the
+report mechanic exists would just make the HUD less informative with
+no payoff yet. Once the report is live, replace verdict-flavored
+labels with the raw evidence behind them — e.g. `Week 38 / 24 —
+OVERDUE` becomes `Forecast Completion: Week 38` / `Baseline Completion:
+Week 24`. General rule for the pass: the HUD should read as evidence,
+not judgement — raw budget remaining, forecast completion, risk
+exposure, etc. can stay; any label that effectively answers the RAG
+question for the player should be reviewed. Uses the same
+`scene.act`-branching hook the HUD already has, just a second branch on
+label style for Act 4+.
+
+**Step 8 — selective character-challenge dialogue, last (most
+expensive, least reusable, needs a stable report shape first).** Daniel
+challenges Budget, Camille challenges Milestone (etc.), but only fire
+on a mismatch or an interesting judgement call — not on every report,
+or it reads as a tutorial correcting a wrong color rather than a
+consequence. Three trigger categories, not just one:
+
+- **Misrepresentation** — actual Red, reported Green.
+- **Omission** — a major known/reportable risk left out of the four
+  reported risk rows.
+- **Defensible-but-contestable judgement** — underlying evidence is
+  mixed and the player chose Amber over Red (or similar); the
+  character challenges the call and the player has to talk through
+  their reasoning, not necessarily be wrong. ("Validation is two weeks
+  behind — talk me through why you called this Amber.") This is what
+  makes the beat feel senior-PM rather than "wrong answer, NPC
+  corrects you."
+
+All three compare `StatusReportRecord.reported`/`selectedRisks`
+against `actualSnapshot`, which the record already stores side by side
+specifically to make this comparison possible later.
+
+**Already satisfied, no action needed:** the risk/issue distinction is
+already an explicit data field (`ReportableRisk.status: "risk" |
+"issue"`), not just a display-label difference — this was raised as a
+future to-do during design review but the current `computeKnownReportableRisks`
+implementation already does it.
