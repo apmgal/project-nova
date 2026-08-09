@@ -805,3 +805,88 @@ just does it through a real interaction now instead of an automatic
 flip); Group 2/3 pool membership and caps are a first pass, not
 validated by an actual full playthrough yet — that's the explicit next
 step after this build, not a further design pass.
+
+## Act 4 event presentation grammar — teaserTitle (tiny win #1 of a larger pass)
+
+**Status:** Implemented (the small piece only — see the roadmap below for
+what's deliberately not done yet). Reached through design review after
+an actual Act 4 playthrough surfaced two related but distinct problems
+in the same screenshot:
+
+1. **A debug-language leak.** `synthesizeEventFrameScene` (data.ts)
+   hardcoded `title: \`${event.title} — lead-in\`` — internal authoring
+   language visible on a real player-facing screen.
+2. **A spoiler problem, underneath the debug one.** Even with the
+   suffix removed, `event.title` itself — "Electrical Contractor Goes
+   Bankrupt", "Cleanroom GMP Review Failure" — is the real, revealed
+   name of the event, used as the screen header for both the lead-in
+   AND the actual event scene (`scene.title` renders directly as the
+   visible header — confirmed in GameRoot.tsx). Fixing #1 alone
+   wouldn't have fixed #2; they needed separate treatment.
+
+**The fix:** `EventEntry.teaserTitle?: string` — a non-spoiler "what
+kind of thing is this" category label (an inbox/Teams/document
+category, not the event's real name), used as `scene.title` for both
+`synthesizeEventScene` and `synthesizeEventFrameScene`, falling back to
+`event.title` if unset. The "— lead-in" suffix is gone entirely,
+independent of whether an event has a teaserTitle yet. `event.title`
+itself is untouched and stays the internal/authoring-canonical name
+(DESIGN_NOTES, `REPORTABLE_RISK_CATALOG.issueLabel`, etc. all still
+reference it) — it's simply never rendered as a header directly once a
+teaserTitle exists.
+
+Populated for all 18 events currently reachable via
+`EVENT_WAVE_MEMBERS.MAIN_WAVE`/`GAP_WAVE_SPECS` (not every event.json
+entry — EV-NP1/EV-12/BIG-01 are hand-authored scenes.json scenes with
+their own titles already, not synthesized from events.json, so
+teaserTitle doesn't apply to them): e.g. EV-06 → "Site Communication",
+EV-02 → "Quality Review", EV-09 → "System Alert". First-pass wording,
+expected to be revised once paired with real delivery artefacts (see
+below) rather than shown as bare narration text.
+
+**Explicitly NOT done in this pass (see the fuller roadmap that follows
+from a design review of a full Act 4 playthrough):**
+
+- The "revisited" preamble narrations (`DIALOGUE_REVISITED_CONTRACTOR`/
+  `_VALIDATION`/`_CONTINGENCY`) still say things like "not formally
+  logged" / "This is happening now. You weren't ready for it." —
+  flagged as too explicit/judgemental ("don't narrate state the UI can
+  show" — if a RAID entry can visually show a blank mitigation field,
+  the narrator doesn't need to say so in words). Rewrite is planned but
+  not done — it's grouped with delivery-format work below, not a
+  standalone tiny fix.
+- No RAID history fields yet (`RaidUpdateCard.tsx` doesn't yet show
+  "First raised: Week N / Owner: — / Mitigation: — none recorded —")
+  — flagged as cheap (the underlying flags — `contractor_risk_logged`,
+  `asked_contractor_impact/mitigation` — already exist; this is mostly
+  a rendering change) but not yet built.
+- No delivery-format variety (email/Teams/news/etc. instead of
+  narrator-box + Continue for every event) and no location variety
+  (every Act 4 event currently opens on the same office backdrop
+  regardless of content) — both real, agreed-good ideas, explicitly
+  gated behind the investigation below.
+- No "interrupt" pattern (events breaking into the game directly
+  instead of a lead-in scene) — explicitly deferred pending playtest
+  evidence that the smaller delivery-variety win isn't already enough;
+  the only genuinely expensive item in this whole list, correctly not
+  worth building speculatively.
+
+**Roadmap agreed for the rest of this pass (dependency-ordered, not
+task-order):**
+
+1. Tiny wins — `teaserTitle` + drop "— lead-in" (this entry).
+2. **Audit `EmailInboxPanel`/`TeamsThreadPanel`/`SharePointBrowserPanel`/
+   `DocumentDiscoveredCard` (built for the Act 1 investigation
+   mechanic — Investigation Board) for Act 4 reusability.** Named as
+   the single highest-leverage open question — if these generalize,
+   varied delivery formats for Act 4 events becomes mostly reuse, not
+   new component work; if they're deeply Act-1-coupled, it's a
+   different-sized project. Investigation only, no conversion work,
+   until this comes back.
+3. Prototype: convert a small number of major Act 4 events (contractor
+   bankruptcy is the running example) through whatever the audit found
+   reusable.
+4. Playtest that prototype specifically.
+5. Only then decide whether the interrupt pattern and/or a
+   location-per-event system are actually needed, based on whether the
+   prototype already closes most of the gap.

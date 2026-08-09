@@ -405,6 +405,18 @@ export interface StatusReportRecord {
 export interface EventEntry {
   eventId: string;
   title: string;
+  /** A non-spoiler "what kind of thing is this" label — an inbox/Teams/
+   * document category, not the event's real name — shown as the scene
+   * header instead of `title` for both the event's own scene and its
+   * lead-in (see synthesizeEventScene/synthesizeEventFrameScene in
+   * data.ts). `title` stays the internal/authoring-canonical name (used
+   * in DESIGN_NOTES, REPORTABLE_RISK_CATALOG, etc.) but is never rendered
+   * as a screen header directly once this is set — the header shouldn't
+   * announce "Electrical Contractor Goes Bankrupt" before the player has
+   * any in-fiction reason to know that. Falls back to `title` if unset
+   * (older/lower-priority events not yet given one). See the "event
+   * presentation grammar" entry in DESIGN_NOTES.md. */
+  teaserTitle?: string;
   act: string;
   participants?: string[];
   dialogueId?: string | null;

@@ -125,7 +125,7 @@ function synthesizeEventScene(eventId: string): Scene | null {
   if (!event) return null;
   return {
     sceneId: eventId,
-    title: event.title,
+    title: event.teaserTitle ?? event.title,
     act: event.act === "Act 3→4" ? "Act 4" : event.act,
     location: null,
     charactersInvolved: event.participants ?? [],
@@ -148,7 +148,12 @@ function synthesizeEventFrameScene(eventId: string): Scene | null {
   if (!event?.precedingDialogueId) return null;
   return {
     sceneId: `${eventId}${EVENT_FRAME_SUFFIX}`,
-    title: `${event.title} — lead-in`,
+    // No "— lead-in" suffix — that was internal/authoring language
+    // leaking into the player-facing header. Same teaser-first title as
+    // the real event scene (see synthesizeEventScene) since the whole
+    // point of a lead-in is that the player doesn't know yet which real
+    // event is about to unfold.
+    title: event.teaserTitle ?? event.title,
     act: "Act 4",
     location: null,
     charactersInvolved: event.participants ?? [],

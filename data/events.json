@@ -3,7 +3,7 @@
     "eventId": "BIG-01",
     "title": "The Board Bought Another Company",
     "act": "Act 4",
-    "trigger": "Scheduled — fixed narrative beat, Week 18",
+    "trigger": "Scheduled \u2014 fixed narrative beat, Week 18",
     "description": "Mike E. walks in mid-project: the Board has acquired a second pharmaceutical company and wants NOVA to manufacture two products instead of one. Scope, benefits case, risk profile, timeline and internal politics all move simultaneously.",
     "pmConcept": "Emergency re-planning / scope change at portfolio level",
     "impact": [
@@ -11,7 +11,7 @@
       "Schedule Health",
       "Risk Exposure",
       "Benefits Realisation Score",
-      "Board Confidence — the only event in the game to move five variables in one beat"
+      "Board Confidence \u2014 the only event in the game to move five variables in one beat"
     ],
     "participants": [
       "marcus"
@@ -21,7 +21,7 @@
       "accept fully and re-plan WBS+CBS live",
       "accept partially and quietly protect the riskiest workstream"
     ],
-    "designTag": "THE BIG CURVEBALL — the single 'holy crap' moment",
+    "designTag": "THE BIG CURVEBALL \u2014 the single 'holy crap' moment",
     "section": "Event / Curveball Library (v2)",
     "dialogueId": "DIALOGUE_BIG-01",
     "choicesId": "CHOICE_BIG-01"
@@ -29,10 +29,11 @@
   "EV-R1": {
     "eventId": "EV-R1",
     "title": "Supplier Reversal",
+    "teaserTitle": "Supplier Update",
     "act": "Act 4",
-    "trigger": "Conditional — fires against whichever supplier was NOT chosen in Act 3",
+    "trigger": "Conditional \u2014 fires against whichever supplier was NOT chosen in Act 3",
     "description": "The unchosen supplier from the Act 3 Procurement Pitch either disappoints badly or turns out to have been the safer bet all along, recontextualising that earlier decision.",
-    "pmConcept": "Retrospective risk judgement — teaches that a decision can only be evaluated against the information available at the time",
+    "pmConcept": "Retrospective risk judgement \u2014 teaches that a decision can only be evaluated against the information available at the time",
     "impact": [
       "Budget Remaining",
       "Schedule Health",
@@ -44,7 +45,7 @@
       "fall back to the unchosen supplier at a premium",
       "absorb the impact and adjust the schedule"
     ],
-    "designTag": "AMBIGUITY / REVERSAL — no dominant 'correct' Act 3 choice exists once this fires",
+    "designTag": "AMBIGUITY / REVERSAL \u2014 no dominant 'correct' Act 3 choice exists once this fires",
     "section": "AMBIGUITY & REVERSAL EVENTS",
     "choicesId": "CHOICE_EV-R1",
     "dialogueId": "DIALOGUE_EV-R1"
@@ -52,8 +53,9 @@
   "EV-R2": {
     "eventId": "EV-R2",
     "title": "The Deferred Decision Pays Off",
-    "act": "Act 3→4",
-    "trigger": "Conditional — fires if the player deferred or rejected the automated inspection camera change request",
+    "teaserTitle": "Budget Note",
+    "act": "Act 3\u21924",
+    "trigger": "Conditional \u2014 fires if the player deferred or rejected the automated inspection camera change request",
     "description": "Budget the player protected by declining an earlier scope addition turns out to be exactly what's needed to absorb BIG-01's re-scoping.",
     "pmConcept": "Delayed-value trade-offs / opportunity cost",
     "impact": [
@@ -62,18 +64,19 @@
     ],
     "participants": [],
     "possibleChoices": [
-      "No choice — a recontextualising narrative beat that shows the consequence of the earlier decision"
+      "No choice \u2014 a recontextualising narrative beat that shows the consequence of the earlier decision"
     ],
-    "designTag": "AMBIGUITY / REVERSAL — a decision that felt over-cautious in the moment pays off months later",
+    "designTag": "AMBIGUITY / REVERSAL \u2014 a decision that felt over-cautious in the moment pays off months later",
     "section": "AMBIGUITY & REVERSAL EVENTS",
     "dialogueId": "DIALOGUE_EV-R2"
   },
   "EV-R3": {
     "eventId": "EV-R3",
     "title": "The Ally You Didn't Expect",
+    "teaserTitle": "Stakeholder Note",
     "act": "Act 4",
-    "trigger": "Conditional — fires if Camille's trust band is Cold/Cool through Act 2–3",
-    "description": "A stakeholder who spent Acts 1–3 opposing the player (Camille, if under-trusted early) becomes an unexpectedly strong advocate at a critical moment — recontextualising her as an ally rather than an obstacle.",
+    "trigger": "Conditional \u2014 fires if Camille's trust band is Cold/Cool through Act 2\u20133",
+    "description": "A stakeholder who spent Acts 1\u20133 opposing the player (Camille, if under-trusted early) becomes an unexpectedly strong advocate at a critical moment \u2014 recontextualising her as an ally rather than an obstacle.",
     "pmConcept": "Stakeholder relationship management over time",
     "impact": [
       "Camille Trust",
@@ -86,7 +89,7 @@
       "Accept her support and adjust the plan accordingly",
       "remain guarded and proceed alone"
     ],
-    "designTag": "AMBIGUITY / REVERSAL — an opponent becomes an ally without a single explicit 'trust' choice causing it",
+    "designTag": "AMBIGUITY / REVERSAL \u2014 an opponent becomes an ally without a single explicit 'trust' choice causing it",
     "section": "AMBIGUITY & REVERSAL EVENTS",
     "choicesId": "CHOICE_EV-R3",
     "dialogueId": "DIALOGUE_EV-R3"
@@ -94,8 +97,9 @@
   "EV-R4": {
     "eventId": "EV-R4",
     "title": "The 'Bad' Decision That Wasn't",
+    "teaserTitle": "Market Update",
     "act": "Act 4",
-    "trigger": "Conditional — fires if the player chose the cheapest supplier (SteriTech) in Act 3",
+    "trigger": "Conditional \u2014 fires if the player chose the cheapest supplier (SteriTech) in Act 3",
     "description": "An unexpected external event (a competitor supplier's insolvency) means the player's earlier budget-driven, seemingly risk-laden choice turns out to be the best-positioned option in hindsight.",
     "pmConcept": "Judging decisions by process, not just outcome",
     "impact": [
@@ -104,15 +108,15 @@
     ],
     "participants": [],
     "possibleChoices": [
-      "No choice — a recontextualising beat"
+      "No choice \u2014 a recontextualising beat"
     ],
-    "designTag": "AMBIGUITY / REVERSAL — deliberately validates a decision that looked unwise at the time",
+    "designTag": "AMBIGUITY / REVERSAL \u2014 deliberately validates a decision that looked unwise at the time",
     "section": "AMBIGUITY & REVERSAL EVENTS",
     "dialogueId": "DIALOGUE_EV-R4"
   },
   "EV-NP1": {
     "eventId": "EV-NP1",
-    "title": "Isolator Supplier Delay — No Perfect Answer",
+    "title": "Isolator Supplier Delay \u2014 No Perfect Answer",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "The isolator supplier confirms a delay. There is no option that protects both budget and schedule.",
@@ -124,9 +128,9 @@
     "participants": [],
     "possibleChoices": [
       "Pay to expedite (saves time, costs budget)",
-      "absorb the delay (saves budget, costs time) — no third option exists"
+      "absorb the delay (saves budget, costs time) \u2014 no third option exists"
     ],
-    "designTag": "NO PERFECT ANSWER — the trade-off is the design intent, not a puzzle to be solved",
+    "designTag": "NO PERFECT ANSWER \u2014 the trade-off is the design intent, not a puzzle to be solved",
     "section": "NO-PERFECT-ANSWER EVENTS",
     "dialogueId": "DIALOGUE_ACT4_SCENE01",
     "choicesId": "CHOICE_ACT4_SCENE01"
@@ -134,8 +138,9 @@
   "EV-NP2": {
     "eventId": "EV-NP2",
     "title": "Two Products, One Validation Engineer",
+    "teaserTitle": "Resourcing Decision",
     "act": "Act 4",
-    "trigger": "Conditional — fires only after BIG-01",
+    "trigger": "Conditional \u2014 fires only after BIG-01",
     "description": "With two products now in scope, there are not enough validation resources to fully validate both lines on schedule.",
     "pmConcept": "Resource prioritisation under irreducible constraint",
     "impact": [
@@ -149,7 +154,7 @@
       "split resource thinly across both and accept schedule slip on both",
       "bring in premium contract resource, straining Budget Remaining"
     ],
-    "designTag": "NO PERFECT ANSWER — every option knowingly under-serves something",
+    "designTag": "NO PERFECT ANSWER \u2014 every option knowingly under-serves something",
     "section": "NO-PERFECT-ANSWER EVENTS",
     "choicesId": "CHOICE_EV-NP2",
     "dialogueId": "DIALOGUE_EV-NP2"
@@ -159,7 +164,7 @@
     "title": "Isolator Supplier Delay (superseded by EV-NP1 in v2)",
     "act": "Act 4",
     "trigger": "Scheduled",
-    "description": "Retained from v1 for continuity reference only — see EV-NP1 for the v2 no-perfect-answer version.",
+    "description": "Retained from v1 for continuity reference only \u2014 see EV-NP1 for the v2 no-perfect-answer version.",
     "pmConcept": "Risk response / schedule recovery",
     "impact": [
       "See EV-NP1"
@@ -168,12 +173,13 @@
     "possibleChoices": [
       "See EV-NP1"
     ],
-    "designTag": "Superseded — kept for traceability",
+    "designTag": "Superseded \u2014 kept for traceability",
     "section": "RETAINED FROM v1 (Main Act 4 Wave)"
   },
   "EV-02": {
     "eventId": "EV-02",
     "title": "Cleanroom GMP Review Failure",
+    "teaserTitle": "Quality Review",
     "act": "Act 4",
     "trigger": "Conditional (Regulatory Readiness < 60 at trigger)",
     "description": "The cleanroom design fails a Good Manufacturing Practice review.",
@@ -193,12 +199,13 @@
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "choicesId": "CHOICE_EV-02",
     "dialogueId": "DIALOGUE_EV-02",
-    "engineNote": "Impact should be softened if validation_risk_logged is true (set in ACT2_SCENE04), full severity if false/absent. NEW: if asked_validation_impact is false/absent, apply an EXTRA +5 riskExposure on top of the chosen option's normal effects. NEW: option 3 ('Phase the fix around commissioning') requires asked_validation_mitigation to be true to use its listed effects (scheduleHealth +5, regulatoryReadiness -10, camilleTrust -10) — if false/absent, this option's effects become scheduleHealth -5, regulatoryReadiness -20, camilleTrust -15 instead (the parallel-validation workaround Camille mentioned was never actually planned for, so phasing it in causes more damage).",
+    "engineNote": "Impact should be softened if validation_risk_logged is true (set in ACT2_SCENE04), full severity if false/absent. NEW: if asked_validation_impact is false/absent, apply an EXTRA +5 riskExposure on top of the chosen option's normal effects. NEW: option 3 ('Phase the fix around commissioning') requires asked_validation_mitigation to be true to use its listed effects (scheduleHealth +5, regulatoryReadiness -10, camilleTrust -10) \u2014 if false/absent, this option's effects become scheduleHealth -5, regulatoryReadiness -20, camilleTrust -15 instead (the parallel-validation workaround Camille mentioned was never actually planned for, so phasing it in causes more damage).",
     "precedingDialogueId": "DIALOGUE_REVISITED_VALIDATION"
   },
   "EV-03": {
     "eventId": "EV-03",
     "title": "Local Resident Traffic Complaints",
+    "teaserTitle": "Community Notice",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "Residents complain about construction traffic.",
@@ -221,6 +228,7 @@
   "EV-04": {
     "eventId": "EV-04",
     "title": "Investor Visit Brought Forward",
+    "teaserTitle": "Calendar Update",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "An investor visit is moved up unexpectedly.",
@@ -243,6 +251,7 @@
   "EV-05": {
     "eventId": "EV-05",
     "title": "Contamination Found During Commissioning",
+    "teaserTitle": "Commissioning Update",
     "act": "Act 4",
     "trigger": "Conditional (Risk Exposure > 50)",
     "description": "Contamination is discovered during commissioning.",
@@ -266,6 +275,7 @@
   "EV-06": {
     "eventId": "EV-06",
     "title": "Electrical Contractor Goes Bankrupt",
+    "teaserTitle": "Site Communication",
     "act": "Act 4",
     "trigger": "Conditional (contractor risk flagged in Act 2 unresolved)",
     "description": "The electrical contractor collapses mid-build.",
@@ -281,18 +291,18 @@
       "absorb via secondary supplier already on the Risk Register",
       "delay dependent work"
     ],
-    "designTag": "Standard — foreshadowed since Act 2",
+    "designTag": "Standard \u2014 foreshadowed since Act 2",
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "choicesId": "CHOICE_EV-06",
     "dialogueId": "DIALOGUE_EV-06",
     "precedingDialogueId": "DIALOGUE_REVISITED_CONTRACTOR",
-    "engineNote": "Existing severity/softening logic from contractor_risk_logged is unchanged. NEW: if asked_contractor_impact is false/absent, apply an EXTRA +5 riskExposure on top of whatever the chosen EV-06 option's normal effects are (player under-prepared for the true scale). NEW: option 2 ('Absorb via the secondary supplier already on the Risk Register') requires asked_contractor_mitigation to be true to use its listed mild effects (scheduleHealth -3, budgetRemaining -100000) — if that flag is false/absent, this option's effects become scheduleHealth -12, budgetRemaining -350000 instead (the backup was never actually confirmed, so 'absorbing via secondary supplier' turns into an improvised emergency scramble instead)."
+    "engineNote": "Existing severity/softening logic from contractor_risk_logged is unchanged. NEW: if asked_contractor_impact is false/absent, apply an EXTRA +5 riskExposure on top of whatever the chosen EV-06 option's normal effects are (player under-prepared for the true scale). NEW: option 2 ('Absorb via the secondary supplier already on the Risk Register') requires asked_contractor_mitigation to be true to use its listed mild effects (scheduleHealth -3, budgetRemaining -100000) \u2014 if that flag is false/absent, this option's effects become scheduleHealth -12, budgetRemaining -350000 instead (the backup was never actually confirmed, so 'absorbing via secondary supplier' turns into an improvised emergency scramble instead)."
   },
   "EV-06-RAID": {
     "eventId": "EV-06-RAID",
-    "title": "RAID Log — Electrical Contractor",
+    "title": "RAID Log \u2014 Electrical Contractor",
     "act": "Act 4",
-    "trigger": "Follows EV-06 directly whenever it fires — spliced into the MID_WAVE_2 queue right after it, not independently eligibility-gated.",
+    "trigger": "Follows EV-06 directly whenever it fires \u2014 spliced into the MID_WAVE_2 queue right after it, not independently eligibility-gated.",
     "description": "The electrical contractor risk has materialised. The player updates the RAID log: owner, immediate response, and whether to escalate.",
     "pmConcept": "RAID log discipline / issue ownership",
     "impact": [],
@@ -302,7 +312,7 @@
       "choose an immediate response",
       "escalate or not"
     ],
-    "designTag": "RAID mini-artefact — governance follow-up to EV-06, not a scored decision",
+    "designTag": "RAID mini-artefact \u2014 governance follow-up to EV-06, not a scored decision",
     "section": "RAID / Change-Impact Beats",
     "dialogueId": "DIALOGUE_EV-06-RAID",
     "toolId": "TOOL_EV-06-RAID_CARD"
@@ -310,6 +320,7 @@
   "EV-07": {
     "eventId": "EV-07",
     "title": "Key Automation Engineer Resigns",
+    "teaserTitle": "Team Notice",
     "act": "Act 4",
     "trigger": "Conditional (Team Morale < 40)",
     "description": "An engineer resigns under sustained pressure.",
@@ -333,6 +344,7 @@
   "EV-08": {
     "eventId": "EV-08",
     "title": "Extreme Weather Floods the Loading Bay",
+    "teaserTitle": "Weather Alert",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "Severe weather damages partially-installed equipment.",
@@ -355,6 +367,7 @@
   "EV-09": {
     "eventId": "EV-09",
     "title": "Cyberattack Locks the Building Management System",
+    "teaserTitle": "System Alert",
     "act": "Act 4",
     "trigger": "Conditional (BMS flagged as a dependency)",
     "description": "A cyberattack halts environmental controls.",
@@ -378,6 +391,7 @@
   "EV-10": {
     "eventId": "EV-10",
     "title": "Finance Freezes Part of the Contingency Budget",
+    "teaserTitle": "Finance Notice",
     "act": "Act 4",
     "trigger": "Conditional (Budget Remaining < 15%)",
     "description": "Daniel freezes remaining contingency.",
@@ -399,12 +413,13 @@
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "choicesId": "CHOICE_EV-10",
     "dialogueId": "DIALOGUE_EV-10",
-    "engineNote": "Impact should be softened if contingency_risk_logged is true (set in ACT2_SCENE04), full severity if false/absent. NEW: if asked_contingency_impact is false/absent, apply an EXTRA +5 riskExposure on top of the chosen option's normal effects. NEW: option 2 ('Descope a Should requirement') requires asked_contingency_mitigation to be true to use its listed effect (stakeholderGoodwill -5) — if false/absent, this option's effect becomes stakeholderGoodwill -15 instead (without knowing where the slack was, the player descopes something more painful than necessary).",
+    "engineNote": "Impact should be softened if contingency_risk_logged is true (set in ACT2_SCENE04), full severity if false/absent. NEW: if asked_contingency_impact is false/absent, apply an EXTRA +5 riskExposure on top of the chosen option's normal effects. NEW: option 2 ('Descope a Should requirement') requires asked_contingency_mitigation to be true to use its listed effect (stakeholderGoodwill -5) \u2014 if false/absent, this option's effect becomes stakeholderGoodwill -15 instead (without knowing where the slack was, the player descopes something more painful than necessary).",
     "precedingDialogueId": "DIALOGUE_REVISITED_CONTINGENCY"
   },
   "EV-11": {
     "eventId": "EV-11",
     "title": "New MHRA Guidance Note Published",
+    "teaserTitle": "Regulatory Bulletin",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "A new guidance note forces a design review.",
@@ -444,7 +459,7 @@
       "defer to a future phase",
       "reject with rationale logged"
     ],
-    "designTag": "Standard — also seeds EV-R2",
+    "designTag": "Standard \u2014 also seeds EV-R2",
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "dialogueId": "DIALOGUE_ACT4_SCENE02",
     "choicesId": "CHOICE_ACT4_SCENE02"
@@ -452,6 +467,7 @@
   "EV-13": {
     "eventId": "EV-13",
     "title": "Supplier Ships Wrong Voltage Equipment",
+    "teaserTitle": "Goods-In Notice",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "A critical supplier ships the wrong voltage spec.",
@@ -475,6 +491,7 @@
   "EV-14": {
     "eventId": "EV-14",
     "title": "Validation Engineer Poached by a Competitor",
+    "teaserTitle": "HR Notice",
     "act": "Act 4",
     "trigger": "Conditional (Team Morale < 50 OR Mike E. Trust Cold/Cool)",
     "description": "An engineer is poached with commissioning approaching.",
@@ -498,6 +515,7 @@
   "EV-15": {
     "eventId": "EV-15",
     "title": "Social Media Safety Claim",
+    "teaserTitle": "Social Media Alert",
     "act": "Act 4",
     "trigger": "Scheduled",
     "description": "A social media post claims the project is unsafe.",
@@ -535,7 +553,7 @@
       "search shared drive (all lead to the same discovery)"
     ],
     "designTag": "Standard",
-    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "section": "EARLIER-ACT EVENTS (Acts 1\u20133)",
     "dialogueId": "DIALOGUE_ACT1_SCENE05",
     "choicesId": null,
     "note": "Content lives in ACT1_SCENE05 (Missing Appendices) rather than duplicated here."
@@ -545,7 +563,7 @@
     "title": "Contractor \"Gone Quiet\"",
     "act": "Act 2",
     "trigger": "Scheduled",
-    "description": "Vaughn mentions the electrical contractor has gone quiet — the seed of EV-06.",
+    "description": "Vaughn mentions the electrical contractor has gone quiet \u2014 the seed of EV-06.",
     "pmConcept": "Early risk identification",
     "impact": [
       "Risk Exposure"
@@ -559,7 +577,7 @@
       "wait and monitor"
     ],
     "designTag": "Standard",
-    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "section": "EARLIER-ACT EVENTS (Acts 1\u20133)",
     "dialogueId": "DIALOGUE_ACT2_SCENE04",
     "choicesId": "CHOICE_ACT2_SCENE04",
     "note": "Content lives in ACT2_SCENE04 (Risk Workshop) rather than duplicated here."
@@ -581,9 +599,9 @@
       "Player self-corrects, or proceeds and carries the budget hit"
     ],
     "designTag": "Standard",
-    "section": "EARLIER-ACT EVENTS (Acts 1–3)",
+    "section": "EARLIER-ACT EVENTS (Acts 1\u20133)",
     "dialogueId": null,
     "choicesId": null,
-    "note": "Runtime-triggered reaction inside ACT2_SCENE02's MoSCoW tool (fires if player marks everything Must) — not a standalone scripted scene, so no dedicated dialogue entry."
+    "note": "Runtime-triggered reaction inside ACT2_SCENE02's MoSCoW tool (fires if player marks everything Must) \u2014 not a standalone scripted scene, so no dedicated dialogue entry."
   }
 }
