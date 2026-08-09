@@ -60,11 +60,15 @@ function Chip({
   value,
   band,
   state,
+  valueClassName = "text-zinc-100",
 }: {
   label: string;
   value: string;
   band: "green" | "yellow" | "red";
   state: ChipState;
+  /** Overrides the value span's colour — used by Delivery Pace to tint its
+   * +/- delta green/red independently of the dot's overall health band. */
+  valueClassName?: string;
 }) {
   return (
     <div
@@ -78,9 +82,20 @@ function Chip({
     >
       <span className={`h-2 w-2 rounded-full ${BAND_DOT[band]}`} />
       <span className="text-zinc-400">{label}</span>
-      <span className="font-semibold text-zinc-100">{value}</span>
+      <span className={`font-semibold ${valueClassName}`}>{value}</span>
     </div>
   );
+}
+
+/** Delivery Pace shows as a signed delta from its 100 baseline (e.g. "▲ 5%"
+ * / "▼ 5%") rather than the raw scheduleHealth score — the arrow answers
+ * "ahead or behind" at a glance without the player needing to know 100 is
+ * the neutral point. */
+function deliveryPaceDisplay(scheduleHealth: number): { value: string; className: string } {
+  const delta = Math.round(scheduleHealth - 100);
+  if (delta > 0) return { value: `▲ ${delta}%`, className: "text-emerald-400" };
+  if (delta < 0) return { value: `▼ ${Math.abs(delta)}%`, className: "text-red-400" };
+  return { value: "0%", className: "text-zinc-100" };
 }
 
 /**
@@ -163,6 +178,7 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
   const isOverdue = weeksRemaining > 24 || weeksRemaining < 0;
 
   const budgetPct = (metrics.budgetRemaining / STARTING_BUDGET) * 100;
+  const pace = deliveryPaceDisplay(metrics.scheduleHealth);
   const objective = ganttToolScreen
     ? computeCurrentObjective(
         ganttToolScreen,
@@ -224,7 +240,8 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
         <div className="relative">
           <Chip
             label="Delivery Pace"
-            value={`${metrics.scheduleHealth}`}
+            value={pace.value}
+            valueClassName={pace.className}
             band={metricBand(metrics.scheduleHealth, true)}
             state={chipState(1)}
           />
