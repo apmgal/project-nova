@@ -106,6 +106,6 @@
   },
   "choiceHistory": [],
   "derivedDisplayValues": {
-    "weeksRemaining": "round(projectMetrics.scheduleHealth / 100 * 24) — display only, not a stored variable. Format as 'Week X / 24'. Active from ACT3_SCENE06B until Act 5 begins. Not a gate — story progresses on its own scene sequence regardless of this number; if it goes negative/over 24, display as-is (e.g. 'Week 27 / 24' or an OVERDUE state), don't clamp or block."
+    "weeksRemaining": "round((200 - projectMetrics.scheduleHealth) / 100 * 24) — display only, not a stored variable. Format as 'Week X / 24'. scheduleHealth 100 anchors to week 24 (on target); above 100 (choices that speed delivery up) pulls the week count below 24, below 100 (choices that slow it down) pushes it above 24. Active from ACT3_SCENE06B until Act 5 begins. Not a gate — story progresses on its own scene sequence regardless of this number; if it goes negative/over 24, display as-is (e.g. 'Week 27 / 24' or an OVERDUE state), don't clamp or block."
   }
 }

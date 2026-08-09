@@ -1012,11 +1012,19 @@ export function toggleCriticalPathGuess(
 // persisted).
 // ---------------------------------------------------------------------------
 
-/** weeksRemaining = round(scheduleHealth / 100 * 24). Not clamped — a bad
- * scheduleHealth can push this negative or past 24; the HUD displays
- * whatever comes out, it never gates progression. */
+/** weeksRemaining = round((200 - scheduleHealth) / 100 * 24). scheduleHealth
+ * starts at 100, which anchors to exactly week 24 (on target). Choices that
+ * "speed delivery up" push scheduleHealth above 100, which must pull the
+ * week count BELOW 24 (finishing ahead of schedule) — and choices that slow
+ * it down push scheduleHealth below 100, pulling the week count above 24
+ * (running late/OVERDUE). Deliberately the inverse of a naive
+ * scheduleHealth/100*24: that reads scheduleHealth as "how many weeks
+ * this used up" rather than "how healthy the schedule is", so raising it
+ * (good choices) perversely made the project look later, not earlier. Not
+ * clamped — a bad scheduleHealth can still push this past 24; the HUD
+ * displays whatever comes out, it never gates progression. */
 export function computeWeeksRemaining(scheduleHealth: number): number {
-  return Math.round((scheduleHealth / 100) * 24);
+  return Math.round(((200 - scheduleHealth) / 100) * 24);
 }
 
 export type MetricBand = "green" | "yellow" | "red";
