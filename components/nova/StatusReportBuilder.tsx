@@ -398,18 +398,25 @@ export default function StatusReportBuilder({
             <table className="w-full border-collapse" style={{ tableLayout: "fixed", fontSize: 12, minWidth: 460 }}>
               <thead>
                 <tr>
-                  <th style={{ width: "26%", border: `1px solid ${LINE}`, padding: "7px 8px", textAlign: "left" }}>Risk</th>
-                  <th style={{ width: "35%", border: `1px solid ${LINE}`, padding: "7px 8px", textAlign: "left" }}>
+                  <th className={BAR_CLASS} style={{ width: "26%", border: `1px solid ${LINE}`, textAlign: "left" }}>
+                    Risk
+                  </th>
+                  <th className={BAR_CLASS} style={{ width: "35%", border: `1px solid ${LINE}`, textAlign: "left" }}>
                     Mitigation actions
                   </th>
-                  <th className="group relative cursor-help" style={{ width: "17%", border: `1px solid ${LINE}`, padding: "7px 8px" }}>
+                  <th
+                    className={`${BAR_CLASS} group relative cursor-help`}
+                    style={{ width: "17%", border: `1px solid ${LINE}`, textAlign: "center" }}
+                  >
                     RAG
                     <span className="pointer-events-none absolute left-0 top-full z-10 mt-1 w-52 rounded bg-[#1f3864] px-2 py-1.5 text-[10px] font-normal normal-case tracking-normal text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
                       Tap the box to change colour.
                     </span>
                   </th>
-                  <th style={{ width: "16%", border: `1px solid ${LINE}`, padding: "7px 8px" }}>Outlook</th>
-                  <th style={{ width: "6%", border: `1px solid ${LINE}`, padding: "7px 8px" }} />
+                  <th className={BAR_CLASS} style={{ width: "16%", border: `1px solid ${LINE}`, textAlign: "center" }}>
+                    Outlook
+                  </th>
+                  <th className={BAR_CLASS} style={{ width: "6%", border: `1px solid ${LINE}` }} />
                 </tr>
               </thead>
               <tbody>
@@ -516,9 +523,15 @@ export default function StatusReportBuilder({
               <table className="w-full min-w-0 border-collapse text-[10.5px]">
                 <thead>
                   <tr>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px", textAlign: "left" }}>Name</th>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>Start</th>
-                    <th style={{ border: `1px solid ${LINE}`, padding: "5px 6px" }}>End</th>
+                    <th className={BAR_CLASS} style={{ border: `1px solid ${LINE}`, textAlign: "left" }}>
+                      Name
+                    </th>
+                    <th className={BAR_CLASS} style={{ border: `1px solid ${LINE}`, textAlign: "center" }}>
+                      Start
+                    </th>
+                    <th className={BAR_CLASS} style={{ border: `1px solid ${LINE}`, textAlign: "center" }}>
+                      End
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
