@@ -225,8 +225,11 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
   return (
     <div className="relative z-20 border-b border-zinc-800 bg-zinc-950/80">
       <div className="flex flex-wrap items-center gap-2 px-4 py-2">
-        <div className={`text-xs font-semibold ${isOverdue ? "text-red-400" : "text-emerald-400"}`}>
-          Week {weeksRemaining} / 24{isOverdue ? " — OVERDUE" : ""}
+        <div className="flex items-center gap-1 text-xs">
+          <span className="font-semibold text-zinc-500">Est. Completion:</span>
+          <span className={`font-semibold ${isOverdue ? "text-red-400" : "text-emerald-400"}`}>
+            Week {weeksRemaining} / 24{isOverdue ? " — OVERDUE" : ""}
+          </span>
         </div>
         <div className="relative">
           <Chip
