@@ -110,6 +110,7 @@ export default function StatusReportBuilder({
 }: StatusReportBuilderProps) {
   const hint = useConceptHint(pmConcept);
   const riskSlotSeq = useRef(0);
+  const [openRiskPicker, setOpenRiskPicker] = useState<string | null>(null);
 
   const [overall, setOverall] = useState<RagStatus | null>(null);
   const [dims, setDims] = useState<Record<DimensionKey, RagStatus | null>>({
@@ -394,8 +395,7 @@ export default function StatusReportBuilder({
             </table>
             </div>
 
-            <div className="w-full min-w-0 overflow-x-auto">
-            <table className="w-full border-collapse" style={{ tableLayout: "fixed", fontSize: 12, minWidth: 460 }}>
+            <table className="w-full min-w-0 border-collapse text-[10.5px]" style={{ tableLayout: "fixed" }}>
               <thead>
                 <tr>
                   <th className={BAR_CLASS} style={{ width: "26%", border: `1px solid ${LINE}`, textAlign: "left" }}>
@@ -422,27 +422,52 @@ export default function StatusReportBuilder({
               <tbody>
                 {riskSlots.map((slot) => {
                   const slotOptions = risks.filter((r) => r.riskId === slot.riskId || !usedRiskIds.has(r.riskId));
+                  const selectedTitle = risks.find((r) => r.riskId === slot.riskId)?.title ?? "Select a risk";
+                  const pickerOpen = openRiskPicker === slot.key;
                   return (
                     <tr key={slot.key}>
-                      <td style={{ border: `1px solid ${LINE}`, padding: "7px 8px" }}>
-                        <select
-                          value={slot.riskId ?? ""}
-                          onChange={(e) => updateRiskSlot(slot.key, { riskId: e.target.value || null })}
-                          className="w-full border-none bg-transparent text-[12px]"
+                      <td style={{ border: `1px solid ${LINE}`, padding: "7px 8px", position: "relative" }}>
+                        <button
+                          type="button"
+                          onClick={() => setOpenRiskPicker(pickerOpen ? null : slot.key)}
+                          className="w-full text-left text-[10.5px] leading-snug text-[#333] hover:text-[#1f3864]"
+                          style={{ whiteSpace: "normal", wordBreak: "break-word" }}
                         >
-                          {slotOptions.map((r) => (
-                            <option key={r.riskId} value={r.riskId}>
-                              {r.title}
-                            </option>
-                          ))}
-                        </select>
+                          {selectedTitle}
+                        </button>
+                        {pickerOpen && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label="Close risk picker"
+                              onClick={() => setOpenRiskPicker(null)}
+                              className="fixed inset-0 z-10 cursor-default"
+                            />
+                            <div className="absolute left-0 top-full z-20 mt-1 w-56 max-w-[80vw] rounded border border-[#c9c9c9] bg-white shadow-lg">
+                              {slotOptions.map((r) => (
+                                <button
+                                  key={r.riskId}
+                                  type="button"
+                                  onClick={() => {
+                                    updateRiskSlot(slot.key, { riskId: r.riskId });
+                                    setOpenRiskPicker(null);
+                                  }}
+                                  className="block w-full px-2 py-1.5 text-left text-[10.5px] leading-snug text-[#333] hover:bg-[#eef0f2]"
+                                  style={{ whiteSpace: "normal", wordBreak: "break-word" }}
+                                >
+                                  {r.title}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </td>
                       <td style={{ border: `1px solid ${LINE}`, padding: "7px 8px" }}>
                         <input
                           value={slot.mitigationText}
                           onChange={(e) => updateRiskSlot(slot.key, { mitigationText: e.target.value })}
                           placeholder="Mitigation action"
-                          className="w-full border-none bg-transparent text-[12px] outline-none"
+                          className="w-full border-none bg-transparent text-[10.5px] outline-none"
                         />
                       </td>
                       <td style={{ border: `1px solid ${LINE}`, padding: "7px 8px" }}>
@@ -516,7 +541,6 @@ export default function StatusReportBuilder({
                 </tr>
               </tbody>
             </table>
-            </div>
 
             <div>
               <div className={BAR_CLASS}>Upcoming milestones</div>
