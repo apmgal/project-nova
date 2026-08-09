@@ -625,11 +625,24 @@ export interface ToolScreenBlock {
    * report should read for its Upcoming Milestones table and completed-
    * milestone accomplishment candidates. */
   ganttToolId?: string;
+  /** toolId of the sort_into_buckets (WBS) tool whose cards this report
+   * breaks Upcoming Activities down into — see upcomingActivityWindowWeeks. */
+  wbsToolId?: string;
+  /** How many weeks ahead of the report's current week counts as "near
+   * future" for Upcoming Activities (also includes milestones already in
+   * progress, not just ones yet to start). Defaults to 4 (roughly one
+   * reporting period) if unset. Deliberately separate from Upcoming
+   * Milestones, which shows the FULL remaining plan with no window. */
+  upcomingActivityWindowWeeks?: number;
   projectManagerLabel?: string;
   projectSponsorLabel?: string;
   taxTower?: string;
   projectDescription?: string;
   accomplishmentCandidates?: StatusReportChecklistItem[];
+  /** Fallback only, used when no real near-term WBS/Gantt activity data is
+   * available yet (e.g. before any milestone has been placed) — see
+   * StatusReportBuilder.tsx. Not the primary source once real placement
+   * data exists. */
   upcomingActivityCandidates?: StatusReportChecklistItem[];
   maxRiskSlots?: number;
 

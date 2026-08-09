@@ -434,3 +434,40 @@ label once evidenced, stays hidden with zero evidence despite being
 always-eligible, and flips to the specific issue label once resolved;
 EV-02 stays hidden while ineligible even with evidence logged, and
 surfaces once both eligible and evidenced.
+
+---
+
+## Monthly Status Report — Upcoming Activities broken down into real near-term WBS tasks
+
+**Status:** Implemented. Follow-up to the report-builder UI work above —
+confirmed Upcoming Milestones was already correctly sourced from the real
+Gantt chart (`toolScreen.ganttToolId` -> `state.toolPlacements`, unchanged
+by this entry); the actual gap was Upcoming Activities, which had been
+shipped as three static, generic, always-the-same authored bullets
+regardless of what the player had actually placed on the timeline.
+
+**The fix:** Upcoming Activities is now a genuinely finer-grained, real,
+time-scoped breakdown of the same Gantt data Upcoming Milestones already
+reads — deliberately not just that table's rows restated. A milestone
+counts as "near future" once it's already in progress (`start <=
+currentWeek`) or starts within `upcomingActivityWindowWeeks` (new
+`ToolScreenBlock` field, default 4 — roughly one reporting period) of the
+current week — distinct from Upcoming Milestones, which shows the FULL
+remaining plan with no window at all. For each near-term milestone, its
+individual WBS task cards (`toolScreen.wbsToolId` — new field, pointed at
+`TOOL_ACT3_SCENE01_WBS` — matched by `milestone.wbsCategory === card
+.correctBucket`) become separate checkable activity items instead of one
+headline title, so the player is choosing among real, specific pieces of
+work ("Install and commission the isolator line — Equipment Delivered &
+Installed, Wk 8–13") rather than restating a milestone name they already
+saw in the table above. `toolScreen.upcomingActivityCandidates` is kept
+only as a genuine fallback (shown if no milestone is near-term yet, e.g.
+before any Gantt placement exists at all) — no longer the default source.
+
+**Verified** via a throwaway scripted check (written, run, deleted):
+confirmed `wbsToolId`/`upcomingActivityWindowWeeks` wiring, and that the
+near-term filter correctly excludes already-finished and too-far-out
+milestones while including in-progress ones, at two different simulated
+`currentWeek` values against real placed Gantt data — e.g. at week 9
+(mid-Equipment), only Equipment's real WBS task cards appear; pushing to
+week 14 correctly swaps the window to Validation/Training instead.

@@ -788,6 +788,8 @@
     "type": "status_report_builder",
     "instructions": "Fill out this period's Monthly Status Report. Ratings, risks, and evidence are your own call \u2014 nothing here is pre-filled or graded for you.",
     "ganttToolId": "TOOL_ACT3_SCENE04_MILESTONES",
+    "wbsToolId": "TOOL_ACT3_SCENE01_WBS",
+    "upcomingActivityWindowWeeks": 4,
     "projectManagerLabel": "You",
     "projectSponsorLabel": "Mike Elloian",
     "taxTower": "Governance, Digital and Change",
@@ -812,21 +814,13 @@
     ],
     "upcomingActivityCandidates": [
       {
-        "id": "act_validation_review",
-        "text": "Complete validation master plan review"
-      },
-      {
-        "id": "act_electrical_replacement",
-        "text": "Close out electrical contractor replacement"
-      },
-      {
-        "id": "act_cleanroom_requal",
-        "text": "Run cleanroom requalification"
+        "id": "act_fallback_general",
+        "text": "Review outstanding actions from the last report"
       }
     ],
     "maxRiskSlots": 4,
     "completionCondition": "Overall status and all four RAG dimensions chosen (risks/accomplishments/upcoming activities are optional)",
-    "note": "Upcoming Milestones and completed-milestone accomplishment candidates are both derived at render time from TOOL_ACT3_SCENE04_MILESTONES's real placements (see ganttToolId) split against the current week \u2014 never hardcoded here. See StatusReportBuilder.tsx.",
+    "note": "Upcoming Milestones and completed-milestone accomplishment candidates are both derived at render time from TOOL_ACT3_SCENE04_MILESTONES's real placements (see ganttToolId) split against the current week -- never hardcoded here. Upcoming Activities is likewise derived at render time: for each Gantt milestone in progress or starting within upcomingActivityWindowWeeks of the current week, its individual WBS task cards (see wbsToolId, matched by milestone.wbsCategory == card.correctBucket) become separate checkable activity items -- a finer-grained, real, near-term breakdown rather than the milestone's own single headline title. upcomingActivityCandidates is a fallback only, shown if that real data produces nothing (e.g. before any milestone has been placed). See StatusReportBuilder.tsx.",
     "onComplete": {
       "nextScene": "ACT4_SCENE05B"
     }

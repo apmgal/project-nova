@@ -150,9 +150,12 @@ export default function StatusReportBuilder({
       const startRaw = ganttPlacements[m.id];
       if (startRaw === undefined) return null;
       const start = Number(startRaw);
-      return { id: m.id, text: m.text, start, end: start + m.durationWeeks };
+      return { id: m.id, text: m.text, start, end: start + m.durationWeeks, wbsCategory: m.wbsCategory };
     })
-    .filter((m): m is { id: string; text: string; start: number; end: number } => m !== null);
+    .filter(
+      (m): m is { id: string; text: string; start: number; end: number; wbsCategory: string | undefined } =>
+        m !== null
+    );
 
   const upcomingMilestones = resolvedMilestones
     .filter((m) => m.end > currentWeek)
@@ -166,7 +169,35 @@ export default function StatusReportBuilder({
       text: `${m.text} (completed Week ${m.end})`,
     })),
   ];
-  const activityCandidates = toolScreen.upcomingActivityCandidates ?? [];
+
+  // Upcoming Activities is a finer-grained, near-term breakdown of the same
+  // real Gantt data — deliberately NOT just Upcoming Milestones restated.
+  // A milestone counts as "near future" once it's already in progress
+  // (start <= currentWeek) or starts within upcomingActivityWindowWeeks —
+  // for each one, its individual WBS task cards (matched by
+  // milestone.wbsCategory === card.correctBucket) become separate
+  // checkable activities instead of one headline title, so the player is
+  // choosing among real, specific pieces of work rather than restating a
+  // milestone name they already saw in the table above.
+  const activityWindowWeeks = toolScreen.upcomingActivityWindowWeeks ?? 4;
+  const wbsTool = toolScreen.wbsToolId ? getToolScreen(toolScreen.wbsToolId) : null;
+  const wbsCards = wbsTool?.cards ?? [];
+  const nearTermMilestones = resolvedMilestones.filter(
+    (m) => m.end > currentWeek && m.start <= currentWeek + activityWindowWeeks
+  );
+  const activityCandidates =
+    nearTermMilestones.length > 0
+      ? nearTermMilestones.flatMap((m) => {
+          const zoneTasks = wbsCards.filter((c) => c.correctBucket === m.wbsCategory);
+          if (zoneTasks.length === 0) {
+            return [{ id: `gantt_activity_${m.id}`, text: `${m.text} (Wk ${m.start}–${m.end})` }];
+          }
+          return zoneTasks.map((c) => ({
+            id: `wbs_activity_${c.id}`,
+            text: `${c.text} — ${m.text}, Wk ${m.start}–${m.end}`,
+          }));
+        })
+      : (toolScreen.upcomingActivityCandidates ?? []);
 
   const usedRiskIds = new Set(riskSlots.map((s) => s.riskId).filter((id): id is string => id !== null));
 
