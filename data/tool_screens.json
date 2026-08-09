@@ -809,7 +809,7 @@
       },
       {
         "id": "acc_wbs_cbs_baselined",
-        "text": "WBS and CBS baselined, no unresolved gaps"
+        "text": "WBS and CBS baselined"
       }
     ],
     "upcomingActivityCandidates": [
