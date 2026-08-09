@@ -2243,10 +2243,11 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "A post is circulating \u2014 claims the site is unsafe. It isn't true. It's spreading anyway."
+        "text": "It isn't true. It's spreading anyway."
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "The claim itself is now shown via EV-15's leadInPanelId (EV15_LEADIN, a social_feed panel) immediately before this scene, so this line no longer needs to describe the post \u2014 it just reacts to it."
   },
   "DIALOGUE_REVISITED_CONTRACTOR": {
     "dialogueId": "DIALOGUE_REVISITED_CONTRACTOR",
@@ -2290,7 +2291,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Plays immediately before DIALOGUE_EV-06. asked_contractor_likelihood only affects framing tone here, no mechanical effect. asked_contractor_mitigation and asked_contractor_impact affect EV-06's own choice options directly \u2014 see events.json EV-06 engineNote."
+    "engineNote": "Currently unreferenced \u2014 EV-06 switched from precedingDialogueId (this block) to leadInPanelId (EV06_LEADIN, a Teams-thread panel) as its lead-in. Left in place rather than deleted per project convention (don't delete orphaned content without being asked). asked_contractor_mitigation and asked_contractor_impact still affect EV-06's own choice options directly regardless \u2014 see events.json EV-06 engineNote."
   },
   "DIALOGUE_REVISITED_VALIDATION": {
     "dialogueId": "DIALOGUE_REVISITED_VALIDATION",
@@ -2334,7 +2335,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Plays immediately before DIALOGUE_EV-02. asked_validation_mitigation gates the effectiveness of EV-02's 'phase the fix' option \u2014 see events.json EV-02 engineNote."
+    "engineNote": "Currently unreferenced \u2014 EV-02 switched from precedingDialogueId (this block) to leadInPanelId (EV02_LEADIN, an email panel) as its lead-in. Left in place rather than deleted per project convention (don't delete orphaned content without being asked). asked_validation_mitigation still gates the effectiveness of EV-02's 'phase the fix' option regardless \u2014 see events.json EV-02 engineNote."
   },
   "DIALOGUE_REVISITED_CONTINGENCY": {
     "dialogueId": "DIALOGUE_REVISITED_CONTINGENCY",

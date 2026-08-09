@@ -931,3 +931,91 @@ delivery once one small new engine hook exists (bank-panel lead-in).
 Document-reveal specifically carries real production cost per document,
 separate from the code question. Step 3 (prototype 2-3 major events)
 is unblocked and cheap; not yet started, pending go-ahead.
+
+## Act 4 event delivery — panel lead-in prototype (step 3, built)
+
+Following the audit above, built the small event-level panel hook and
+converted exactly three events through it, per direction: "let Claude
+build the small event-level panel hook now, then convert exactly three
+events and playtest before expanding."
+
+**The hook.** `EventEntry.leadInPanelId?: string` — deliberately NOT
+named `riskInvestigationId`, to avoid overloading a field that already
+means something specific (a choice-scoped risk Q&A) with a different,
+more general job (any event's delivery panel: Teams, email, social
+feed, whatever). References a `risk_investigation.json` bank by id,
+reusing the existing `RiskInvestigationBank`/`getRiskInvestigation`
+shape and its `visualStyle` discriminator rather than inventing a
+parallel data file — the underlying content shape (a list of
+sender/body items) is genuinely the same thing either way; only the
+*attachment field name* on the event needed to be neutral, not the
+storage. Wired through the same `EVENT_FRAME_SUFFIX` synthesized
+lead-in scene mechanism `precedingDialogueId` already used
+(`synthesizeEventFrameScene` in data.ts now builds a panel-only frame
+scene when `leadInPanelId` is set, no dialogue lines at all — the panel
+IS the whole beat) — `resolveEventQueueEntryScene` (state.ts) routes
+the queue into it exactly like a dialogue lead-in.
+
+**Kept deliberately simple, per direction:** an event gets EITHER a
+`precedingDialogueId` lead-in OR a `leadInPanelId` lead-in, never both —
+no panel → narration → event dialogue → choice chains. `Scene` gained a
+matching `leadInPanelId?: string | null` field (only ever set on a
+synthesized frame scene, never in scenes.json) so GameRoot can render
+the right panel component with no dialogue box above it, then Continue
+goes straight to the event's own scene via the same `handleContinueScene`
+every plain-continue scene already uses — no new resolved-state tracking
+needed (unlike `atInvestigation`'s choice-scoped version) since a queued
+event's frame scene is one-directional.
+
+**Three events converted:**
+- **EV-06** (electrical contractor bankruptcy) — Teams thread lead-in
+  (`EV06_LEADIN`), one message from Vaughn: "Harcourt's office is shut
+  and nobody is answering. I'm trying their site manager now." Reveals
+  the situation unfolding rather than naming the event; the real
+  bankruptcy is still discovered in EV-06's own dialogue that follows.
+- **EV-02** (cleanroom GMP review failure) — email lead-in (`EV02_LEADIN`,
+  `outlook_inbox` visualStyle), a cold official notification from a
+  "GMP Compliance Team" sender ahead of Camille's own spoken reaction
+  in EV-02's existing dialogue, so the beat reads as
+  official-notice-then-human-reaction rather than the same news twice.
+- **EV-15** (social media safety claim) — a new `social_feed` visualStyle
+  and `SocialFeedPanel.tsx` component (no existing panel matched a
+  social-post look), showing the actual claimed post
+  (`EV15_LEADIN`) instead of narration describing it. Trimmed
+  `DIALOGUE_EV-15`'s own first line ("A post is circulating — claims
+  the site is unsafe...") since the panel now shows that directly —
+  the remaining line ("It isn't true. It's spreading anyway.") reacts
+  to the post instead of re-describing it.
+
+**Side effect, not a separate rewrite pass:** EV-06 and EV-02 previously
+used `precedingDialogueId` pointing at `DIALOGUE_REVISITED_CONTRACTOR`/
+`DIALOGUE_REVISITED_VALIDATION` — the "RISK REGISTER — REVISITED... You
+weren't ready for it" judgmental narration blocks flagged in the
+presentation-grammar critique. Converting these two events to panel
+lead-ins retired that copy for them by construction (mutual exclusivity
+meant the dialogue lead-in had to go). No mechanical loss: the
+`asked_contractor_likelihood`/`asked_validation_likelihood` framing-tone
+line those blocks read was explicitly "no mechanical effect" per their
+own engineNotes, and the risk-logged-or-not acknowledgment already
+exists independently in EV-06's own dialogue (`"At least we saw it
+coming"`, conditioned on `contractor_risk_logged`). Both blocks are left
+in `dialogue.json`, now marked unreferenced via an `engineNote`, rather
+than deleted (per the standing "don't delete orphaned content" rule) —
+they're still there if a future event ever wants that framing pattern
+again. This is NOT the full "revisited narration rewrite" the
+presentation-grammar critique deferred — that item is about the pattern
+in general, wherever else it still appears; this only retired the two
+instances that happened to be directly in the way of this conversion.
+
+**Not done:** RAID-style history fields, location-per-event variety, and
+the interrupt-pattern engine are all still deferred exactly as before —
+this step only touched delivery format for these three events. Group
+2/3 event-pool caps are still an unvalidated first pass (per the
+"Act 4 event redistribution" entry).
+
+**Next:** playtest these three specifically (per direction — "then
+convert exactly three events and playtest before expanding"). Only
+after that, decide whether to convert more medium events through the
+same hook, and whether `TeamsThreadPanel`/`SharePointBrowserPanel`'s
+hardcoded per-message chrome maps are worth generalising yet (still "not
+yet — one map entry per message is a reasonable cost" per the audit).

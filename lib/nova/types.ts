@@ -160,6 +160,17 @@ export interface Scene {
    * toolId — lets a reaction line follow the interactive tool instead of
    * every line being forced to play before it. */
   postToolDialogueId?: string | null;
+  /** References a risk_investigation.json bank (see RiskInvestigationBank)
+   * shown as this scene's ENTIRE content in place of dialogue — no
+   * narration, just the panel and its own Continue. Only ever set on a
+   * synthesized Event Library lead-in scene (see EventEntry.leadInPanelId,
+   * EVENT_FRAME_SUFFIX in data.ts); never appears in authored scenes.json.
+   * Mutually exclusive with dialogueId being non-null on the same
+   * synthesized scene — an event picks EITHER a dialogue lead-in
+   * (precedingDialogueId) OR a panel lead-in (leadInPanelId), never both,
+   * to keep the lead-in a single beat. See "Act 4 event delivery — panel
+   * lead-in prototype" in DESIGN_NOTES.md. */
+  leadInPanelId?: string | null;
   trigger?: { previousScene: string | null };
   nextScenes: string[];
   needsWriting?: boolean;
@@ -284,9 +295,13 @@ export interface RiskInvestigationBank {
   instructions?: string;
   questions: RiskInvestigationQuestion[];
   /** Opts this bank into bespoke chrome (Outlook inbox, Teams thread,
-   * SharePoint file browser) instead of the default risk-investigation
-   * panel UI, mirroring ToolScreenBlock's visualStyle pattern. */
-  visualStyle?: "outlook_inbox" | "teams_thread" | "sharepoint_browser";
+   * SharePoint file browser, social feed) instead of the default
+   * risk-investigation panel UI, mirroring ToolScreenBlock's visualStyle
+   * pattern. "social_feed" (SocialFeedPanel.tsx) is also used by Act 4
+   * event panel lead-ins (see EventEntry.leadInPanelId) for a
+   * social-media-post-style reveal — not just risk investigation despite
+   * the type's name; see the reuse note in DESIGN_NOTES.md. */
+  visualStyle?: "outlook_inbox" | "teams_thread" | "sharepoint_browser" | "social_feed";
 }
 
 // ---------------------------------------------------------------------------
@@ -426,6 +441,19 @@ export interface EventEntry {
    * lib/nova/data.ts) — e.g. reopening an artefact/thread from an earlier
    * act before the event's own content plays. Absent for most events. */
   precedingDialogueId?: string;
+  /** References a risk_investigation.json bank (RiskInvestigationBank) —
+   * deliberately NOT named riskInvestigationId: this isn't a risk
+   * investigation, it's a generic event-delivery panel (a Teams message,
+   * an email, a social post) that leads in before the event's own
+   * dialogueId/choicesId, on its own synthesized frame scene (same
+   * EVENT_FRAME_SUFFIX mechanism precedingDialogueId uses — see
+   * synthesizeEventFrameScene in data.ts). The bank's own visualStyle
+   * picks the chrome (teams_thread/outlook_inbox/sharepoint_browser/
+   * social_feed). Mutually exclusive with precedingDialogueId for now — an
+   * event gets one lead-in beat, not a dialogue one followed by a panel
+   * one. See "Act 4 event delivery — panel lead-in prototype" in
+   * DESIGN_NOTES.md. */
+  leadInPanelId?: string;
   /** A tool_screens.json entry to show for this event, exactly like
    * Scene.toolId — see synthesizeEventScene in data.ts, which passes this
    * straight through so a queued event can carry a real interactive tool

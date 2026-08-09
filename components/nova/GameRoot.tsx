@@ -90,6 +90,7 @@ import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
 import TeamsThreadPanel from "./TeamsThreadPanel";
 import SharePointBrowserPanel from "./SharePointBrowserPanel";
+import SocialFeedPanel from "./SocialFeedPanel";
 import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
 import PauseOverlay from "./PauseOverlay";
@@ -594,6 +595,14 @@ export default function GameRoot() {
       !resolvedInvestigationIds.has(pendingChoice.block.choiceId)
   );
 
+  // An Event Library lead-in scene can carry a leadInPanelId instead of
+  // dialogue (see Scene.leadInPanelId, synthesizeEventFrameScene in
+  // data.ts) — the whole scene IS the panel, no dialogue lines, no
+  // resolved-tracking needed (unlike atInvestigation's choice-scoped
+  // version) since leaving this synthesized scene is one-directional.
+  const panelLeadInBank = getRiskInvestigation(scene.leadInPanelId);
+  const atPanelLeadIn = Boolean(panelLeadInBank);
+
   const inDialogue = !atToolBreak && !atChoiceBreak && lineIndex < combinedLines.length;
   // Lines revealed so far in this scene's transcript: up to and including
   // the currently displayed line while in dialogue, up to (not including)
@@ -907,7 +916,36 @@ export default function GameRoot() {
   const isAnnouncement = scene.displayStyle === "announcement";
 
   const actionContent =
-    atToolBreak && toolScreen && toolIsPriority ? (
+    atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "teams_thread" ? (
+              <TeamsThreadPanel
+                bank={panelLeadInBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={handleContinueScene}
+              />
+            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "outlook_inbox" ? (
+              <EmailInboxPanel
+                bank={panelLeadInBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={handleContinueScene}
+              />
+            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "sharepoint_browser" ? (
+              <SharePointBrowserPanel
+                bank={panelLeadInBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={handleContinueScene}
+                onOpenArtefact={setViewingArtefactId}
+              />
+            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "social_feed" ? (
+              <SocialFeedPanel
+                bank={panelLeadInBank}
+                flags={gameState.flags}
+                onAsk={handleAskRiskQuestion}
+                onContinue={handleContinueScene}
+              />
+            ) : atToolBreak && toolScreen && toolIsPriority ? (
               <PriorityBoard
                 toolScreen={toolScreen}
                 placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}

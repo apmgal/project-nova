@@ -209,5 +209,53 @@
         "flagOnAsk": "asked_contingency_mitigation"
       }
     ]
+  },
+  "EV06_LEADIN": {
+    "riskId": "ev06_leadin",
+    "sourceScene": "EV-06__frame",
+    "askTarget": "steering_group_chat",
+    "maxQuestions": 1,
+    "visualStyle": "teams_thread",
+    "questions": [
+      {
+        "id": "q_ev06_leadin_1",
+        "dimension": "Vaughn Kessler",
+        "questionText": "",
+        "answerText": "Harcourt's office is shut and nobody is answering. I'm trying their site manager now.",
+        "flagOnAsk": "seen_ev06_leadin"
+      }
+    ]
+  },
+  "EV02_LEADIN": {
+    "riskId": "ev02_leadin",
+    "sourceScene": "EV-02__frame",
+    "askTarget": "inbox",
+    "maxQuestions": 1,
+    "visualStyle": "outlook_inbox",
+    "questions": [
+      {
+        "id": "q_ev02_leadin_1",
+        "dimension": "GMP Compliance Team",
+        "questionText": "Cleanroom Validation — FAILED (Ref: GMP-2291)",
+        "answerText": "This confirms the cleanroom design has failed Good Manufacturing Practice review. This is not a marginal finding — see the attached deviation report for the full list of non-conformances.\n\nEscalating to Quality & Validation for a decision on next steps.",
+        "flagOnAsk": "seen_ev02_leadin"
+      }
+    ]
+  },
+  "EV15_LEADIN": {
+    "riskId": "ev15_leadin",
+    "sourceScene": "EV-15__frame",
+    "askTarget": "public_feed",
+    "maxQuestions": 1,
+    "visualStyle": "social_feed",
+    "questions": [
+      {
+        "id": "q_social_1",
+        "dimension": "Local Watch Now",
+        "questionText": "",
+        "answerText": "Anyone else concerned about what's happening at the old Helix BioPharma site? Multiple reports of safety corners being cut. Regulators need to look into this. 🚨",
+        "flagOnAsk": "seen_ev15_leadin"
+      }
+    ]
   }
 }

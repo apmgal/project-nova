@@ -1780,11 +1780,11 @@ export function computeEventQueue(waveId: string, state: GameState): string[] {
 
 /** The actual scene id to enter for a given queue slot — the event's own
  * synthesized scene (see synthesizeEventScene in data.ts), unless it has a
- * precedingDialogueId, in which case its synthesized lead-in scene plays
- * first (see synthesizeEventFrameScene). */
+ * precedingDialogueId OR a leadInPanelId, in which case its synthesized
+ * lead-in scene plays first (see synthesizeEventFrameScene). */
 export function resolveEventQueueEntryScene(eventId: string): string {
   const event = getEvent(eventId);
-  return event?.precedingDialogueId ? `${eventId}${EVENT_FRAME_SUFFIX}` : eventId;
+  return event?.precedingDialogueId || event?.leadInPanelId ? `${eventId}${EVENT_FRAME_SUFFIX}` : eventId;
 }
 
 /** True when `state.currentScene` is exactly the queue's current entry's

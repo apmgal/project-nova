@@ -200,7 +200,7 @@
     "choicesId": "CHOICE_EV-02",
     "dialogueId": "DIALOGUE_EV-02",
     "engineNote": "Impact should be softened if validation_risk_logged is true (set in ACT2_SCENE04), full severity if false/absent. NEW: if asked_validation_impact is false/absent, apply an EXTRA +5 riskExposure on top of the chosen option's normal effects. NEW: option 3 ('Phase the fix around commissioning') requires asked_validation_mitigation to be true to use its listed effects (scheduleHealth +5, regulatoryReadiness -10, camilleTrust -10) \u2014 if false/absent, this option's effects become scheduleHealth -5, regulatoryReadiness -20, camilleTrust -15 instead (the parallel-validation workaround Camille mentioned was never actually planned for, so phasing it in causes more damage).",
-    "precedingDialogueId": "DIALOGUE_REVISITED_VALIDATION"
+    "leadInPanelId": "EV02_LEADIN"
   },
   "EV-03": {
     "eventId": "EV-03",
@@ -295,7 +295,7 @@
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "choicesId": "CHOICE_EV-06",
     "dialogueId": "DIALOGUE_EV-06",
-    "precedingDialogueId": "DIALOGUE_REVISITED_CONTRACTOR",
+    "leadInPanelId": "EV06_LEADIN",
     "engineNote": "Existing severity/softening logic from contractor_risk_logged is unchanged. NEW: if asked_contractor_impact is false/absent, apply an EXTRA +5 riskExposure on top of whatever the chosen EV-06 option's normal effects are (player under-prepared for the true scale). NEW: option 2 ('Absorb via the secondary supplier already on the Risk Register') requires asked_contractor_mitigation to be true to use its listed mild effects (scheduleHealth -3, budgetRemaining -100000) \u2014 if that flag is false/absent, this option's effects become scheduleHealth -12, budgetRemaining -350000 instead (the backup was never actually confirmed, so 'absorbing via secondary supplier' turns into an improvised emergency scramble instead)."
   },
   "EV-06-RAID": {
@@ -533,7 +533,8 @@
     "designTag": "Standard",
     "section": "RETAINED FROM v1 (Main Act 4 Wave)",
     "choicesId": "CHOICE_EV-15",
-    "dialogueId": "DIALOGUE_EV-15"
+    "dialogueId": "DIALOGUE_EV-15",
+    "leadInPanelId": "EV15_LEADIN"
   },
   "EV-E1": {
     "eventId": "EV-E1",

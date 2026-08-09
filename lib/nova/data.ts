@@ -139,34 +139,41 @@ function synthesizeEventScene(eventId: string): Scene | null {
   };
 }
 
-/** The synthesized lead-in beat for an event with a precedingDialogueId —
- * see EVENT_FRAME_SUFFIX. Its nextScenes can be a plain static pointer
- * (unlike the real event scene's) since "after the lead-in comes the
- * event itself" is always true, never queue-dependent. */
+/** The synthesized lead-in beat for an event with EITHER a
+ * precedingDialogueId OR a leadInPanelId — see EVENT_FRAME_SUFFIX. Its
+ * nextScenes can be a plain static pointer (unlike the real event scene's)
+ * since "after the lead-in comes the event itself" is always true, never
+ * queue-dependent. The two lead-in kinds are mutually exclusive
+ * (precedingDialogueId takes priority if an event somehow has both, which
+ * no authored event currently does — see EventEntry.leadInPanelId). */
 function synthesizeEventFrameScene(eventId: string): Scene | null {
   const event = getEvent(eventId);
-  if (!event?.precedingDialogueId) return null;
-  return {
+  if (!event || (!event.precedingDialogueId && !event.leadInPanelId)) return null;
+  // No "— lead-in" suffix — that was internal/authoring language leaking
+  // into the player-facing header. Same teaser-first title as the real
+  // event scene (see synthesizeEventScene) since the whole point of a
+  // lead-in is that the player doesn't know yet which real event is about
+  // to unfold.
+  const title = event.teaserTitle ?? event.title;
+  const base = {
     sceneId: `${eventId}${EVENT_FRAME_SUFFIX}`,
-    // No "— lead-in" suffix — that was internal/authoring language
-    // leaking into the player-facing header. Same teaser-first title as
-    // the real event scene (see synthesizeEventScene) since the whole
-    // point of a lead-in is that the player doesn't know yet which real
-    // event is about to unfold.
-    title: event.teaserTitle ?? event.title,
+    title,
     act: "Act 4",
     location: null,
     charactersInvolved: event.participants ?? [],
-    dialogueId: event.precedingDialogueId,
     choicesId: null,
     nextScenes: [eventId],
   };
+  if (event.precedingDialogueId) {
+    return { ...base, dialogueId: event.precedingDialogueId, leadInPanelId: null };
+  }
+  return { ...base, dialogueId: null, leadInPanelId: event.leadInPanelId };
 }
 
 function isEventSceneId(sceneId: string): boolean {
   if (sceneId.endsWith(EVENT_FRAME_SUFFIX)) {
     const baseId = sceneId.slice(0, -EVENT_FRAME_SUFFIX.length);
-    return Boolean(events[baseId]?.precedingDialogueId);
+    return Boolean(events[baseId]?.precedingDialogueId) || Boolean(events[baseId]?.leadInPanelId);
   }
   return Boolean(events[sceneId]);
 }
