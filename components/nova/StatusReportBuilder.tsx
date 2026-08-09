@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { ArrowUp, ArrowDown, Minus, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { GameState, RagStatus, StatusReportRecord, ToolScreenBlock } from "@/lib/nova/types";
 import { computeActualStatusReport, computeWeeksRemaining } from "@/lib/nova/state";
 import { getToolScreen } from "@/lib/nova/data";
@@ -109,8 +109,8 @@ export default function StatusReportBuilder({
   onSubmitReport,
 }: StatusReportBuilderProps) {
   const hint = useConceptHint(pmConcept);
-  const riskSlotSeq = useRef(0);
   const [openRiskPicker, setOpenRiskPicker] = useState<string | null>(null);
+  const maxRiskSlots = toolScreen.maxRiskSlots ?? 4;
 
   const [overall, setOverall] = useState<RagStatus | null>(null);
   const [dims, setDims] = useState<Record<DimensionKey, RagStatus | null>>({
@@ -119,7 +119,19 @@ export default function StatusReportBuilder({
     resource: null,
     milestone: null,
   });
-  const [riskSlots, setRiskSlots] = useState<RiskSlotDraft[]>([]);
+  // Fixed-length, always maxRiskSlots rows — the player fills in whichever
+  // ones they want to report on (a blank row is simply skipped at submit
+  // time), rather than starting empty and growing via an "Add risk"
+  // action. Matches the approved mockup, which always shows all 4 slots.
+  const [riskSlots, setRiskSlots] = useState<RiskSlotDraft[]>(() =>
+    Array.from({ length: maxRiskSlots }, (_, i) => ({
+      key: `slot_${i}`,
+      riskId: null,
+      mitigationText: "",
+      rag: null,
+      outlook: "stable" as Outlook,
+    }))
+  );
   const [accomplishments, setAccomplishments] = useState<Set<string>>(new Set());
   const [activities, setActivities] = useState<Set<string>>(new Set());
 
@@ -153,31 +165,10 @@ export default function StatusReportBuilder({
   ];
   const activityCandidates = toolScreen.upcomingActivityCandidates ?? [];
 
-  const maxRiskSlots = toolScreen.maxRiskSlots ?? 4;
   const usedRiskIds = new Set(riskSlots.map((s) => s.riskId).filter((id): id is string => id !== null));
-  const availableRisks = risks.filter((r) => !usedRiskIds.has(r.riskId));
-
-  function addRiskSlot() {
-    if (riskSlots.length >= maxRiskSlots || availableRisks.length === 0) return;
-    riskSlotSeq.current += 1;
-    setRiskSlots((prev) => [
-      ...prev,
-      {
-        key: `slot_${riskSlotSeq.current}`,
-        riskId: availableRisks[0].riskId,
-        mitigationText: "",
-        rag: null,
-        outlook: "stable",
-      },
-    ]);
-  }
 
   function updateRiskSlot(key: string, patch: Partial<RiskSlotDraft>) {
     setRiskSlots((prev) => prev.map((s) => (s.key === key ? { ...s, ...patch } : s)));
-  }
-
-  function removeRiskSlot(key: string) {
-    setRiskSlots((prev) => prev.filter((s) => s.key !== key));
   }
 
   function toggleInSet(set: Set<string>, id: string, setter: (next: Set<string>) => void) {
@@ -193,7 +184,15 @@ export default function StatusReportBuilder({
   function handleReset() {
     setOverall(null);
     setDims({ budget: null, scope: null, resource: null, milestone: null });
-    setRiskSlots([]);
+    setRiskSlots(
+      Array.from({ length: maxRiskSlots }, (_, i) => ({
+        key: `slot_${i}`,
+        riskId: null,
+        mitigationText: "",
+        rag: null,
+        outlook: "stable" as Outlook,
+      }))
+    );
     setAccomplishments(new Set());
     setActivities(new Set());
   }
@@ -398,10 +397,10 @@ export default function StatusReportBuilder({
             <table className="w-full min-w-0 border-collapse text-[10.5px]" style={{ tableLayout: "fixed" }}>
               <thead>
                 <tr>
-                  <th className={BAR_CLASS} style={{ width: "26%", border: `1px solid ${LINE}`, textAlign: "left" }}>
+                  <th className={BAR_CLASS} style={{ width: "28%", border: `1px solid ${LINE}`, textAlign: "left" }}>
                     Risk
                   </th>
-                  <th className={BAR_CLASS} style={{ width: "35%", border: `1px solid ${LINE}`, textAlign: "left" }}>
+                  <th className={BAR_CLASS} style={{ width: "37%", border: `1px solid ${LINE}`, textAlign: "left" }}>
                     Mitigation actions
                   </th>
                   <th
@@ -413,16 +412,15 @@ export default function StatusReportBuilder({
                       Tap the box to change colour.
                     </span>
                   </th>
-                  <th className={BAR_CLASS} style={{ width: "16%", border: `1px solid ${LINE}`, textAlign: "center" }}>
+                  <th className={BAR_CLASS} style={{ width: "18%", border: `1px solid ${LINE}`, textAlign: "center" }}>
                     Outlook
                   </th>
-                  <th className={BAR_CLASS} style={{ width: "6%", border: `1px solid ${LINE}` }} />
                 </tr>
               </thead>
               <tbody>
                 {riskSlots.map((slot) => {
                   const slotOptions = risks.filter((r) => r.riskId === slot.riskId || !usedRiskIds.has(r.riskId));
-                  const selectedTitle = risks.find((r) => r.riskId === slot.riskId)?.title ?? "Select a risk";
+                  const selected = risks.find((r) => r.riskId === slot.riskId);
                   const pickerOpen = openRiskPicker === slot.key;
                   return (
                     <tr key={slot.key}>
@@ -430,10 +428,12 @@ export default function StatusReportBuilder({
                         <button
                           type="button"
                           onClick={() => setOpenRiskPicker(pickerOpen ? null : slot.key)}
-                          className="w-full text-left text-[10.5px] leading-snug text-[#333] hover:text-[#1f3864]"
+                          className={`w-full text-left text-[10.5px] leading-snug hover:text-[#1f3864] ${
+                            selected ? "text-[#333]" : "text-[#999]"
+                          }`}
                           style={{ whiteSpace: "normal", wordBreak: "break-word" }}
                         >
-                          {selectedTitle}
+                          {selected ? selected.title : "Select a risk"}
                         </button>
                         {pickerOpen && (
                           <>
@@ -444,6 +444,16 @@ export default function StatusReportBuilder({
                               className="fixed inset-0 z-10 cursor-default"
                             />
                             <div className="absolute left-0 top-full z-20 mt-1 w-56 max-w-[80vw] rounded border border-[#c9c9c9] bg-white shadow-lg">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateRiskSlot(slot.key, { riskId: null });
+                                  setOpenRiskPicker(null);
+                                }}
+                                className="block w-full px-2 py-1.5 text-left text-[10.5px] italic leading-snug text-[#999] hover:bg-[#eef0f2]"
+                              >
+                                — none —
+                              </button>
                               {slotOptions.map((r) => (
                                 <button
                                   key={r.riskId}
@@ -506,39 +516,9 @@ export default function StatusReportBuilder({
                           </button>
                         </div>
                       </td>
-                      <td style={{ border: `1px solid ${LINE}`, padding: "7px 8px", textAlign: "center" }}>
-                        <button
-                          type="button"
-                          onClick={() => removeRiskSlot(slot.key)}
-                          aria-label="Remove risk"
-                          className="text-[#999] hover:text-[#df4a3d]"
-                        >
-                          <X size={13} />
-                        </button>
-                      </td>
                     </tr>
                   );
                 })}
-                <tr>
-                  <td
-                    colSpan={5}
-                    style={{ border: `1px solid ${LINE}`, padding: "7px 8px", textAlign: "center", color: "#888" }}
-                  >
-                    {riskSlots.length < maxRiskSlots && availableRisks.length > 0 ? (
-                      <button
-                        type="button"
-                        onClick={addRiskSlot}
-                        className="inline-flex items-center gap-1 text-[11px] text-[#666] hover:text-[#1f3864]"
-                      >
-                        <Plus size={12} /> Add risk ({riskSlots.length} of {maxRiskSlots} slots used)
-                      </button>
-                    ) : (
-                      <span className="text-[11px]">
-                        {riskSlots.length} of {maxRiskSlots} slots used
-                      </span>
-                    )}
-                  </td>
-                </tr>
               </tbody>
             </table>
 
