@@ -500,64 +500,6 @@
     ],
     "needsWriting": false
   },
-  "CHOICE_ACT4_SCENE05_M1": {
-    "choiceId": "CHOICE_ACT4_SCENE05_M1",
-    "sourceScene": "ACT4_SCENE05",
-    "options": [
-      {
-        "text": "Everything's on track.",
-        "effects": {
-          "honestyTone": "optimistic"
-        },
-        "nextScene": "ACT4_SCENE05B"
-      },
-      {
-        "text": "There are risks, but nothing critical yet.",
-        "effects": {
-          "honestyTone": "measured"
-        },
-        "nextScene": "ACT4_SCENE05B"
-      },
-      {
-        "text": "I need to flag something serious.",
-        "effects": {
-          "honestyTone": "transparent"
-        },
-        "nextScene": "ACT4_SCENE05B"
-      }
-    ],
-    "needsWriting": false,
-    "engineNote": "marcusTrust delta is NOT fixed per option — compare honestyTone against the ACTUAL riskExposure/scheduleHealth/budgetRemaining state at report time. If 'optimistic' or 'measured' is chosen while true state is bad (e.g. riskExposure > 60 or scheduleHealth < 40), set flag hid_problem_from_marcus=true and apply the marcusTrust penalty at the NEXT report, not this one (delayed feedback, by design). If the report accurately reflects trouble, apply a small immediate marcusTrust gain instead and do not set the flag."
-  },
-  "CHOICE_ACT4_SCENE05_M2": {
-    "choiceId": "CHOICE_ACT4_SCENE05_M2",
-    "sourceScene": "ACT4_SCENE05B",
-    "options": [
-      {
-        "text": "Everything's on track.",
-        "effects": {
-          "honestyTone": "optimistic"
-        },
-        "nextScene": "ACT4_SCENE05C"
-      },
-      {
-        "text": "There are risks, but nothing critical yet.",
-        "effects": {
-          "honestyTone": "measured"
-        },
-        "nextScene": "ACT4_SCENE05C"
-      },
-      {
-        "text": "I need to flag something serious.",
-        "effects": {
-          "honestyTone": "transparent"
-        },
-        "nextScene": "ACT4_SCENE05C"
-      }
-    ],
-    "needsWriting": false,
-    "engineNote": "marcusTrust delta is NOT fixed per option — compare honestyTone against the ACTUAL riskExposure/scheduleHealth/budgetRemaining state at report time. If 'optimistic' or 'measured' is chosen while true state is bad (e.g. riskExposure > 60 or scheduleHealth < 40), set flag hid_problem_from_marcus=true and apply the marcusTrust penalty at the NEXT report, not this one (delayed feedback, by design). If the report accurately reflects trouble, apply a small immediate marcusTrust gain instead and do not set the flag."
-  },
   "CHOICE_EV-02": {
     "choiceId": "CHOICE_EV-02",
     "sourceScene": "EV-02",

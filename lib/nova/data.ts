@@ -36,17 +36,19 @@ import type {
 // Currently: the Opening Curveball Wave (ACT4_SCENE01 + its Ellis Fragment
 // #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), THE BIG
 // CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"), and
-// the Main Curveball Wave (ACT4_SCENE04) and Late Curveball Wave
-// (ACT4_SCENE06), both using the Event Library checkpoint system (see
-// EVENT_WAVE_MEMBERS/computeEventQueue in state.ts, and
-// Scene.eventWaveId/getEvent below), and the Monthly Status Reports
-// (ACT4_SCENE05/05B/05C), which use the honesty-vs-actual-state
-// delayed-consequence mechanic (applyHonestyReport/
-// applyDeferredHonestyPenalty in state.ts). That's the whole of Act 4 as
-// currently written — ACT4_SCENE06's own nextScenes points at
-// ACT5_SCENE01, which isn't part of any BUILT_ACTS/OVERRIDES entry, so
-// reaching the end of the Late Wave's queue correctly shows end-of-built-
-// content rather than a broken scene, exactly like every other staged
+// four Event Library checkpoint waves (see EVENT_WAVE_MEMBERS/
+// GAP_WAVE_SPECS/computeEventQueue in state.ts, and Scene.eventWaveId/
+// getEvent below) interleaved with three real Monthly Status Report tool
+// screens (ACT4_SCENE05/05B/05C, all the same StatusReportBuilder
+// component) — ACT4_SCENE04 (MAIN_WAVE) before report #1, ACT4_SCENE05_MID
+// (MID_WAVE_1) between reports #1/#2, ACT4_SCENE05B_MID (MID_WAVE_2, plus
+// the EV-06 RAID follow-up) between reports #2/#3, and ACT4_SCENE06 as a
+// pure post-report-#3 transition with no event wave of its own anymore —
+// see the "Act 4 event redistribution" entry in DESIGN_NOTES.md for why.
+// That's the whole of Act 4 as currently written — ACT4_SCENE06's own
+// nextScenes points at ACT5_SCENE01, which isn't part of any BUILT_ACTS/
+// OVERRIDES entry, so reaching it correctly shows end-of-built-content
+// rather than a broken scene, exactly like every other staged
 // boundary in this build.
 // ---------------------------------------------------------------------------
 
@@ -59,7 +61,9 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT4_SCENE03",
   "ACT4_SCENE04",
   "ACT4_SCENE05",
+  "ACT4_SCENE05_MID",
   "ACT4_SCENE05B",
+  "ACT4_SCENE05B_MID",
   "ACT4_SCENE05C",
   "ACT4_SCENE06",
 ]);
@@ -127,6 +131,10 @@ function synthesizeEventScene(eventId: string): Scene | null {
     charactersInvolved: event.participants ?? [],
     dialogueId: event.dialogueId ?? null,
     choicesId: event.choicesId ?? null,
+    // See EventEntry.toolId — lets a queued event carry a real tool screen
+    // (currently just "EV-06-RAID", the RAID mini-artefact follow-up)
+    // instead of only ever dialogue/choices.
+    toolId: event.toolId ?? null,
     nextScenes: [],
   };
 }

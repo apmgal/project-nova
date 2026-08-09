@@ -414,6 +414,14 @@ export interface EventEntry {
    * lib/nova/data.ts) — e.g. reopening an artefact/thread from an earlier
    * act before the event's own content plays. Absent for most events. */
   precedingDialogueId?: string;
+  /** A tool_screens.json entry to show for this event, exactly like
+   * Scene.toolId — see synthesizeEventScene in data.ts, which passes this
+   * straight through so a queued event can carry a real interactive tool
+   * (not just dialogue/choices). Currently only used by "EV-06-RAID", the
+   * RAID mini-artefact follow-up spliced directly after EV-06 in
+   * MID_WAVE_2 — see the "Act 4 event redistribution" entry in
+   * DESIGN_NOTES.md. */
+  toolId?: string;
 }
 
 export interface Character {
@@ -645,6 +653,26 @@ export interface ToolScreenBlock {
    * data exists. */
   upcomingActivityCandidates?: StatusReportChecklistItem[];
   maxRiskSlots?: number;
+
+  // raid_update_card (RAID lifecycle mini-artefact — e.g. the EV-06
+  // electrical-contractor follow-up). Deliberately tiny: one risk, a
+  // status readout, and three player-made calls — the whole point is
+  // being a real (if small) interaction rather than a dialogue choice
+  // wearing a RAID-log hat. See RaidUpdateCard.tsx and the "Act 4 event
+  // redistribution" entry in DESIGN_NOTES.md.
+  /** Flag-key prefix used to persist this card's choices (e.g. "raid_ev06"
+   * -> decisions.raid_ev06_owner / decisions.raid_ev06_response /
+   * flags.raid_ev06_escalated). */
+  raidKey?: string;
+  /** The risk's pre-materialisation label, as already shown in the status
+   * report's risk picker (see REPORTABLE_RISK_CATALOG) — shown struck
+   * through/superseded by raidIssueLabel on submit. */
+  raidRiskLabel?: string;
+  /** The same risk's post-materialisation label — what it reads as an
+   * Issue from this point on. */
+  raidIssueLabel?: string;
+  raidOwnerOptions?: string[];
+  raidResponseOptions?: string[];
 
   onComplete: {
     nextScene: string;

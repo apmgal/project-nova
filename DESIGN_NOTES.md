@@ -638,3 +638,170 @@ already an explicit data field (`ReportableRisk.status: "risk" |
 "issue"`), not just a display-label difference — this was raised as a
 future to-do during design review but the current `computeKnownReportableRisks`
 implementation already does it.
+
+## Act 4 event redistribution — Report #1 playtested, building step 6
+
+**Status:** Implemented. Report #1 (`ACT4_SCENE05`) was played and
+approved as-is before this work started — this entry covers what
+changed *around* it, not report #1 itself. Reached through several
+rounds of design review, not decided unilaterally; the review process
+itself is worth recording briefly because it caught a real structural
+problem the file contents alone didn't make obvious: the original plan
+(see the "Act 4 roadmap, steps 6–8" entry above) assumed BIG-01 sits
+*between* Report 1 and Report 2. Reading `scenes.json` showed the
+opposite — BIG-01 and the entire old Main Wave (13 events) already fire
+*before* Report 1, and Reports 2/3 (`ACT4_SCENE05B`/`05C`) were
+back-to-back placeholder "bridge" scenes still running the old
+honesty-choice mechanic (`CHOICE_ACT4_SCENE05_M2`,
+`hid_problem_from_marcus`) that predates the real report builder.
+Decision: leave BIG-01 where it is (Report 1 already played well
+downstream of it) and fix the *event distribution* instead.
+
+**The core problem with the old structure:** one giant wave dumped
+almost every risk-catalog event before Report 1, then two reports with
+zero events between them. That's the opposite of a recurring
+governance heartbeat — it's "one big dump, then three isolated
+exercises." The fix reframes each inter-report gap as its own project
+period with a narrow narrative question, not a bucket to redistribute
+existing content evenly into.
+
+**The four periods, and what question each report should capture:**
+
+- **Group 1 — BIG-01 → Report 1.** Only `EV-NP2` (the two-product
+  validation-capacity no-perfect-answer beat, gated on "fires only
+  after BIG-01" — effectively guaranteed) and `EV-R2` (the deferred-
+  decision payoff, explicitly about absorbing BIG-01's re-scoping) fire
+  here — both are direct, immediate consequences of BIG-01 itself, not
+  general Act 4 texture. Report 1's question: *"The project has just
+  fundamentally changed. What do you now tell leadership?"* `EV-11`
+  (MHRA guidance) and `EV-03` (resident complaints), originally slated
+  for this group, moved to Group 2 — they're not BIG-01 consequences
+  and diluted that question.
+- **Group 2 — Report 1 → Report 2 (`MID_WAVE_1`).** The project trying
+  to operate under the new reality: conflicting evidence, not just more
+  bad news. Substantive pool `EV-02, EV-13, EV-04, EV-08, EV-05, EV-11,
+  EV-03` (7 events), capped to 2 per playthrough; reversal pool
+  `EV-R1, EV-R3, EV-R4` (the three "was that decision actually bad?"
+  beats), capped to 1. `EV-02`/`EV-05` (cleanroom failure /
+  contamination) are both quality-regulatory and would read as
+  repetitive if drawn together, so they're explicitly mutually
+  exclusive within one draw.
+- **Group 3 — Report 2 → Report 3 (`MID_WAVE_2`).** Where the RAID
+  lifecycle beat lives. Anchor: `EV-06` (electrical contractor — has
+  Act 2 pre-discovery evidence, so it's shown as a known "risk" since
+  Report 1/2 and materialises here), immediately followed by a small
+  RAID mini-artefact interaction (see below) if it fires. Substantive
+  pool `EV-15, EV-14, EV-10` (social-media pressure, validation
+  engineer poached — continuing the EV-NP2 thread from Group 1 —,
+  contingency freeze), capped to 2. A separate single-slot "final
+  shock" pick, capped to 1, from `{EV-09, EV-07}` — cyberattack or key-
+  engineer resignation, whichever's eligible, never both. Report 3's
+  question: *"This is what the project formally says immediately
+  before inspection"* — deliberately the last operational pressure
+  before that report, not after it, so nothing materially important
+  happens post-Report-3 that the record doesn't capture.
+- **Group 4 — after Report 3.** `ACT4_SCENE06` keeps its existing
+  Ellis-fragment/transition content and leads straight into Act 5 —
+  it no longer carries an `eventWaveId` at all, since every event
+  formerly in the old `LATE_WAVE` has been redistributed into Groups
+  1–3 above. All 18 original events (13 old `MAIN_WAVE` + 5 old
+  `LATE_WAVE`) are accounted for across the four groups — 2 + 10 + 6 =
+  18, nothing dropped, nothing duplicated.
+
+**Anti-starvation mechanism (the one real engineering addition here):**
+capped selection from a fixed-order pool risks the same failure mode
+as the old single-wave design at a smaller scale — if the first two
+declared substantive events are commonly eligible, the rest could
+become dead content nobody ever sees across many playthroughs.
+Deliberately not solved with RNG (nothing else in this engine uses
+randomness, and reproducibility matters for testing/debugging a save).
+Instead: the pool is rotated by a state-derived seed before capping —
+`rotationSeed = round(riskExposure) + round(budgetRemaining / 10000) +
+eventsResolved.length`, `offset = rotationSeed % eligiblePool.length`.
+Same save state always produces the same selection (deterministic,
+testable), but different playthroughs — which necessarily have
+different metric/history values by the time they reach a given gap —
+rotate the starting point differently, so a later-declared event isn't
+structurally disadvantaged just for being declared later. Verified via
+a throwaway scripted check (written, run, deleted) that fed the
+selection function a spread of different synthetic metric states and
+logged how often each pool member got picked — confirmed no pool
+member was ever selected in 0 of the sampled states.
+
+**The RAID mini-artefact (`raid_update_card` tool type,
+`RaidUpdateCard.tsx`):** deliberately NOT a three-button dialogue
+choice — that was flagged in review as just "a RAID log wearing a
+dialogue hat," which is the exact problem this whole redesign is
+trying to move Act 4 away from. It's a small reusable card with real
+fields: Risk name, a Status readout (`Risk → ISSUE`, shown as a state
+change rather than a choice), Owner (pick), Response (pick), Escalate
+(Y/N), Submit. Wired as its own queued-event scene (`EV-06-RAID`,
+spliced directly after `EV-06` in the `MID_WAVE_2` queue whenever
+`EV-06` itself fires — not independently eligibility-gated, since its
+whole premise is "this follows the contractor risk materialising", not
+an unrelated trigger condition). Technically this required teaching
+`synthesizeEventScene` to pass through an event's `toolId` (previously
+only `dialogueId`/`choicesId`), since queued-event scenes had never
+carried a tool screen before. Follows `StatusReportBuilder`'s existing
+"self-contained local state, own Submit gating, custom `onSubmit`
+prop" pattern rather than the generic `toolProgress`/`computeToolComplete`
+path — same reason StatusReportBuilder does: there's no single
+placement-style completion condition to check. Owner/Response are
+written to `GameState.decisions` (`raid_ev06_owner`, `raid_ev06_response`);
+Escalate to a boolean flag (`raid_ev06_escalated`). No numeric metric
+effects on submit — deliberately inert for v1, a hook for later rather
+than a scored decision, so the beat stays about governance discipline
+rather than becoming another effects-bearing choice to min-max.
+
+**Technical catch fixed as part of this, not after:** `computeActiveRisks`
+(the hidden truth engine's own event pool, feeding
+`ActualStatusReport`/the Act 5 "what you said vs. what was true" data)
+previously read `[...EVENT_WAVE_MEMBERS.MAIN_WAVE,
+...EVENT_WAVE_MEMBERS.LATE_WAVE]` directly. Splitting the waves without
+updating this would have silently dropped every Group 2/3 event from
+the hidden truth engine. Replaced with a single derived
+`ALL_ACT4_EVENT_IDS` list covering `MAIN_WAVE` plus every id across
+both `GAP_WAVE_SPECS` entries (anchor + substantive + reversals +
+finalShock, excluding the non-risk `EV-06-RAID` follow-up id) — one
+source of list, so a future Group 5 or pool change can't drift out of
+sync with the hidden truth engine again.
+
+**Timing-phrase rule (documented, not code-enforced):** event-wave
+group progression (1→2→3→4) is narrative-phase driven — which
+governance period a beat lands in — not tied to the live `currentWeek`
+forecast HUD value. Each report's own displayed "Week N" stays the
+already-fixed `WEEKS_PER_REPORT`-derived real elapsed time. Individual
+event copy should never name an exact week number relative to a fixed
+anchor (e.g. "a week before commissioning") unless that number is
+guaranteed consistent with whatever week the HUD is actually showing
+at that point, which it generally isn't once `scheduleHealth` has
+drifted. Checked all existing Act 4 dialogue for this before writing
+new content — the only offending phrase was in `EV-14`'s **events.json
+`description`** field (dev-facing design summary, not player-facing
+`DIALOGUE_EV-14` content, which was already phase-relative with no
+week reference at all) — softened to "with commissioning approaching."
+No player-facing dialogue needed changing. All new dialogue written for
+this feature (the two transition scenes, the RAID beat, rebuilt
+05B/05C) uses phase-relative language throughout (e.g. "weeks pass",
+"the picture is more visible than it was a month ago") rather than
+exact week numbers, by rule, to avoid reintroducing this problem later.
+
+**Old honesty mechanic removed, not left dangling:** `ACT4_SCENE05B`/
+`05C` are now real `status_report_builder` tool screens (reusing
+`StatusReportBuilder.tsx` — same component, different `tool_screens.json`
+data, per the "reuse, don't rebuild" instruction). `CHOICE_ACT4_SCENE05_M2`
+and the `hid_problem_from_marcus`/`honestyTone` mechanic it drove are
+removed from `choices.json`/`dialogue.json` outright — redundant and
+potentially contradictory now that the player is filling in real
+Budget/Scope/Resource/Milestone RAGs and risk rows directly, per
+explicit instruction not to run two reporting systems at once.
+
+**Follow-ups deliberately not built now (same "don't solve a problem
+you haven't observed yet" principle used elsewhere in this file):** no
+metric effects on the RAID card submit; no closed/mitigated lifecycle
+stage yet (still the open item from the steps 6–8 entry above — this
+RAID beat only takes a risk from `risk`→`issue`, same as before, it
+just does it through a real interaction now instead of an automatic
+flip); Group 2/3 pool membership and caps are a first pass, not
+validated by an actual full playthrough yet — that's the explicit next
+step after this build, not a further design pass.

@@ -822,7 +822,77 @@
     "completionCondition": "Overall status and all four RAG dimensions chosen (risks/accomplishments/upcoming activities are optional)",
     "note": "Upcoming Milestones and completed-milestone accomplishment candidates are both derived at render time from TOOL_ACT3_SCENE04_MILESTONES's real placements (see ganttToolId) split against the current week -- never hardcoded here. Upcoming Activities is likewise derived at render time: for each Gantt milestone in progress or starting within upcomingActivityWindowWeeks of the current week, its individual WBS task cards (see wbsToolId, matched by milestone.wbsCategory == card.correctBucket) become separate checkable activity items -- a finer-grained, real, near-term breakdown rather than the milestone's own single headline title. upcomingActivityCandidates is a fallback only, shown if that real data produces nothing (e.g. before any milestone has been placed). See StatusReportBuilder.tsx.",
     "onComplete": {
-      "nextScene": "ACT4_SCENE05B"
+      "nextScene": "ACT4_SCENE05_MID"
+    }
+  },
+  "TOOL_ACT4_SCENE05B_STATUS_REPORT": {
+    "toolId": "TOOL_ACT4_SCENE05B_STATUS_REPORT",
+    "sourceScene": "ACT4_SCENE05B",
+    "type": "status_report_builder",
+    "instructions": "Fill out this period's Status Report. Ratings, risks, and evidence are your own call — nothing here is pre-filled or graded for you.",
+    "ganttToolId": "TOOL_ACT3_SCENE04_MILESTONES",
+    "wbsToolId": "TOOL_ACT3_SCENE01_WBS",
+    "upcomingActivityWindowWeeks": 4,
+    "projectManagerLabel": "You",
+    "projectSponsorLabel": "Mike Elloian",
+    "taxTower": "Governance, Digital and Change",
+    "projectDescription": "Helix BioPharma's fill-finish suite, now scoped for two products following the Board's acquisition. Scope covers construction, utilities and equipment installation, and full process validation for both lines, delivered against the re-baselined plan.",
+    "accomplishmentCandidates": [],
+    "upcomingActivityCandidates": [
+      {
+        "id": "act_fallback_general",
+        "text": "Review outstanding actions from the last report"
+      }
+    ],
+    "maxRiskSlots": 4,
+    "completionCondition": "Overall status and all four RAG dimensions chosen (risks/accomplishments/upcoming activities are optional)",
+    "note": "Same real-data derivation as TOOL_ACT4_SCENE05_STATUS_REPORT -- see its own note. accomplishmentCandidates is deliberately empty here (no hand-authored items for report 2): every accomplishment candidate comes from real completed Gantt milestones by this point in the playthrough, matching the 'reflects what actually happened' principle rather than restating report 1's own authored list.",
+    "onComplete": {
+      "nextScene": "ACT4_SCENE05B_MID"
+    }
+  },
+  "TOOL_ACT4_SCENE05C_STATUS_REPORT": {
+    "toolId": "TOOL_ACT4_SCENE05C_STATUS_REPORT",
+    "sourceScene": "ACT4_SCENE05C",
+    "type": "status_report_builder",
+    "instructions": "Fill out this period's Status Report — the last one before Inspector Whitfield's visit. Ratings, risks, and evidence are your own call — nothing here is pre-filled or graded for you.",
+    "ganttToolId": "TOOL_ACT3_SCENE04_MILESTONES",
+    "wbsToolId": "TOOL_ACT3_SCENE01_WBS",
+    "upcomingActivityWindowWeeks": 4,
+    "projectManagerLabel": "You",
+    "projectSponsorLabel": "Mike Elloian",
+    "taxTower": "Governance, Digital and Change",
+    "projectDescription": "Helix BioPharma's fill-finish suite, pre-inspection. Scope covers construction, utilities and equipment installation, and full process validation for both lines, delivered against the re-baselined plan.",
+    "accomplishmentCandidates": [],
+    "upcomingActivityCandidates": [
+      {
+        "id": "act_fallback_general",
+        "text": "Review outstanding actions from the last report"
+      }
+    ],
+    "maxRiskSlots": 4,
+    "completionCondition": "Overall status and all four RAG dimensions chosen (risks/accomplishments/upcoming activities are optional)",
+    "note": "Same real-data derivation as TOOL_ACT4_SCENE05_STATUS_REPORT -- see its own note. This is the last report before Inspector Whitfield's Act 5 audit -- see the 'Act 4 event redistribution' entry in DESIGN_NOTES.md for why nothing operationally significant happens after this report.",
+    "onComplete": {
+      "nextScene": "ACT4_SCENE06"
+    }
+  },
+  "TOOL_EV-06-RAID_CARD": {
+    "toolId": "TOOL_EV-06-RAID_CARD",
+    "sourceScene": "EV-06-RAID",
+    "type": "raid_update_card",
+    "instructions": "Update the RAID log. This isn't scored — it's a record.",
+    "raidKey": "raid_ev06",
+    "raidRiskLabel": "Electrical contractor financial instability",
+    "raidIssueLabel": "Electrical contractor insolvency — replacement required",
+    "raidOwnerOptions": ["You", "Camille", "Procurement (Daniel)"],
+    "raidResponseOptions": [
+      "Emergency re-tender",
+      "Activate the secondary supplier on the Risk Register",
+      "Delay dependent work and reassess"
+    ],
+    "onComplete": {
+      "nextScene": "ACT4_SCENE05B_MID"
     }
   }
 }

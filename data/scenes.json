@@ -729,10 +729,36 @@
       "previousScene": "ACT4_SCENE04"
     },
     "nextScenes": [
-      "ACT4_SCENE05B"
+      "ACT4_SCENE05_MID"
     ],
     "needsWriting": false,
     "toolId": "TOOL_ACT4_SCENE05_STATUS_REPORT"
+  },
+  "ACT4_SCENE05_MID": {
+    "sceneId": "ACT4_SCENE05_MID",
+    "title": "Between Reports — Month 1 to 2",
+    "act": "Act 4",
+    "screenRange": "bridge",
+    "screenType": "Curveball / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Applied risk, stakeholder, procurement & communications management",
+    "contentSummary": "The project operating under the re-scoped reality — a capped, rotated selection from MID_WAVE_1, not the whole pool.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Multiple — see Tab 5"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE05_MID",
+    "choicesId": null,
+    "eventWaveId": "MID_WAVE_1",
+    "trigger": {
+      "previousScene": "ACT4_SCENE05"
+    },
+    "nextScenes": [
+      "ACT4_SCENE05B"
+    ],
+    "needsWriting": false,
+    "note": "Non-canonical bridge scene — see the “Act 4 event redistribution” entry in DESIGN_NOTES.md."
   },
   "ACT4_SCENE06": {
     "sceneId": "ACT4_SCENE06",
@@ -745,7 +771,7 @@
       "ellis"
     ],
     "pmConcept": "Crisis decision-making under constraint",
-    "contentSummary": "Final pressure events before commissioning; third Ellis Grant fragment.",
+    "contentSummary": "No operational pressure left to resolve — every event formerly here now lands before Report 3 instead (see the Act 4 event redistribution entry in DESIGN_NOTES.md). Pure transition beat: third Ellis Grant fragment, then Act 5.",
     "worldMemoryBeat": null,
     "variablesTouched": [
       "Risk Exposure",
@@ -753,9 +779,8 @@
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE06",
     "choicesId": null,
-    "eventWaveId": "LATE_WAVE",
     "trigger": {
-      "previousScene": "ACT4_SCENE05"
+      "previousScene": "ACT4_SCENE05C"
     },
     "nextScenes": [
       "ACT5_SCENE01"
@@ -1060,15 +1085,42 @@
       "Board Confidence"
     ],
     "dialogueId": "DIALOGUE_ACT4_SCENE05B",
-    "choicesId": "CHOICE_ACT4_SCENE05_M2",
+    "choicesId": null,
     "trigger": {
-      "previousScene": "ACT4_SCENE05"
+      "previousScene": "ACT4_SCENE05_MID"
+    },
+    "nextScenes": [
+      "ACT4_SCENE05B_MID"
+    ],
+    "needsWriting": false,
+    "toolId": "TOOL_ACT4_SCENE05B_STATUS_REPORT",
+    "note": "Non-canonical bridge scene \u2014 second monthly status report in the x3 sequence. Real status_report_builder tool screen (StatusReportBuilder.tsx, same component as report #1) since the Act 4 event redistribution \u2014 see DESIGN_NOTES.md. No longer uses the old honesty-choice mechanic."
+  },
+  "ACT4_SCENE05B_MID": {
+    "sceneId": "ACT4_SCENE05B_MID",
+    "title": "Between Reports \u2014 Month 2 to 3",
+    "act": "Act 4",
+    "screenRange": "bridge",
+    "screenType": "Curveball / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Applied risk, stakeholder, procurement & communications management",
+    "contentSummary": "The RAID materialisation window \u2014 EV-06 (+ its RAID follow-up if it fires), a capped substantive pool, and a single-slot final shock, ahead of the pre-inspection report.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Multiple \u2014 see Tab 5"
+    ],
+    "dialogueId": "DIALOGUE_ACT4_SCENE05B_MID",
+    "choicesId": null,
+    "eventWaveId": "MID_WAVE_2",
+    "trigger": {
+      "previousScene": "ACT4_SCENE05B"
     },
     "nextScenes": [
       "ACT4_SCENE05C"
     ],
     "needsWriting": false,
-    "note": "Non-canonical bridge scene \u2014 second/third monthly status report in the x3 sequence."
+    "note": "Non-canonical bridge scene \u2014 see the \u201cAct 4 event redistribution\u201d entry in DESIGN_NOTES.md."
   },
   "ACT4_SCENE05C": {
     "sceneId": "ACT4_SCENE05C",
@@ -1090,13 +1142,14 @@
     "dialogueId": "DIALOGUE_ACT4_SCENE05C",
     "choicesId": null,
     "trigger": {
-      "previousScene": "ACT4_SCENE05B"
+      "previousScene": "ACT4_SCENE05B_MID"
     },
     "nextScenes": [
       "ACT4_SCENE06"
     ],
     "needsWriting": false,
-    "note": "Non-canonical bridge scene \u2014 second/third monthly status report in the x3 sequence."
+    "toolId": "TOOL_ACT4_SCENE05C_STATUS_REPORT",
+    "note": "Non-canonical bridge scene \u2014 third/final monthly status report in the x3 sequence, and the last one before Inspector Whitfield's Act 5 audit. Real status_report_builder tool screen (StatusReportBuilder.tsx, same component as reports #1/#2) since the Act 4 event redistribution \u2014 see DESIGN_NOTES.md. No longer uses the old honesty-choice mechanic."
   },
   "ACT1_SCENE02B": {
     "sceneId": "ACT1_SCENE02B",

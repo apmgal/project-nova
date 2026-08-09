@@ -1889,30 +1889,58 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "A month later, less holds."
-      },
-      {
-        "speaker": "marcus",
-        "emotion": "frustrated",
-        "text": "I asked for one thing.",
-        "condition": "hid_problem_from_marcus"
-      },
-      {
-        "speaker": "narrator",
-        "emotion": null,
-        "text": "He doesn't raise his voice. He doesn't need to.",
-        "condition": "hid_problem_from_marcus"
-      },
-      {
-        "speaker": "marcus",
-        "emotion": "concerned",
-        "text": "Never mind. Just tell me now.",
-        "condition": "hid_problem_from_marcus"
+        "text": "Report two. More of the picture is visible now than it was a month ago — not all of it good."
       },
       {
         "speaker": "marcus",
         "emotion": "neutral",
         "text": "How's my project?"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player fills out the Status Report.]"
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT4_SCENE05_MID": {
+    "dialogueId": "DIALOGUE_ACT4_SCENE05_MID",
+    "sourceScene": "ACT4_SCENE05_MID",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Weeks pass. Under a plan that now covers two products instead of one, the pressure doesn't land evenly — some of it lands exactly where you'd expect, some of it doesn't."
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_ACT4_SCENE05B_MID": {
+    "dialogueId": "DIALOGUE_ACT4_SCENE05B_MID",
+    "sourceScene": "ACT4_SCENE05B_MID",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The pace doesn't let up. Some of what was only ever a line on a register months ago stops being theoretical."
+      }
+    ],
+    "needsWriting": false
+  },
+  "DIALOGUE_EV-06-RAID": {
+    "dialogueId": "DIALOGUE_EV-06-RAID",
+    "sourceScene": "EV-06-RAID",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The contractor risk stops being a line on the Risk Register. It's an issue now, and it needs a record, not just a reaction."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player updates the RAID log.]"
       }
     ],
     "needsWriting": false
@@ -1924,7 +1952,17 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "A third report follows before commissioning starts in earnest. By now, you've learned whether honesty costs you less than the alternative \u2014 or more."
+        "text": "A third report, and the project has history now \u2014 reports one and two are both still on file, whatever they said."
+      },
+      {
+        "speaker": "marcus",
+        "emotion": "neutral",
+        "text": "How's my project? Inspector Whitfield's going to ask the same question soon enough \u2014 I'd like our answers to match."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player fills out the Status Report.]"
       }
     ],
     "needsWriting": false

@@ -288,6 +288,25 @@
     "precedingDialogueId": "DIALOGUE_REVISITED_CONTRACTOR",
     "engineNote": "Existing severity/softening logic from contractor_risk_logged is unchanged. NEW: if asked_contractor_impact is false/absent, apply an EXTRA +5 riskExposure on top of whatever the chosen EV-06 option's normal effects are (player under-prepared for the true scale). NEW: option 2 ('Absorb via the secondary supplier already on the Risk Register') requires asked_contractor_mitigation to be true to use its listed mild effects (scheduleHealth -3, budgetRemaining -100000) — if that flag is false/absent, this option's effects become scheduleHealth -12, budgetRemaining -350000 instead (the backup was never actually confirmed, so 'absorbing via secondary supplier' turns into an improvised emergency scramble instead)."
   },
+  "EV-06-RAID": {
+    "eventId": "EV-06-RAID",
+    "title": "RAID Log — Electrical Contractor",
+    "act": "Act 4",
+    "trigger": "Follows EV-06 directly whenever it fires — spliced into the MID_WAVE_2 queue right after it, not independently eligibility-gated.",
+    "description": "The electrical contractor risk has materialised. The player updates the RAID log: owner, immediate response, and whether to escalate.",
+    "pmConcept": "RAID log discipline / issue ownership",
+    "impact": [],
+    "participants": [],
+    "possibleChoices": [
+      "Assign an owner",
+      "choose an immediate response",
+      "escalate or not"
+    ],
+    "designTag": "RAID mini-artefact — governance follow-up to EV-06, not a scored decision",
+    "section": "RAID / Change-Impact Beats",
+    "dialogueId": "DIALOGUE_EV-06-RAID",
+    "toolId": "TOOL_EV-06-RAID_CARD"
+  },
   "EV-07": {
     "eventId": "EV-07",
     "title": "Key Automation Engineer Resigns",
@@ -458,7 +477,7 @@
     "title": "Validation Engineer Poached by a Competitor",
     "act": "Act 4",
     "trigger": "Conditional (Team Morale < 50 OR Mike E. Trust Cold/Cool)",
-    "description": "An engineer is poached a week before commissioning.",
+    "description": "An engineer is poached with commissioning approaching.",
     "pmConcept": "Resourcing risk / succession planning",
     "impact": [
       "Team Morale",

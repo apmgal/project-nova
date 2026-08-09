@@ -125,22 +125,6 @@ export function applyDecisions(state: GameState, decisions: Record<string, strin
   return { ...state, decisions: { ...state.decisions, ...decisions } };
 }
 
-/** Reads an `effects` entry whose value is a string rather than the usual
- * number — e.g. honestyTone ("optimistic"/"measured"/"transparent"), a
- * per-choice signal a few scenes need to hand off to their own bespoke
- * logic instead of a flat metric delta applyEffects could apply. Effects
- * is typed as Record<string, number> since that's what every ordinary
- * effect actually is; this is the narrow, explicit escape hatch for the
- * handful that aren't — mirrors getFlagString below for the same reason. */
-export function getEffectString(
-  effects: Record<string, number> | undefined,
-  key: string
-): string | undefined {
-  if (!effects) return undefined;
-  const value = (effects as unknown as Record<string, unknown>)[key];
-  return typeof value === "string" ? value : undefined;
-}
-
 /** Applies a scene's own `flagsSet` array (flags that become true simply by
  * reaching/completing the scene, independent of any choice). */
 export function applySceneFlagsSet(
@@ -161,98 +145,17 @@ export function applySceneFlagsSet(
 }
 
 // ---------------------------------------------------------------------------
-// Monthly Status Report honesty mechanic (ACT4_SCENE05/05B/05C) —
-// CHOICE_ACT4_SCENE05_M1/M2 both carry an `effects: { honestyTone: ... }`
-// that's never a fixed marcusTrust delta (per their own identical
-// engineNote): the real question is whether the CHOSEN tone matches the
-// ACTUAL project state at report time, and if it doesn't, the cost is
-// deferred to the START of the next report rather than charged
-// immediately — the delay between the lie and its consequence is the
-// mechanic's whole point (DIALOGUE_ACT4_SCENE05C even narrates it: "you've
-// learned whether honesty costs you less than the alternative — or more").
-//
-// Two flags do two different jobs, deliberately kept separate:
-//   - hid_problem_from_marcus: purely a DISPLAY flag. DIALOGUE_ACT4_SCENE05B
-//     already keys its own reaction lines ("I asked for one thing...") off
-//     it — untouched by this mechanic beyond setting/clearing it at the
-//     right moments, exactly as if it had been hand-authored as a plain
-//     choice-set flag.
-//   - honesty_penalty_pending: pure bookkeeping. Tracks whether a
-//     marcusTrust penalty is still owed from an earlier misleading report.
-//     Consumed (and cleared) the instant the next report scene is entered,
-//     independent of hid_problem_from_marcus's own display-driven
-//     lifecycle — keeping these separate is what stops a penalty from
-//     applying twice for the same lie (see applyDeferredHonestyPenalty).
-// ---------------------------------------------------------------------------
-
-const HONESTY_REPORT_SCENES = new Set(["ACT4_SCENE05B", "ACT4_SCENE05C"]);
-const HONESTY_ACCURATE_TRUST_GAIN = 5;
-const HONESTY_DEFERRED_TRUST_PENALTY = -10;
-
-/** Scenes whose CHOICE_ACT4_SCENE05_M1-style honestyTone choice is being
- * superseded by the Act 4 report redesign's new report-builder UI (step
- * 4/5) — GameRoot's handleSelectChoice skips actually running
- * applyHonestyReport for a choice fired from one of these scenes (it still
- * strips the honestyTone key out of that option's effects either way, so
- * the string never reaches applyEffects). This exists so report #1 can be
- * switched over to the new mechanic without also having to touch
- * choices.json or risk double-scoring the same report once both
- * mechanisms would otherwise fire for the same submission. Currently just
- * ACT4_SCENE05 (report #1, the only one migrated so far) —
- * ACT4_SCENE05B/05C keep the original mechanic fully live and untouched
- * until a later step migrates them too. See DESIGN_NOTES.md. */
-export const HONESTY_MECHANIC_DEPRECATED_SCENES = new Set(["ACT4_SCENE05"]);
-
-/** Whether the project's true state is bad enough that a rosy status
- * report would be misleading — the exact pair of conditions named in
- * CHOICE_ACT4_SCENE05_M1/M2's own engineNote. */
-function isProjectStateBad(metrics: GameState["projectMetrics"]): boolean {
-  return metrics.riskExposure > 60 || metrics.scheduleHealth < 40;
-}
-
-/**
- * Applies a Monthly Status Report's honestyTone choice against the
- * project's ACTUAL state at report time (passed-in `state`, i.e. BEFORE
- * this same choice's other effects, if any, are merged in):
- * - Truth isn't bad, regardless of tone chosen: nothing to hide either
- *   way — no effect. Matches DIALOGUE_ACT4_SCENE05's own framing ("the
- *   first report is easy... nothing's gone wrong enough yet to be a real
- *   test") — Month 1 is expected to land here most playthroughs.
- * - Rosy tone ("optimistic"/"measured") while the truth IS bad:
- *   misleading. No immediate consequence — sets hid_problem_from_marcus
- *   (display) and honesty_penalty_pending (bookkeeping) both true, so the
- *   real cost lands the moment the NEXT report scene is entered instead
- *   of this one.
- * - "transparent" tone while the truth IS bad: accurately flagged real
- *   trouble — small immediate marcusTrust gain, and hid_problem_from_marcus
- *   is cleared (this report redeems whatever the last one was hiding).
- *   Deliberately does NOT touch honesty_penalty_pending — a penalty
- *   already deferred from an earlier report is still owed regardless of
- *   how well this one goes.
- */
-export function applyHonestyReport(state: GameState, honestyTone: string | undefined): GameState {
-  if (!honestyTone || !isProjectStateBad(state.projectMetrics)) return state;
-  if (honestyTone === "transparent") {
-    const withGain = applyEffects(state, { marcusTrust: HONESTY_ACCURATE_TRUST_GAIN });
-    return applyFlags(withGain, { hid_problem_from_marcus: false });
-  }
-  return applyFlags(state, { hid_problem_from_marcus: true, honesty_penalty_pending: true });
-}
-
-/** Consumes any honesty debt left over from the PREVIOUS report — called
- * from enterScene on every scene transition (a no-op outside
- * HONESTY_REPORT_SCENES), so the trust hit lands at exactly the moment a
- * new report scene is entered, alongside whatever reaction dialogue that
- * scene's own hid_problem_from_marcus condition already shows. Safe from
- * double-applying: enterScene only ever runs once per real transition
- * (never on resume-from-save), and this clears honesty_penalty_pending
- * the instant it's paid — see the section comment above for why that's a
- * separate flag from hid_problem_from_marcus rather than reusing it. */
-export function applyDeferredHonestyPenalty(state: GameState, sceneId: string): GameState {
-  if (!HONESTY_REPORT_SCENES.has(sceneId) || !state.flags.honesty_penalty_pending) return state;
-  const withPenalty = applyEffects(state, { marcusTrust: HONESTY_DEFERRED_TRUST_PENALTY });
-  return applyFlags(withPenalty, { honesty_penalty_pending: false });
-}
+// Monthly Status Report honesty mechanic — REMOVED. Used to live here
+// (CHOICE_ACT4_SCENE05_M1/M2's honestyTone vs. actual-state comparison,
+// deferred-penalty bookkeeping via hid_problem_from_marcus/
+// honesty_penalty_pending), covering ACT4_SCENE05B/05C before they had
+// real report-builder tool screens of their own. Superseded now that
+// every Monthly Status Report (05/05B/05C) is the real StatusReportBuilder
+// UI — keeping both would mean scoring the same submission twice through
+// two different, potentially contradictory mechanics. Removed rather than
+// left dangling per explicit instruction; see "Act 4 event redistribution"
+// in DESIGN_NOTES.md. CHOICE_ACT4_SCENE05_M2 (the only choice that ever
+// set honestyTone) is removed from choices.json too.
 
 // ---------------------------------------------------------------------------
 // Monthly Status Report — actual state (computeActualStatusReport). This is
@@ -418,7 +321,7 @@ function computeResourceDimension(state: GameState): StatusReportDimension {
  * initializing, but a top-level `const` referencing it here would trip
  * the temporal-dead-zone check at module-eval time. */
 function computeActiveRisks(state: GameState): ActiveRisk[] {
-  const pool = [...EVENT_WAVE_MEMBERS.MAIN_WAVE, ...EVENT_WAVE_MEMBERS.LATE_WAVE];
+  const pool = allAct4EventIds();
   // Same banding the HUD's own risk chip uses (metricBand(riskExposure,
   // false) — default 60/30 thresholds) — every active risk currently
   // shares this one severity rather than each having its own; see
@@ -1532,29 +1435,35 @@ export function computeCurrentObjective(
 }
 
 // ---------------------------------------------------------------------------
-// Event Library checkpoint system (Act 4 curveball waves) — ACT4_SCENE04
-// (Main Wave) and ACT4_SCENE06 (Late Wave) each hand off, via their own
-// Scene.eventWaveId, to a pool of conditionally-triggered events from
-// events.json. computeEventQueue evaluates every member of that wave's
-// pool against live GameState the instant the wave scene's own dialogue
-// finishes, and GameRoot then routes through the eligible ones one at a
-// time — see isActiveQueuedEventScene/advanceEventQueue in GameRoot.tsx,
-// and synthesizeEventScene/synthesizeEventFrameScene in data.ts for how a
+// Event Library checkpoint system (Act 4 curveball waves) — each report-
+// gap scene hands off, via its own Scene.eventWaveId, to a pool of
+// conditionally-triggered events from events.json. GameRoot routes through
+// the resulting queue one entry at a time — see
+// isActiveQueuedEventScene/advanceEventQueue in GameRoot.tsx, and
+// synthesizeEventScene/synthesizeEventFrameScene in data.ts for how a
 // queued event becomes a real playable "scene".
 //
-// Wave membership below follows the split named explicitly in the game's
-// own content: DIALOGUE_ACT4_SCENE06's engineNote hands Late Wave exactly
-// EV-07/EV-09/EV-10/EV-14/EV-15 ("final pressure events before
-// commissioning"); everything else standard/reversal/no-perfect-answer
-// goes to Main Wave. (DIALOGUE_ACT4_SCENE04's own engineNote lists a
-// broader, looser range — "EV-02 through EV-11, EV-13, EV-15" — that
-// overlaps several of ACT4_SCENE06's five; ACT4_SCENE06's shorter, more
-// deliberate list is treated as authoritative for what's exclusively
-// Late, so no event can ever fire in both waves.) EV-NP1 (=ACT4_SCENE01),
-// EV-12 (=ACT4_SCENE02) and BIG-01 (=ACT4_SCENE03) are already wired as
-// their own standalone scenes, not part of either wave's pool. EV-E1/E2/E3
-// are earlier-act content, also not part of Act 4's pools. EV-01 is a
-// dead v1 stub explicitly superseded by EV-NP1.
+// Restructured (see "Act 4 event redistribution" in DESIGN_NOTES.md) from
+// the original two-wave design (one giant Main Wave before Report 1, one
+// Late Wave after Report 3, and nothing between Reports 1/2/3) into four
+// narrative periods, each answering a distinct question rather than just
+// evenly redistributing the same 18 events:
+//   - EVENT_WAVE_MEMBERS.MAIN_WAVE (BIG-01 -> Report 1): EV-NP2 + EV-R2
+//     only — direct, immediate BIG-01 consequences, not general texture.
+//   - GAP_WAVE_SPECS.MID_WAVE_1 (Report 1 -> Report 2): capped substantive
+//     + reversal pools — "the project operating under the new reality",
+//     not just more bad news.
+//   - GAP_WAVE_SPECS.MID_WAVE_2 (Report 2 -> Report 3): the EV-06 RAID
+//     anchor, a capped substantive pool, and a single-slot final shock —
+//     "this is what the project formally says right before inspection."
+//   - After Report 3 (ACT4_SCENE06): no event wave at all anymore — every
+//     event that used to live in the old LATE_WAVE has moved into
+//     MID_WAVE_2 above, so nothing operationally significant happens after
+//     the final report that its own record doesn't capture.
+// EV-NP1 (=ACT4_SCENE01), EV-12 (=ACT4_SCENE02) and BIG-01 (=ACT4_SCENE03)
+// are already wired as their own standalone scenes, not part of any wave's
+// pool. EV-E1/E2/E3 are earlier-act content, also not part of Act 4's
+// pools. EV-01 is a dead v1 stub explicitly superseded by EV-NP1.
 // ---------------------------------------------------------------------------
 
 /** Reads a flag whose value is a string rather than the usual boolean —
@@ -1592,23 +1501,166 @@ export function supplierTemplateValues(
 }
 
 export const EVENT_WAVE_MEMBERS: Record<string, string[]> = {
-  MAIN_WAVE: [
-    "EV-NP2",
-    "EV-R2",
-    "EV-02",
-    "EV-06",
-    "EV-03",
-    "EV-13",
-    "EV-04",
-    "EV-08",
-    "EV-11",
-    "EV-05",
-    "EV-R1",
-    "EV-R4",
-    "EV-R3",
-  ],
-  LATE_WAVE: ["EV-07", "EV-14", "EV-09", "EV-10", "EV-15"],
+  MAIN_WAVE: ["EV-NP2", "EV-R2"],
 };
+
+/** One inter-report gap's event pool — see GAP_WAVE_SPECS. Deliberately
+ * NOT "every eligible member fires": that's what produced the original
+ * "one giant wave" problem this whole restructure fixes, just at gap
+ * scale instead of whole-Act-4 scale. Each category is capped, and
+ * selection is deterministic-but-rotated (see selectCapped) so a
+ * later-declared pool member isn't structurally starved by an
+ * earlier-declared one that's commonly eligible. */
+interface GapWaveSpec {
+  /** Fires first if eligible, ahead of every capped category — used for a
+   * gap's one "anchor" beat (e.g. EV-06) rather than being just another
+   * pool member, since its follow-up (anchorFollowUp) depends on it. */
+  anchor?: string;
+  /** Spliced directly after `anchor` in the returned queue whenever
+   * `anchor` itself fires — NOT independently eligibility-gated (never
+   * passed through isEventEligible at all), since its only precondition
+   * is "the anchor just fired". See "EV-06-RAID" in events.json. */
+  anchorFollowUp?: string;
+  substantive: string[];
+  substantiveCap: number;
+  /** Pairs that should never both be selected in the same draw (e.g. two
+   * quality/regulatory events reading as repetitive back to back). Only
+   * checked within `substantive`. */
+  mutuallyExclusive?: string[][];
+  reversals?: string[];
+  reversalCap?: number;
+  /** A single-slot pool evaluated independently of `substantive` — e.g.
+   * "at most one of {cyberattack, key-engineer resignation}", never both
+   * in the same gap. */
+  finalShock?: string[];
+  finalShockCap?: number;
+}
+
+const GAP_WAVE_SPECS: Record<string, GapWaveSpec> = {
+  MID_WAVE_1: {
+    substantive: ["EV-02", "EV-13", "EV-04", "EV-08", "EV-05", "EV-11", "EV-03"],
+    substantiveCap: 2,
+    mutuallyExclusive: [["EV-02", "EV-05"]],
+    reversals: ["EV-R1", "EV-R3", "EV-R4"],
+    reversalCap: 1,
+  },
+  MID_WAVE_2: {
+    anchor: "EV-06",
+    anchorFollowUp: "EV-06-RAID",
+    substantive: ["EV-15", "EV-14", "EV-10"],
+    substantiveCap: 2,
+    finalShock: ["EV-09", "EV-07"],
+    finalShockCap: 1,
+  },
+};
+
+/** Every real (non-synthetic) Act 4 event id across every wave/gap pool —
+ * single source of truth so the hidden truth engine (computeActiveRisks)
+ * can't silently drift out of sync with the player-facing wave structure
+ * the way it would have the instant MAIN_WAVE stopped being "everything".
+ * Deliberately excludes anchorFollowUp ids (e.g. "EV-06-RAID") — those
+ * aren't risks/events, just a governance-interaction beat glued to a real
+ * one, and have no events.json trigger condition of their own. */
+function allAct4EventIds(): string[] {
+  const gapIds = Object.values(GAP_WAVE_SPECS).flatMap((spec) => [
+    ...(spec.anchor ? [spec.anchor] : []),
+    ...spec.substantive,
+    ...(spec.reversals ?? []),
+    ...(spec.finalShock ?? []),
+  ]);
+  return [...EVENT_WAVE_MEMBERS.MAIN_WAVE, ...gapIds];
+}
+
+/** Deterministic-but-rotated pick of up to `cap` eligible members of
+ * `pool`, respecting `exclude` (ids already picked elsewhere in this same
+ * draw) and `mutuallyExclusive` pairs. Never random (nothing else in this
+ * engine uses RNG, and reproducibility matters for testing/debugging a
+ * save) — instead the pool's start point rotates by a value derived from
+ * live project state, so the same save always yields the same pick, but
+ * different playthroughs (which have different metric/history values by
+ * the time they reach a given gap) don't all favour the same
+ * early-declared pool members. See "Anti-starvation mechanism" in
+ * DESIGN_NOTES.md. */
+function selectCapped(
+  pool: string[],
+  cap: number,
+  state: GameState,
+  seed: number,
+  exclude: Set<string>,
+  mutuallyExclusive: string[][] = []
+): string[] {
+  const eligible = pool.filter((id) => !exclude.has(id) && isEventEligible(id, state));
+  if (eligible.length === 0 || cap <= 0) return [];
+  const offset = seed % eligible.length;
+  const rotated = [...eligible.slice(offset), ...eligible.slice(0, offset)];
+  const picked: string[] = [];
+  for (const id of rotated) {
+    if (picked.length >= cap) break;
+    const blocked = mutuallyExclusive.some(
+      (group) => group.includes(id) && group.some((other) => other !== id && picked.includes(other))
+    );
+    if (blocked) continue;
+    picked.push(id);
+  }
+  return picked;
+}
+
+/** The rotation seed for selectCapped — deliberately built from values
+ * that vary meaningfully across different playthroughs' project state
+ * (not wall-clock time or anything non-reproducible), so the same save
+ * always rotates the same way but different playthroughs generally
+ * don't. */
+function gapRotationSeed(state: GameState): number {
+  const metrics = state.projectMetrics;
+  return (
+    Math.round(metrics.riskExposure) +
+    Math.round(metrics.budgetRemaining / 10000) +
+    state.eventsResolved.length
+  );
+}
+
+/** Builds one gap wave's queue from its GapWaveSpec — anchor (+ its
+ * follow-up, if the anchor fires) first, then capped substantive picks,
+ * then capped reversal picks, then the capped final-shock slot. Order
+ * matters here (it's the order the player experiences them in), unlike
+ * computeActiveRisks' pool, which doesn't care about order at all. */
+function computeGapEventQueue(waveId: string, state: GameState): string[] {
+  const spec = GAP_WAVE_SPECS[waveId];
+  if (!spec) return [];
+  const seed = gapRotationSeed(state);
+  const queue: string[] = [];
+  const picked = new Set<string>();
+
+  if (spec.anchor && isEventEligible(spec.anchor, state)) {
+    queue.push(spec.anchor);
+    picked.add(spec.anchor);
+    if (spec.anchorFollowUp) queue.push(spec.anchorFollowUp);
+  }
+
+  const substantivePicks = selectCapped(
+    spec.substantive,
+    spec.substantiveCap,
+    state,
+    seed,
+    picked,
+    spec.mutuallyExclusive
+  );
+  queue.push(...substantivePicks);
+  substantivePicks.forEach((id) => picked.add(id));
+
+  if (spec.reversals && spec.reversalCap) {
+    const reversalPicks = selectCapped(spec.reversals, spec.reversalCap, state, seed, picked);
+    queue.push(...reversalPicks);
+    reversalPicks.forEach((id) => picked.add(id));
+  }
+
+  if (spec.finalShock && spec.finalShockCap) {
+    const shockPicks = selectCapped(spec.finalShock, spec.finalShockCap, state, seed, picked);
+    queue.push(...shockPicks);
+  }
+
+  return queue;
+}
 
 /** Starting budgetRemaining every playthrough begins with (see
  * game_state.json) — EV-10's "Budget Remaining < 15%" trigger is relative
@@ -1713,12 +1765,16 @@ export function isEventEligible(eventId: string, state: GameState): boolean {
   }
 }
 
-/** Every member of `waveId`'s pool that's eligible right now, in the
- * wave's declared narrative order (see EVENT_WAVE_MEMBERS) — computed
- * once, the instant the wave scene's own dialogue finishes, and never
- * recomputed for the rest of that wave (matching "eligibility checked at
- * trigger", the same semantics events.json's own trigger prose implies). */
+/** The queue for `waveId` — computed once, the instant the wave scene's
+ * own dialogue finishes, and never recomputed for the rest of that wave
+ * (matching "eligibility checked at trigger", the same semantics
+ * events.json's own trigger prose implies). Dispatches to
+ * computeGapEventQueue for a capped/rotated GAP_WAVE_SPECS entry, or the
+ * simple "every eligible member, declared order" behaviour for a plain
+ * EVENT_WAVE_MEMBERS array (currently just MAIN_WAVE, which is small
+ * enough — 2 candidates — to need no cap). */
 export function computeEventQueue(waveId: string, state: GameState): string[] {
+  if (GAP_WAVE_SPECS[waveId]) return computeGapEventQueue(waveId, state);
   return (EVENT_WAVE_MEMBERS[waveId] ?? []).filter((eventId) => isEventEligible(eventId, state));
 }
 

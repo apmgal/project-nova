@@ -59,11 +59,7 @@ import {
   resolveEventQueueEntryScene,
   isActiveQueuedEventScene,
   supplierTemplateValues,
-  getEffectString,
-  applyHonestyReport,
-  applyDeferredHonestyPenalty,
   applyDecisions,
-  HONESTY_MECHANIC_DEPRECATED_SCENES,
   submitStatusReport,
 } from "@/lib/nova/state";
 import type {
@@ -88,6 +84,7 @@ import TeamSelector from "./TeamSelector";
 import GanttBoard from "./GanttBoard";
 import BenefitsBuilder from "./BenefitsBuilder";
 import StatusReportBuilder from "./StatusReportBuilder";
+import RaidUpdateCard from "./RaidUpdateCard";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -305,11 +302,6 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
-    // A no-op outside ACT4_SCENE05B/05C — see the Monthly Status Report
-    // honesty mechanic's own section comment in state.ts for why this
-    // lives here (scene-entry) rather than inside the report's own choice
-    // handler.
-    next = applyDeferredHonestyPenalty(next, sceneId);
     return next;
   }
 
@@ -637,23 +629,7 @@ export default function GameRoot() {
 
   function handleSelectChoice(option: ChoiceOption, choiceId: string) {
     if (!gameState) return;
-    // honestyTone (CHOICE_ACT4_SCENE05_M1/M2) is a string, not a metric
-    // delta applyEffects can apply — pulled out and handled by its own
-    // mechanic first; whatever's left of option.effects (nothing, for
-    // those two, but kept generic for any future content that combines
-    // honestyTone with ordinary numeric effects) goes through applyEffects
-    // exactly as before. The string is always stripped out regardless of
-    // scene (so it never reaches applyEffects), but applyHonestyReport's
-    // actual scoring only runs outside HONESTY_MECHANIC_DEPRECATED_SCENES
-    // — see that set's doc comment in state.ts for why (Act 4 report
-    // redesign, report #1 moving to the new report-builder UI).
-    const honestyTone = getEffectString(option.effects, "honestyTone");
-    const skipHonestyMechanic = HONESTY_MECHANIC_DEPRECATED_SCENES.has(gameState.currentScene);
-    let next = honestyTone && !skipHonestyMechanic ? applyHonestyReport(gameState, honestyTone) : gameState;
-    const remainingEffects = honestyTone
-      ? Object.fromEntries(Object.entries(option.effects ?? {}).filter(([key]) => key !== "honestyTone"))
-      : option.effects;
-    next = applyEffects(next, remainingEffects);
+    let next = applyEffects(gameState, option.effects);
     next = applyFlags(next, option.flags);
     next = applyDecisions(next, option.decisions);
     next = {
@@ -777,6 +753,33 @@ export default function GameRoot() {
   function handleSubmitStatusReport(submission: Omit<StatusReportRecord, "actualSnapshot">) {
     if (!gameState || !scene || !toolScreen) return;
     let next = submitStatusReport(gameState, submission);
+    next = submitTool(next, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
+  // The RAID card's own explicit submit action — mirrors
+  // handleSubmitStatusReport's pattern (self-contained local state, no
+  // generic completion check). Owner/response are written to
+  // GameState.decisions (raidKey_owner / raidKey_response); escalate to a
+  // boolean flag (raidKey_escalated). Deliberately no numeric metric
+  // effects — see the "Act 4 event redistribution" entry in
+  // DESIGN_NOTES.md for why this stays inert for v1. goToScene's own
+  // isActiveQueuedEventScene check (not toolScreen.onComplete) is what
+  // actually routes this correctly back into the MID_WAVE_2 queue, since
+  // this tool screen is itself a queued event scene ("EV-06-RAID").
+  function handleSubmitRaidUpdate(submission: { owner: string; response: string; escalate: boolean }) {
+    if (!gameState || !scene || !toolScreen) return;
+    const key = toolScreen.raidKey ?? toolScreen.toolId;
+    let next = applyDecisions(gameState, {
+      [`${key}_owner`]: submission.owner,
+      [`${key}_response`]: submission.response,
+    });
+    next = applyFlags(next, { [`${key}_escalated`]: submission.escalate });
     next = submitTool(next, toolScreen);
     setGameState(next);
     saveGame(next);
@@ -964,6 +967,8 @@ export default function GameRoot() {
                 pmConcept={scene.pmConcept}
                 onSubmitReport={handleSubmitStatusReport}
               />
+            ) : atToolBreak && toolScreen && toolType === "raid_update_card" ? (
+              <RaidUpdateCard toolScreen={toolScreen} onSubmitUpdate={handleSubmitRaidUpdate} />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
                 toolScreen={toolScreen}
