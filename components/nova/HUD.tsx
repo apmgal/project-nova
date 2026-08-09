@@ -84,6 +84,56 @@ function Chip({
 }
 
 /**
+ * The tutorial's "Got it" step content, anchored directly under whichever
+ * chip is currently active rather than claiming a full-width row below the
+ * whole chip bar. Floats over the scene background (translucent + blurred,
+ * matching DialogueBox's own treatment) instead of pushing it down with an
+ * opaque bar — chosen over a full-width translucent bar or reusing the
+ * dialogue box's own slot after a design brainstorm with the user.
+ */
+function TutorialPopover({
+  step,
+  total,
+  label,
+  description,
+  isLast,
+  onSkip,
+  onGotIt,
+}: {
+  step: number;
+  total: number;
+  label: string;
+  description: string;
+  isLast: boolean;
+  onSkip: () => void;
+  onGotIt: () => void;
+}) {
+  return (
+    <div className="absolute left-0 top-full z-30 mt-2 w-64">
+      <div className="absolute -top-1 left-4 h-2 w-2 rotate-45 border-l border-t border-emerald-700/50 bg-zinc-950/95" />
+      <div className="rounded-lg border border-emerald-700/50 bg-zinc-950/95 p-3 backdrop-blur-sm">
+        <div className="text-[10px] uppercase tracking-wide text-zinc-500">
+          Step {step + 1} of {total}
+        </div>
+        <div className="mt-1 text-sm font-semibold text-zinc-100">{label}</div>
+        <p className="mt-1 text-xs leading-relaxed text-zinc-400">{description}</p>
+        <div className="mt-3 flex items-center justify-between">
+          <button onClick={onSkip} className="text-[11px] text-zinc-500 underline hover:text-zinc-300">
+            Skip tutorial
+          </button>
+          <button
+            onClick={onGotIt}
+            className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500"
+          >
+            {isLast ? "Got it" : "Got it →"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Deployment Countdown HUD — a pure display layer over existing
  * projectMetrics/toolPlacements, introducing no new stored variables of
  * its own beyond the tutorial-seen flag. weeksRemaining is derived fresh
@@ -140,7 +190,21 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
     setTutorialStep(tutorialStep + 1);
   }
 
-  const activeHelp = tutorialStep !== null ? METRIC_HELP[tutorialStep] : null;
+  function renderPopoverIfActive(index: number) {
+    if (tutorialStep !== index) return null;
+    const help = METRIC_HELP[index];
+    return (
+      <TutorialPopover
+        step={tutorialStep}
+        total={METRIC_HELP.length}
+        label={help.label}
+        description={help.description}
+        isLast={tutorialStep === METRIC_HELP.length - 1}
+        onSkip={endTutorial}
+        onGotIt={handleGotIt}
+      />
+    );
+  }
 
   return (
     <div className="relative z-10 border-b border-zinc-800 bg-zinc-950/80">
@@ -148,36 +212,51 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
         <div className={`text-xs font-semibold ${isOverdue ? "text-red-400" : "text-emerald-400"}`}>
           Week {weeksRemaining} / 24{isOverdue ? " — OVERDUE" : ""}
         </div>
-        <Chip
-          label="Budget"
-          value={`${Math.round(budgetPct)}%`}
-          band={metricBand(budgetPct, true)}
-          state={chipState(0)}
-        />
-        <Chip
-          label="Schedule"
-          value={`${metrics.scheduleHealth}`}
-          band={metricBand(metrics.scheduleHealth, true)}
-          state={chipState(1)}
-        />
-        <Chip
-          label="Risk"
-          value={`${metrics.riskExposure}`}
-          band={metricBand(metrics.riskExposure, false)}
-          state={chipState(2)}
-        />
-        <Chip
-          label="Quality"
-          value={`${metrics.regulatoryReadiness}`}
-          band={metricBand(metrics.regulatoryReadiness, true)}
-          state={chipState(3)}
-        />
-        <Chip
-          label="Benefits"
-          value={`${metrics.benefitsRealisationScore}`}
-          band={metricBand(metrics.benefitsRealisationScore, true)}
-          state={chipState(4)}
-        />
+        <div className="relative">
+          <Chip
+            label="Budget"
+            value={`${Math.round(budgetPct)}%`}
+            band={metricBand(budgetPct, true)}
+            state={chipState(0)}
+          />
+          {renderPopoverIfActive(0)}
+        </div>
+        <div className="relative">
+          <Chip
+            label="Schedule"
+            value={`${metrics.scheduleHealth}`}
+            band={metricBand(metrics.scheduleHealth, true)}
+            state={chipState(1)}
+          />
+          {renderPopoverIfActive(1)}
+        </div>
+        <div className="relative">
+          <Chip
+            label="Risk"
+            value={`${metrics.riskExposure}`}
+            band={metricBand(metrics.riskExposure, false)}
+            state={chipState(2)}
+          />
+          {renderPopoverIfActive(2)}
+        </div>
+        <div className="relative">
+          <Chip
+            label="Quality"
+            value={`${metrics.regulatoryReadiness}`}
+            band={metricBand(metrics.regulatoryReadiness, true)}
+            state={chipState(3)}
+          />
+          {renderPopoverIfActive(3)}
+        </div>
+        <div className="relative">
+          <Chip
+            label="Benefits"
+            value={`${metrics.benefitsRealisationScore}`}
+            band={metricBand(metrics.benefitsRealisationScore, true)}
+            state={chipState(4)}
+          />
+          {renderPopoverIfActive(4)}
+        </div>
         <button
           onClick={() => setTutorialStep(0)}
           aria-label="What do these metrics mean?"
@@ -196,32 +275,6 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
           </div>
         )}
       </div>
-
-      {activeHelp && tutorialStep !== null && (
-        <div className="border-t border-zinc-800 bg-zinc-950 px-4 py-3">
-          <div className="max-w-md rounded-lg border border-emerald-700/50 bg-zinc-900 p-3">
-            <div className="text-[10px] uppercase tracking-wide text-zinc-500">
-              Step {tutorialStep + 1} of {METRIC_HELP.length}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-zinc-100">{activeHelp.label}</div>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-400">{activeHelp.description}</p>
-            <div className="mt-3 flex items-center justify-between">
-              <button
-                onClick={endTutorial}
-                className="text-[11px] text-zinc-500 underline hover:text-zinc-300"
-              >
-                Skip tutorial
-              </button>
-              <button
-                onClick={handleGotIt}
-                className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500"
-              >
-                {tutorialStep === METRIC_HELP.length - 1 ? "Got it" : "Got it →"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
