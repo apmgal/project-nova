@@ -17,27 +17,38 @@ import type {
 } from "./types";
 
 // ---------------------------------------------------------------------------
-// Scope: this build loads Act 1 + Act 2 + Act 3 content. Per project
-// instructions we filter scenes.json down to act === one of BUILT_ACTS —
-// currently Act 1's six canonical beats (ACT1_SCENE01-06) plus bridge
-// scenes (e.g. ACT1_SCENE02R, ACT1_SCENE02B, ACT1_SCENE03B, ACT1_SCENE06B),
-// Act 2's six canonical beats (ACT2_SCENE01-06), and Act 3's seven beats
-// (ACT3_SCENE01-07) plus its ACT3_SCENE06B bridge scene. This filter is
-// dynamic, so any scene added to the data with a matching act is picked up
-// automatically without an engine change. Acts 4-6 are present in the
-// underlying JSON files but are never read past this filter — their
-// content (patches to BIG-01/EV-07/EV-14/ACT6_SCENE03 etc.) is prepared in
-// the data ahead of time but has no built scenes yet, same "flag exists,
-// consequence designed later" pattern used for the Act 2 risk flags before
-// Act 4 existed.
+// Scope: this build loads Act 1 + Act 2 + Act 3 content, plus a staged
+// opening slice of Act 4. Per project instructions we filter scenes.json
+// down to act === one of BUILT_ACTS — currently Act 1's six canonical beats
+// (ACT1_SCENE01-06) plus bridge scenes (e.g. ACT1_SCENE02R, ACT1_SCENE02B,
+// ACT1_SCENE03B, ACT1_SCENE06B), Act 2's six canonical beats
+// (ACT2_SCENE01-06), and Act 3's seven beats (ACT3_SCENE01-07) plus its
+// ACT3_SCENE06B bridge scene. This filter is dynamic, so any scene added to
+// the data with a matching act is picked up automatically without an engine
+// change.
+//
+// Act 4 itself is opened one wave at a time rather than all at once (the
+// same staged approach Act 3 was built with, tracked as "Stage A/B/C..." at
+// the time) — BUILT_SCENE_OVERRIDES below names the individual Act 4 scene
+// ids that are live even though "Act 4" as a whole isn't yet in BUILT_ACTS.
+// Currently: the Opening Curveball Wave (ACT4_SCENE01) and its Ellis
+// Fragment #4 bridge (ACT4_SCENE01B). The rest of Act 4 — Change Control,
+// THE BIG CURVEBALL, the Main/Late curveball waves — is present in the
+// underlying JSON (all needsWriting: false, content was written ahead of
+// engine work, same "flag exists, consequence designed later" pattern used
+// for the Act 2 risk flags before Act 4 existed) but not yet added here.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
 
+const BUILT_SCENE_OVERRIDES = new Set(["ACT4_SCENE01", "ACT4_SCENE01B"]);
+
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
 
 export const BUILT_SCENES: Record<string, Scene> = Object.fromEntries(
-  Object.entries(allScenes).filter(([, scene]) => BUILT_ACTS.has(scene.act))
+  Object.entries(allScenes).filter(
+    ([id, scene]) => BUILT_ACTS.has(scene.act) || BUILT_SCENE_OVERRIDES.has(id)
+  )
 );
 
 export const BUILT_SCENE_IDS = new Set(Object.keys(BUILT_SCENES));
@@ -67,7 +78,8 @@ export function getScene(sceneId: string): Scene | null {
   return BUILT_SCENES[sceneId] ?? null;
 }
 
-/** True if a scene id is part of the Act 1/Act 2 content this build ships. */
+/** True if a scene id is part of the content this build ships — see
+ * BUILT_ACTS/BUILT_SCENE_OVERRIDES above for exactly what that covers. */
 export function isSceneAvailable(sceneId: string): boolean {
   return BUILT_SCENE_IDS.has(sceneId);
 }

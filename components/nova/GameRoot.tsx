@@ -118,7 +118,7 @@ function isHudActiveForScene(scene: Scene): boolean {
 }
 
 interface EndInfo {
-  reason: "act2-complete" | "unbuilt-branch";
+  reason: "unbuilt-branch";
   targetScene: string;
 }
 
@@ -343,7 +343,7 @@ export default function GameRoot() {
       saveGame(baseState);
       setGameState(baseState);
       setEndInfo({
-        reason: nextSceneId?.startsWith("ACT3") ? "act2-complete" : "unbuilt-branch",
+        reason: "unbuilt-branch",
         targetScene: nextSceneId ?? "(none)",
       });
       return;
