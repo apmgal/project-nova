@@ -14,6 +14,12 @@ interface SceneAudioProps {
   loop?: boolean;
   fadeInMs?: number;
   fadeOutMs?: number;
+  /** True freezes playback in place (a real HTMLMediaElement.pause(), not
+   * a volume drop) — used by the pause menu so every track resumes from
+   * exactly where it left off instead of drifting out of sync with
+   * itself. Independent of the mount/unmount fade logic below: toggling
+   * this never touches `src`, so it doesn't trigger a fade-out/fade-in. */
+  paused?: boolean;
 }
 
 /**
@@ -37,6 +43,7 @@ export default function SceneAudio({
   loop = true,
   fadeInMs = 1800,
   fadeOutMs = 1200,
+  paused = false,
 }: SceneAudioProps) {
   // Kept in a ref (not state) because none of this should ever trigger a
   // re-render — it's a side effect running alongside whatever the rest of
@@ -128,6 +135,25 @@ export default function SceneAudio({
     lastVolumeRef.current = volume;
     fadeTo(audioRef.current, volume, 400);
   }, [volume]);
+
+  // Real pause/resume, independent of the volume fades above — freezes
+  // playback position rather than just going silent, so a track picks up
+  // exactly where it left off instead of having advanced silently in the
+  // background. Runs after the mount effect in declaration order, so
+  // audioRef.current is already set by the time this first fires (same
+  // ordering guarantee the codebase already leans on elsewhere in this
+  // file). `.play()`'s rejection is swallowed for the same reason as the
+  // mount effect's own call — resuming before any user gesture on the
+  // page can be silently blocked, which is fine, not an error.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (paused) {
+      audio.pause();
+    } else {
+      audio.play().catch(() => {});
+    }
+  }, [paused]);
 
   return null;
 }

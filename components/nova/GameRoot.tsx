@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { Pause } from "lucide-react";
 import {
   getScene,
   getDialogue,
@@ -82,6 +83,7 @@ import TeamsThreadPanel from "./TeamsThreadPanel";
 import SharePointBrowserPanel from "./SharePointBrowserPanel";
 import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
+import PauseOverlay from "./PauseOverlay";
 import EndOfContent from "./EndOfContent";
 import NarrativeScene from "./narrative/NarrativeScene";
 import SceneBackground from "./narrative/SceneBackground";
@@ -260,6 +262,12 @@ export default function GameRoot() {
   // presentational scaffolding in front of the save-backed engine, not
   // part of it.
   const [showReceptionIntro, setShowReceptionIntro] = useState(false);
+  // Pause: a visual freeze + Resume button, plus pausing (not muting —
+  // see SceneAudio's own `paused` prop) whatever ambient/footsteps audio
+  // is currently playing. Progress already autosaves on every state
+  // change, so this doesn't need to do anything beyond reassure the
+  // player it's safe to stop for a moment.
+  const [paused, setPaused] = useState(false);
 
   function enterScene(state: GameState, sceneId: string): GameState {
     // Carry the outgoing scene's ending backdrop forward as the new
@@ -923,7 +931,14 @@ export default function GameRoot() {
           ambience is currently playing. No key clash with the background
           layer above — SceneAudio renders nothing to the DOM. */}
       {ambientSrc && (
-        <SceneAudio key="ambient" src={ambientSrc} volume={ambientVolume} fadeInMs={1200} fadeOutMs={1500} />
+        <SceneAudio
+          key="ambient"
+          src={ambientSrc}
+          volume={ambientVolume}
+          fadeInMs={1200}
+          fadeOutMs={1500}
+          paused={paused}
+        />
       )}
       {footstepsOn && (
         <SceneAudio
@@ -932,8 +947,23 @@ export default function GameRoot() {
           volume={footstepsVolume}
           fadeInMs={300}
           fadeOutMs={700}
+          paused={paused}
         />
       )}
+      {/* Floating pause button — deliberately separate from the header
+          (right-edge middle, not the top bar) so it stays in the exact
+          same spot regardless of what the header is showing (HUD stats,
+          act label, or nothing at all on announcement scenes). z-20 sits
+          above the background/audio layer and the header, below the
+          overlay itself (z-30). */}
+      <button
+        onClick={() => setPaused(true)}
+        aria-label="Pause"
+        className="absolute right-2 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+      >
+        <Pause size={11} className="fill-current" />
+      </button>
+      <PauseOverlay open={paused} onResume={() => setPaused(false)} />
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (
           <div />
