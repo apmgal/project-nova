@@ -2355,10 +2355,11 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Week 1 / 24."
+        "text": "24-week deployment window opens.",
+        "style": "badge"
       }
     ],
     "needsWriting": false,
-    "engineNote": "HUD activates here for the first time, showing Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Schedule/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins."
+    "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' — scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen."
   }
 }

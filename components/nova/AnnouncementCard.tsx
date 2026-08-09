@@ -8,8 +8,6 @@ interface AnnouncementCardProps {
   actionContent: ReactNode;
 }
 
-const WEEK_BADGE_PATTERN = /^week\s+\d+\s*\/\s*\d+/i;
-
 /**
  * Renders a scene whose `displayStyle` is "announcement" (e.g.
  * ACT3_SCENE06B, "Baseline Approved") as a single dramatic beat instead
@@ -18,11 +16,12 @@ const WEEK_BADGE_PATTERN = /^week\s+\d+\s*\/\s*\d+/i;
  * click-revealed sequentially.
  *
  * A line authored with `style: "header"` renders as the big headline; a
- * line matching "Week X / Y" renders as a pill badge; everything else is
- * an italic subline — matching the content's own existing conventions
- * (DIALOGUE_ACT3_SCENE06B's first line already carries style: "header",
- * scenes.json already tags this scene screenType: "Title Card") rather
- * than inventing new authoring fields.
+ * line authored with `style: "badge"` renders as a pill; everything else
+ * is an italic subline. Badge detection used to sniff the line's own text
+ * for a "Week X / Y" shape instead of an explicit style tag — that broke
+ * the moment the copy was reworded to something that no longer looked like
+ * a week counter (see DIALOGUE_ACT3_SCENE06B's engineNote), so content and
+ * presentation are now decoupled the same way "header" already was.
  *
  * GameRoot fast-forwards lineIndex straight past every line for
  * announcement scenes (see resolveInitialLineIndex), so by the time this
@@ -46,7 +45,7 @@ export default function AnnouncementCard({ lines, actionContent }: AnnouncementC
             </div>
           );
         }
-        if (WEEK_BADGE_PATTERN.test(line.text)) {
+        if (line.style === "badge") {
           return (
             <div
               key={i}
