@@ -257,13 +257,18 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
           />
           {renderPopoverIfActive(4)}
         </div>
-        <button
-          onClick={() => setTutorialStep(0)}
-          aria-label="What do these metrics mean?"
-          className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-zinc-700 text-[11px] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
-        >
-          ?
-        </button>
+        <div className="group relative flex-shrink-0">
+          <button
+            onClick={() => setTutorialStep(0)}
+            aria-label="Replay tutorial"
+            className="flex h-5 w-5 items-center justify-center rounded-full border border-zinc-700 text-[11px] text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+          >
+            ?
+          </button>
+          <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-[10px] text-zinc-100 opacity-0 transition-opacity group-hover:opacity-100">
+            Replay tutorial
+          </span>
+        </div>
         {gameState.flags.second_product_benefits_undefined && (
           <span className="rounded border border-amber-700/50 bg-amber-950/40 px-2 py-1 text-[10px] text-amber-300">
             Second Product Benefits: Undefined
