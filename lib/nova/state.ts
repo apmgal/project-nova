@@ -1051,7 +1051,12 @@ export function metricBand(
  * falls inside. If more than one bar covers the week (Utilities/Training
  * can overlap others), joins all of their names. If the week falls in a
  * gap covered by no bar, shows the nearest upcoming milestone instead. If
- * every milestone's window has already passed, says so.
+ * every milestone's window has already passed (or `currentWeek` — really a
+ * scheduleHealth-derived forecast, not a real elapsed-time clock, see
+ * DESIGN_NOTES.md — has simply overshot all of them), falls back to
+ * "Facility go live": the project's aim regardless of timing, so unlike a
+ * "Deployment complete" claim it can never contradict the story (e.g.
+ * showing up beside "Deployment begins." on the same screen).
  */
 export function computeCurrentObjective(
   toolScreen: ToolScreenBlock | null,
@@ -1074,7 +1079,7 @@ export function computeCurrentObjective(
     .sort((a, b) => a.start - b.start);
   if (upcoming.length > 0) return `Next: ${upcoming[0].text}`;
 
-  return placed.length > 0 ? "Deployment complete" : "";
+  return placed.length > 0 ? "Facility go live" : "";
 }
 
 // ---------------------------------------------------------------------------
