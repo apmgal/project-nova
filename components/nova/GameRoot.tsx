@@ -953,7 +953,15 @@ export default function GameRoot() {
               />
             ) : pendingChoice ? (
               <ChoiceButtons
-                options={pendingChoice.block.options}
+                // Same {token} substitution as displayLines above (e.g.
+                // EV-R1's "Go back to {alternateSupplier}") — option
+                // objects otherwise pass through untouched, so
+                // handleSelectChoice still sees the real effects/flags/
+                // nextScene regardless of what the button displays.
+                options={pendingChoice.block.options.map((option) => ({
+                  ...option,
+                  text: substituteTemplate(option.text, templateValues),
+                }))}
                 reactionText={reactionText}
                 onSelect={(option) => handleSelectChoice(option, pendingChoice.block.choiceId)}
               />
