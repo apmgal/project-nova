@@ -786,7 +786,7 @@
     "toolId": "TOOL_ACT4_SCENE05_STATUS_REPORT",
     "sourceScene": "ACT4_SCENE05",
     "type": "status_report_builder",
-    "instructions": "Fill out this period's Monthly Status Report. Ratings, risks, and evidence are your own call \u2014 nothing here is pre-filled or graded for you.",
+    "instructions": "Fill out this period's Status Report. Ratings, risks, and evidence are your own call \u2014 nothing here is pre-filled or graded for you.",
     "ganttToolId": "TOOL_ACT3_SCENE04_MILESTONES",
     "wbsToolId": "TOOL_ACT3_SCENE01_WBS",
     "upcomingActivityWindowWeeks": 4,
