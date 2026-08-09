@@ -401,14 +401,25 @@ export default function GameRoot() {
    * scene itself had just finished a normal (non-waved) dialogue. */
   function advanceEventQueue(state: GameState) {
     const queue = state.eventQueue ?? [];
-    const nextIndex = state.eventQueueIndex + 1;
+    // The entry the player is LEAVING right now (isActiveQueuedEventScene
+    // already confirmed state.currentScene === this eventId) — record it
+    // as resolved before moving on, regardless of whether the queue has
+    // more entries or is about to clear. This is the single choke point
+    // every queued event's own scene passes through, so it's the one
+    // place that needs to know about eventsResolved at all.
+    const justFinished = queue[state.eventQueueIndex];
+    const withResolved: GameState = justFinished
+      ? { ...state, eventsResolved: [...new Set([...state.eventsResolved, justFinished])] }
+      : state;
+
+    const nextIndex = withResolved.eventQueueIndex + 1;
     if (nextIndex < queue.length) {
-      const withIndex: GameState = { ...state, eventQueueIndex: nextIndex };
+      const withIndex: GameState = { ...withResolved, eventQueueIndex: nextIndex };
       goToRealScene(withIndex, resolveEventQueueEntryScene(queue[nextIndex]));
       return;
     }
     const cleared: GameState = {
-      ...state,
+      ...withResolved,
       eventQueue: null,
       eventQueueIndex: 0,
       eventQueueExitScene: null,

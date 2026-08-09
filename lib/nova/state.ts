@@ -11,6 +11,7 @@ import type {
   ActualStatusReport,
   ActiveRisk,
   StatusReportRecord,
+  ReportableRisk,
 } from "./types";
 import { getCharacter, getDefaultGameState, getEvent, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
@@ -49,6 +50,7 @@ export function loadGame(): GameState | null {
     if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
     if (!state.decisions) state.decisions = {};
     if (!state.statusReports) state.statusReports = [];
+    if (!state.eventsResolved) state.eventsResolved = [];
     return state;
   } catch {
     return null;
@@ -457,6 +459,118 @@ export function submitStatusReport(
     actualSnapshot: computeActualStatusReport(state),
   };
   return { ...state, statusReports: [...state.statusReports, record] };
+}
+
+// ---------------------------------------------------------------------------
+// Report-builder risk picker — a DELIBERATELY separate model from
+// computeActiveRisks/ActualStatusReport.risks above. That truth-engine pool
+// exists to answer "what does the event system know is eligible right now"
+// and is never shown to the player directly. This one answers a completely
+// different question — "what would the PLAYER themselves actually know
+// about, right now, to write into a report" — and is the only one
+// StatusReportBuilder.tsx is allowed to read from. Pulling the risk
+// dropdown straight from event eligibility was the original (wrong) design:
+// it surfaced future plot events (including purely positive ones like "The
+// Ally You Didn't Expect") before the player had any in-fiction reason to
+// know about them, which both spoils the story and undercuts Act 4's whole
+// point of interpreting evidence rather than reading the engine's mind.
+//
+// Lifecycle every catalog entry follows:
+//   1. Potential threat (event exists in the catalog, not yet eligible or
+//      not yet evidenced) -> invisible.
+//   2. Risk discovered (player has picked up real in-fiction evidence —
+//      see `preDiscovery.anyOfFlags` below, all sourced from the Act 2 Risk
+//      Workshop investigation) -> appears with a deliberately vaguer label
+//      than the eventual event title, since the player hasn't lived it yet.
+//   3. Risk materialises (the event has actually played out as a scene —
+//      see GameState.eventsResolved, appended to in GameRoot's
+//      advanceEventQueue) -> appears as an "issue" with a plain, no-longer-
+//      a-spoiler label.
+// There's no explicit "closed" state yet (nothing currently un-sets
+// eventsResolved or offers a mitigated/resolved label) — logged as a
+// follow-up in DESIGN_NOTES.md rather than half-built here.
+//
+// Reversal/positive events (EV-R1–EV-R4) are absent from this catalog
+// entirely, on purpose — they're retrospective recontextualisations of a
+// past decision, not risks the player could ever be "reporting on" in the
+// RAID sense, and at least two of them are explicitly good news. EV-NP1/
+// EV-12/BIG-01 are absent because they're standalone scripted beats, not
+// pooled events, and are always fully visible to the player the moment they
+// happen anyway (no "discovery" phase makes sense for them).
+interface ReportableRiskCatalogEntry {
+  /** Shown once state.eventsResolved confirms the event has actually
+   * fired — plain, specific phrasing, since by now it's history rather
+   * than a spoiler. */
+  issueLabel: string;
+  /** Shown before the event fires, and ONLY if the player has evidence of
+   * it via one of these flags — every one currently traces back to the
+   * Act 2 Risk Workshop (ACT2_SCENE04)'s three risk_investigation banks
+   * (contractor/validation/contingency) and their paired "_risk_logged"
+   * choice. Events with no preDiscovery block have no evidence channel
+   * built yet and are simply invisible until they materialise — never
+   * shown speculatively just because they're currently eligible. */
+  preDiscovery?: { label: string; anyOfFlags: string[] };
+}
+
+const REPORTABLE_RISK_CATALOG: Record<string, ReportableRiskCatalogEntry> = {
+  "EV-02": {
+    preDiscovery: {
+      label: "Validation timeline / cleanroom review risk",
+      anyOfFlags: ["validation_risk_logged", "asked_validation_impact", "asked_validation_mitigation"],
+    },
+    issueLabel: "Cleanroom GMP review failure — rework required",
+  },
+  "EV-06": {
+    preDiscovery: {
+      label: "Electrical contractor financial instability",
+      anyOfFlags: ["contractor_risk_logged", "asked_contractor_impact", "asked_contractor_mitigation"],
+    },
+    issueLabel: "Electrical contractor insolvency — replacement required",
+  },
+  "EV-10": {
+    preDiscovery: {
+      label: "Contingency budget adequacy risk",
+      anyOfFlags: ["contingency_risk_logged", "asked_contingency_impact", "asked_contingency_mitigation"],
+    },
+    issueLabel: "Finance has frozen part of the contingency budget",
+  },
+  // The remaining Main/Late Wave events have no built-in early-evidence
+  // channel yet (no risk_investigation bank or equivalent flag exists for
+  // them) — first-pass scope, expected to grow as more Act 4 content gets
+  // its own investigation beats. Until then they can only ever appear
+  // post-materialisation, as an issue.
+  "EV-NP2": { issueLabel: "Validation resourcing stretched thin across two product lines" },
+  "EV-03": { issueLabel: "Local resident complaints about construction traffic" },
+  "EV-04": { issueLabel: "Investor visit brought forward — workstream visibility pressure" },
+  "EV-05": { issueLabel: "Contamination found during commissioning" },
+  "EV-08": { issueLabel: "Loading bay flood damage from extreme weather" },
+  "EV-11": { issueLabel: "New MHRA guidance note requires a design review" },
+  "EV-13": { issueLabel: "Supplier shipped incorrect voltage equipment" },
+  "EV-07": { issueLabel: "Key automation engineer resignation — team capacity gap" },
+  "EV-09": { issueLabel: "Cyberattack — building management system locked" },
+  "EV-14": { issueLabel: "Validation engineer poached by a competitor" },
+  "EV-15": { issueLabel: "Social media safety claim — reputational exposure" },
+};
+
+/** What the player can actually see and pick in the report-builder's risk
+ * dropdown — see the block comment above REPORTABLE_RISK_CATALOG for the
+ * full model. Still gated on isEventEligible (a risk that literally cannot
+ * fire this playthrough — e.g. its metric threshold was never crossed — is
+ * not "still relevant" to report on, even if the player once investigated
+ * around it), on top of the evidence/materialisation gating below. */
+export function computeKnownReportableRisks(state: GameState): ReportableRisk[] {
+  const results: ReportableRisk[] = [];
+  for (const [eventId, entry] of Object.entries(REPORTABLE_RISK_CATALOG)) {
+    if (!isEventEligible(eventId, state)) continue;
+    if (state.eventsResolved.includes(eventId)) {
+      results.push({ riskId: eventId, title: entry.issueLabel, status: "issue" });
+      continue;
+    }
+    if (entry.preDiscovery && entry.preDiscovery.anyOfFlags.some((flag) => state.flags[flag])) {
+      results.push({ riskId: eventId, title: entry.preDiscovery.label, status: "risk" });
+    }
+  }
+  return results;
 }
 
 /** Adds or upgrades an entry in the player's artefacts drawer. Never

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { GameState, RagStatus, StatusReportRecord, ToolScreenBlock } from "@/lib/nova/types";
-import { computeActualStatusReport, computeWeeksRemaining } from "@/lib/nova/state";
+import { computeKnownReportableRisks, computeWeeksRemaining } from "@/lib/nova/state";
 import { getToolScreen } from "@/lib/nova/data";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
@@ -135,8 +135,11 @@ export default function StatusReportBuilder({
   const [accomplishments, setAccomplishments] = useState<Set<string>>(new Set());
   const [activities, setActivities] = useState<Set<string>>(new Set());
 
-  const actualReport = computeActualStatusReport(gameState);
-  const risks = actualReport.risks; // id + title only ever shown — never .rag
+  // Only risks the player has actual in-fiction evidence for — never the
+  // hidden truth-engine's full eligible-event pool. See
+  // computeKnownReportableRisks' doc comment in state.ts for the full
+  // discovered/materialised model.
+  const risks = computeKnownReportableRisks(gameState);
 
   const currentWeek = Math.max(0, Math.min(24, computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)));
 

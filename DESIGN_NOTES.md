@@ -340,3 +340,97 @@ BioPharma" mark) was resized to 300x170 and saved to
 `<img>` tag — not inlined as base64 in the component source (that pattern
 was only ever a mockup-scratch-file convenience for `show_widget`, never
 meant to ship in real committed code).
+
+---
+
+## Monthly Status Report — risk dropdown was leaking the event engine; replaced with evidence-gated reportable risks
+
+**Status:** Implemented. Reverses part of the original Task #183 design —
+read that entry above first, since this corrects a real conceptual error
+in it, not just a UI tweak.
+
+**The problem, as flagged in review:** `StatusReportBuilder`'s risk
+dropdown originally sourced straight from `computeActualStatusReport(state)
+.risks` (`computeActiveRisks` — every Main/Late Wave event whose
+`isEventEligible` condition is currently true). By the time the player
+reaches report #1 (ACT4_SCENE05, right after Main Wave fires at
+ACT4_SCENE04), that pool held ~14 entries — including future Late Wave
+events the player hadn't lived through yet (e.g. "Cyberattack Locks the
+Building Management System") and purely positive reversal events ("The
+Ally You Didn't Expect", "The Deferred Decision Pays Off"). That's the
+event engine's own eligibility bookkeeping, not something a PM could
+plausibly know to write into a report — it broke the fiction and worked
+against Act 4's actual point (interpreting evidence, not reading the
+engine's mind).
+
+**The fix — two completely separate risk models now exist, on purpose:**
+
+1. `computeActiveRisks`/`ActualStatusReport.risks` (unchanged) — the
+   hidden TRUTH engine, still exactly what it always was: every currently-
+   eligible event, never shown to the player, preserved as
+   `StatusReportRecord.actualSnapshot` for a possible future Act 5 "what
+   you said vs what was true" payoff.
+2. `computeKnownReportableRisks(state): ReportableRisk[]` (new) — the
+   ONLY thing `StatusReportBuilder.tsx` is allowed to read. Built around a
+   three-stage lifecycle per event: hidden (no evidence yet) -> "risk"
+   (player has real in-fiction evidence, shown with a deliberately vaguer
+   pre-materialisation label) -> "issue" (the event has actually played
+   out as a scene, shown with a plain, specific, no-longer-a-spoiler
+   label). A closed/mitigated fourth stage is deliberately not built yet —
+   nothing today ever un-resolves an event or offers a "closed" label;
+   logged here as a follow-up, not half-built.
+
+**`GameState.eventsResolved: string[]`** (new field) — the missing piece
+that made "has this event actually happened yet" answerable at all.
+Nothing tracked this before; `eventQueue`/`eventQueueIndex` only describe
+the *currently in-progress* wave and get cleared back to null once it
+finishes. Appended to in `GameRoot.tsx`'s `advanceEventQueue` — the single
+choke point every queued event's own scene (never its `precedingDialogueId`
+lead-in beat) passes through on its way to whatever comes next, so this
+needed no new call sites, just one field push at an existing one.
+
+**`REPORTABLE_RISK_CATALOG`** (new, `lib/nova/state.ts`) — a hand-curated
+map, NOT auto-derived from `events.json`, covering only the 14 actual
+"risk"-category Main/Late Wave events (`EVENT_WAVE_MEMBERS` minus the four
+EV-R reversal events, which are absent from this catalog entirely and can
+therefore never appear, full stop — they're retrospective
+recontextualisations of a past decision, not something a player could ever
+be "reporting on" in the RAID sense, and at least two are explicitly good
+news). Only three entries (EV-02, EV-06, EV-10) currently have a
+`preDiscovery` block, because those are the only three events with a real
+built-in early-evidence channel today — the Act 2 Risk Workshop's three
+`risk_investigation.json` banks (contractor/validation/contingency) and
+their paired `_risk_logged` choice, all from Task #178's honesty-mechanic
+work. The other 11 events (EV-NP2, EV-03/04/05/08/11/13, EV-07/09/14/15)
+have no early-evidence channel built yet, so they can only ever appear
+post-materialisation, as an issue — a real scope limit, not an oversight;
+worth building dedicated discovery beats for the higher-profile ones
+(EV-09's cyberattack especially) later, exactly as the review suggested
+("surfaced via email/Teams/news/site evidence").
+
+**Example, matching the review's own worked case:** EV-06 (Electrical
+Contractor Goes Bankrupt) — before it fires, if the player asked Vaughn
+about impact/mitigation or formally logged the risk in Act 2, the
+dropdown shows "Electrical contractor financial instability" (status
+`"risk"`). With zero evidence, EV-06 is invisible even though
+`isEventEligible("EV-06", state)` is unconditionally `true` — this is the
+core behavioural change; the old code showed it regardless. Once the
+event has actually played out (`state.eventsResolved` includes `"EV-06"`),
+it flips to "Electrical contractor insolvency — replacement required"
+(status `"issue"`), regardless of whether it was ever investigated in
+advance.
+
+**Eligibility is still checked, on top of discovery/materialisation:** a
+risk the player investigated but that can literally never fire this
+playthrough (e.g. EV-02's `regulatoryReadiness < 60` never actually
+crosses) stays hidden — "still relevant" is part of the review's own
+definition of reportable, not just "known".
+
+**Verified** via a throwaway scripted check (written, run, deleted per
+convention): fresh state shows zero reportable risks despite several
+always-eligible events existing; EV-R1–4 never appear under any
+flags/resolved combination; EV-06 surfaces with the vague pre-discovery
+label once evidenced, stays hidden with zero evidence despite being
+always-eligible, and flips to the specific issue label once resolved;
+EV-02 stays hidden while ineligible even with evidence logged, and
+surfaces once both eligible and evidenced.

@@ -112,6 +112,17 @@ export interface GameState {
    * Act 4 report redesign wire the new report-builder UI into it) is
    * submitted. */
   statusReports: StatusReportRecord[];
+  /** eventIds (see EventEntry) whose OWN scene the player has actually
+   * finished — never the lead-in "revisited" beat some events have, only
+   * the real event scene itself (see isActiveQueuedEventScene). Appended
+   * to in GameRoot's advanceEventQueue, the single choke point every
+   * queued event scene passes through on its way to whatever comes next.
+   * This is what lets computeKnownReportableRisks tell "a risk the player
+   * has evidence for but hasn't happened yet" apart from "a risk that has
+   * now materialised into an issue" — nothing before this field existed
+   * tracked which events had actually played out, only which wave they
+   * belonged to and whether they were currently eligible to fire. */
+  eventsResolved: string[];
 }
 
 /** Which version of a found document is currently on file. See the
@@ -306,14 +317,18 @@ export interface StatusReportDimension {
   evidence: string[];
 }
 
-/** One entry in the report's risk pool — a Main/Late Wave event whose own
- * eligibility condition (see isEventEligible in state.ts) is true right
- * now, regardless of whether the player has already lived through that
- * event's scene. `rag` is a first-pass simplification (every active risk
- * currently shares one banding off riskExposure, the same signal the
- * HUD's own risk chip uses) — the obvious place to add per-risk severity
- * later if a report ever needs risks that read differently from each
- * other. */
+/** One entry in the report's HIDDEN TRUTH risk pool — a Main/Late Wave
+ * event whose own eligibility condition (see isEventEligible in state.ts)
+ * is true right now, regardless of whether the player has any in-fiction
+ * evidence of it yet. This is ground truth for a future "what you said vs
+ * what was true" comparison (see StatusReportRecord.actualSnapshot) —
+ * NEVER what the report-builder UI's risk picker shows the player. That
+ * is a completely separate, much smaller list — see ReportableRisk /
+ * computeKnownReportableRisks. `rag` is a first-pass simplification
+ * (every active risk currently shares one banding off riskExposure, the
+ * same signal the HUD's own risk chip uses) — the obvious place to add
+ * per-risk severity later if a report ever needs risks that read
+ * differently from each other. */
 export interface ActiveRisk {
   riskId: string;
   title: string;
@@ -330,6 +345,22 @@ export interface ActualStatusReport {
   resource: StatusReportDimension;
   milestone: StatusReportDimension;
   risks: ActiveRisk[];
+}
+
+/** One entry the player can actually SEE and pick in the report-builder's
+ * risk dropdown — deliberately a completely separate model from
+ * ActiveRisk/ActualStatusReport.risks (the hidden truth engine). A risk
+ * only appears here once the player has real in-fiction evidence of it:
+ * either they investigated/logged it in advance (status "risk", a
+ * deliberately vaguer pre-materialisation label — see
+ * REPORTABLE_RISK_CATALOG in state.ts) or it has actually played out as a
+ * scene (status "issue", plain now-it's-history phrasing). Events with
+ * neither kind of evidence yet are simply absent — this is what stops the
+ * status report from reading as a menu of future plot hooks. */
+export interface ReportableRisk {
+  riskId: string;
+  title: string;
+  status: "risk" | "issue";
 }
 
 /** One risk the player chose to surface in a submitted report, and how
