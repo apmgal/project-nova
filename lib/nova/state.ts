@@ -9,6 +9,8 @@ import type {
   RagStatus,
   StatusReportDimension,
   ActualStatusReport,
+  ActiveRisk,
+  StatusReportRecord,
 } from "./types";
 import { getCharacter, getDefaultGameState, getEvent, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
@@ -46,6 +48,7 @@ export function loadGame(): GameState | null {
     if (state.eventQueueIndex === undefined) state.eventQueueIndex = 0;
     if (state.eventQueueExitScene === undefined) state.eventQueueExitScene = null;
     if (!state.decisions) state.decisions = {};
+    if (!state.statusReports) state.statusReports = [];
     return state;
   } catch {
     return null;
@@ -183,6 +186,20 @@ export function applySceneFlagsSet(
 const HONESTY_REPORT_SCENES = new Set(["ACT4_SCENE05B", "ACT4_SCENE05C"]);
 const HONESTY_ACCURATE_TRUST_GAIN = 5;
 const HONESTY_DEFERRED_TRUST_PENALTY = -10;
+
+/** Scenes whose CHOICE_ACT4_SCENE05_M1-style honestyTone choice is being
+ * superseded by the Act 4 report redesign's new report-builder UI (step
+ * 4/5) — GameRoot's handleSelectChoice skips actually running
+ * applyHonestyReport for a choice fired from one of these scenes (it still
+ * strips the honestyTone key out of that option's effects either way, so
+ * the string never reaches applyEffects). This exists so report #1 can be
+ * switched over to the new mechanic without also having to touch
+ * choices.json or risk double-scoring the same report once both
+ * mechanisms would otherwise fire for the same submission. Currently just
+ * ACT4_SCENE05 (report #1, the only one migrated so far) —
+ * ACT4_SCENE05B/05C keep the original mechanic fully live and untouched
+ * until a later step migrates them too. See DESIGN_NOTES.md. */
+export const HONESTY_MECHANIC_DEPRECATED_SCENES = new Set(["ACT4_SCENE05"]);
 
 /** Whether the project's true state is bad enough that a rosy status
  * report would be misleading — the exact pair of conditions named in
@@ -386,13 +403,60 @@ function computeResourceDimension(state: GameState): StatusReportDimension {
   return { rag: "amber", reasonCodes: ["RESOURCE_STRAINED"], evidence };
 }
 
+/** Every Main/Late Wave event whose own eligibility condition (the exact
+ * same check computeEventQueue uses) is true right now — reused rather
+ * than reimplemented, so a risk shows up in the report's pool the moment
+ * its real trigger condition is true, matching how a real PM's status
+ * report reports on currently-live risk conditions, not just events the
+ * player has personally already lived through as a scene. Order follows
+ * each wave's own declared order (EVENT_WAVE_MEMBERS), Main Wave first.
+ * Computed inline (rather than a top-level constant) because
+ * EVENT_WAVE_MEMBERS itself is declared later in this file — by the time
+ * this function is actually called the whole module has finished
+ * initializing, but a top-level `const` referencing it here would trip
+ * the temporal-dead-zone check at module-eval time. */
+function computeActiveRisks(state: GameState): ActiveRisk[] {
+  const pool = [...EVENT_WAVE_MEMBERS.MAIN_WAVE, ...EVENT_WAVE_MEMBERS.LATE_WAVE];
+  // Same banding the HUD's own risk chip uses (metricBand(riskExposure,
+  // false) — default 60/30 thresholds) — every active risk currently
+  // shares this one severity rather than each having its own; see
+  // ActiveRisk's doc comment for why that's a deliberate first pass.
+  const rag = ragFromBand(metricBand(state.projectMetrics.riskExposure, false));
+  return pool.filter((eventId) => isEventEligible(eventId, state)).map((eventId) => ({
+    riskId: eventId,
+    title: getEvent(eventId)?.title ?? eventId,
+    rag,
+  }));
+}
+
 export function computeActualStatusReport(state: GameState): ActualStatusReport {
   return {
     budget: computeBudgetDimension(state),
     scope: computeScopeDimension(state),
     resource: computeResourceDimension(state),
     milestone: computeMilestoneDimension(state),
+    risks: computeActiveRisks(state),
   };
+}
+
+/**
+ * Records a player's Monthly Status Report submission — see
+ * StatusReportRecord's doc comment for why both `actualSnapshot` (a fresh
+ * computeActualStatusReport() capture, taken here, at submission time) and
+ * `submission`'s own reported/selectedRisks/etc. views are kept. The
+ * report-builder UI (step 4/5) owns everything about what the player
+ * actually picked; this function's only job is pairing that with the
+ * truth at the same moment and appending it to the log.
+ */
+export function submitStatusReport(
+  state: GameState,
+  submission: Omit<StatusReportRecord, "actualSnapshot">
+): GameState {
+  const record: StatusReportRecord = {
+    ...submission,
+    actualSnapshot: computeActualStatusReport(state),
+  };
+  return { ...state, statusReports: [...state.statusReports, record] };
 }
 
 /** Adds or upgrades an entry in the player's artefacts drawer. Never

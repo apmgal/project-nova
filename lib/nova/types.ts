@@ -105,6 +105,13 @@ export interface GameState {
    * rather than repeating that pattern every time new content needs to
    * remember which of several named options a choice picked. */
   decisions: Record<string, string>;
+  /** Every Monthly Status Report the player has submitted so far, oldest
+   * first — see StatusReportRecord for what each entry holds and why it
+   * keeps both the actual-state snapshot and the reported values. Empty
+   * until the first report (currently ACT4_SCENE05, once step 4/5 of the
+   * Act 4 report redesign wire the new report-builder UI into it) is
+   * submitted. */
+  statusReports: StatusReportRecord[];
 }
 
 /** Which version of a found document is currently on file. See the
@@ -299,6 +306,20 @@ export interface StatusReportDimension {
   evidence: string[];
 }
 
+/** One entry in the report's risk pool — a Main/Late Wave event whose own
+ * eligibility condition (see isEventEligible in state.ts) is true right
+ * now, regardless of whether the player has already lived through that
+ * event's scene. `rag` is a first-pass simplification (every active risk
+ * currently shares one banding off riskExposure, the same signal the
+ * HUD's own risk chip uses) — the obvious place to add per-risk severity
+ * later if a report ever needs risks that read differently from each
+ * other. */
+export interface ActiveRisk {
+  riskId: string;
+  title: string;
+  rag: RagStatus;
+}
+
 /** The project's real position at the moment a report is opened — never
  * shown directly to the player. What they see and choose to submit is a
  * separate, independent RAG per dimension (the report UI's own state,
@@ -308,6 +329,44 @@ export interface ActualStatusReport {
   scope: StatusReportDimension;
   resource: StatusReportDimension;
   milestone: StatusReportDimension;
+  risks: ActiveRisk[];
+}
+
+/** One risk the player chose to surface in a submitted report, and how
+ * they chose to characterize it — independent of (and possibly different
+ * from) that risk's entry in the same report's `actualSnapshot.risks`. */
+export interface SelectedRiskReport {
+  riskId: string;
+  reportedRag: RagStatus;
+  outlook: "worsening" | "stable" | "improving";
+  mitigationId?: string;
+}
+
+/** A single submitted Monthly Status Report, as stored on
+ * GameState.statusReports. Deliberately keeps BOTH views rather than only
+ * the current one: `actualSnapshot` is a full computeActualStatusReport()
+ * capture at the moment of submission (rag + reasonCodes + evidence +
+ * risks, per dimension), and `reported` is what the player independently
+ * chose to submit — everything else in this shape (`selectedRisks` with
+ * per-risk reported RAG/outlook/mitigation, not just risk ids;
+ * `selectedAccomplishments`/`selectedUpcomingActivities`) is the rest of
+ * that same submission. Keeping both means a later scene or Act 5 payoff
+ * can compare "what they said" against "what was true" without having to
+ * reconstruct a since-moved-on GameState. */
+export interface StatusReportRecord {
+  reportId: string;
+  submittedAtScene: string;
+  actualSnapshot: ActualStatusReport;
+  reported: {
+    overall: RagStatus;
+    budget: RagStatus;
+    scope: RagStatus;
+    resource: RagStatus;
+    milestone: RagStatus;
+  };
+  selectedRisks: SelectedRiskReport[];
+  selectedAccomplishments: string[];
+  selectedUpcomingActivities: string[];
 }
 
 export interface EventEntry {

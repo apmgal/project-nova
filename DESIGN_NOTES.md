@@ -189,3 +189,55 @@ actually set — only the individual `filling_line_deferred` and
 could never have fired before this fix. Resolved by evaluating `flags.
 filling_line_deferred || flags.filling_line_rejected` inline instead of
 depending on a derived flag that has to be kept in sync by hand.
+
+---
+
+## Monthly Status Report — risks array, report persistence, honesty-mechanic isolation
+
+**Status:** Implemented (`lib/nova/state.ts`, Task #183). Continues directly
+from the "actual-state RAG formulas" entry above — read that one first.
+
+**`ActualStatusReport.risks`:** a fourth thing the truth engine returns
+alongside the four RAG dimensions — the current *pool* of reportable risks,
+not a verdict. `computeActiveRisks` reuses `isEventEligible` (the exact
+function `computeEventQueue` uses to decide what actually fires) against
+the combined Main + Late Wave event pool, so a risk enters the pool the
+moment its real trigger condition is true — matching how a real PM's status
+report reports on currently-live risk conditions, not just events the
+player has personally already lived through as a scene. Every risk
+currently shares one `rag`, banded off `riskExposure` the same way the
+HUD's own risk chip is — a deliberate first pass; if a later report needs
+risks that read differently from each other, that's the place to add
+per-risk severity.
+
+**`GameState.statusReports` / `submitStatusReport`:** persistence for
+submitted reports, storing BOTH views rather than only the current one —
+`actualSnapshot` (a full `computeActualStatusReport()` capture taken at
+submission time, including `risks`) and `reported` (the player's
+independently-chosen RAG per dimension + overall), plus `selectedRisks`
+with per-risk detail (`riskId`, `reportedRag`, `outlook`, `mitigationId` —
+not just risk ids) and `selectedAccomplishments`/`selectedUpcomingActivities`.
+Kept both because by the time a later scene or Act 5 payoff wants to
+compare "what they said" against "what was true", the live GameState has
+moved on and the true position at submission time would otherwise be
+unrecoverable. `submitStatusReport` only computes `actualSnapshot` and
+appends — everything about what the player actually picked is the future
+report-builder UI's own concern (step 4/5), not modeled here.
+
+**Honesty mechanic isolation for report #1:** the OLD `applyHonestyReport`/
+`applyDeferredHonestyPenalty` mechanic (CHOICE_ACT4_SCENE05_M1/M2's 3-option
+`honestyTone` choice) still exists and still fully drives
+ACT4_SCENE05B/05C. Once the new report-builder UI replaces ACT4_SCENE05's
+own choice, calling both mechanisms for the same submission would
+double-score it. `HONESTY_MECHANIC_DEPRECATED_SCENES` (currently just
+`{"ACT4_SCENE05"}`) names which scenes' honestyTone scoring GameRoot's
+`handleSelectChoice` should skip; the `honestyTone` string is still always
+stripped out of `option.effects` before `applyEffects` runs regardless of
+scene, only the actual `applyHonestyReport` *call* is skipped. Until step
+4/5 actually replace ACT4_SCENE05's content, this makes its 3 tone options
+cosmetically different but mechanically inert — an accepted, temporary
+state. `applyDeferredHonestyPenalty` needed no matching change: it only
+ever fires on entry to ACT4_SCENE05B/05C (never ACT4_SCENE05 itself), and
+with report #1 no longer setting `honesty_penalty_pending`, entering
+ACT4_SCENE05B simply finds nothing pending — a clean no-op, not an orphaned
+penalty.

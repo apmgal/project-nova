@@ -63,6 +63,7 @@ import {
   applyHonestyReport,
   applyDeferredHonestyPenalty,
   applyDecisions,
+  HONESTY_MECHANIC_DEPRECATED_SCENES,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -627,9 +628,14 @@ export default function GameRoot() {
     // mechanic first; whatever's left of option.effects (nothing, for
     // those two, but kept generic for any future content that combines
     // honestyTone with ordinary numeric effects) goes through applyEffects
-    // exactly as before.
+    // exactly as before. The string is always stripped out regardless of
+    // scene (so it never reaches applyEffects), but applyHonestyReport's
+    // actual scoring only runs outside HONESTY_MECHANIC_DEPRECATED_SCENES
+    // — see that set's doc comment in state.ts for why (Act 4 report
+    // redesign, report #1 moving to the new report-builder UI).
     const honestyTone = getEffectString(option.effects, "honestyTone");
-    let next = honestyTone ? applyHonestyReport(gameState, honestyTone) : gameState;
+    const skipHonestyMechanic = HONESTY_MECHANIC_DEPRECATED_SCENES.has(gameState.currentScene);
+    let next = honestyTone && !skipHonestyMechanic ? applyHonestyReport(gameState, honestyTone) : gameState;
     const remainingEffects = honestyTone
       ? Object.fromEntries(Object.entries(option.effects ?? {}).filter(([key]) => key !== "honestyTone"))
       : option.effects;
