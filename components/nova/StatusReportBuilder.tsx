@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { GameState, RagStatus, StatusReportRecord, ToolScreenBlock } from "@/lib/nova/types";
-import { computeKnownReportableRisks, computeWeeksRemaining } from "@/lib/nova/state";
+import { computeKnownReportableRisks } from "@/lib/nova/state";
 import { getToolScreen } from "@/lib/nova/data";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 
@@ -34,6 +34,11 @@ function cycleRag(current: RagStatus | null): RagStatus | null {
   const idx = RAG_CYCLE.indexOf(current);
   return RAG_CYCLE[(idx + 1) % RAG_CYCLE.length];
 }
+
+/** How many weeks of story time one Monthly Status Report represents —
+ * see the doc comment on `currentWeek` below for why this replaces the
+ * HUD's forecast-based week number for this feature specifically. */
+const WEEKS_PER_REPORT = 4;
 
 const NAVY = "#1f3864";
 const LINE = "#c9c9c9";
@@ -141,7 +146,21 @@ export default function StatusReportBuilder({
   // discovered/materialised model.
   const risks = computeKnownReportableRisks(gameState);
 
-  const currentWeek = Math.max(0, Math.min(24, computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)));
+  // Deliberately NOT computeWeeksRemaining(scheduleHealth) — that's a
+  // forecast ("if this pace holds, the whole project would take about X
+  // weeks"), not real elapsed story time, and it can already read close
+  // to 24 very early in a playthrough with poor schedule health (a known,
+  // documented issue — see DESIGN_NOTES.md's "HUD 'current week' is a
+  // forecast, not real elapsed time"). Reusing it here made EVERY Gantt
+  // milestone read as already-complete from report #1 onward, leaving
+  // Upcoming Milestones permanently empty regardless of what the player
+  // actually placed. Instead: each Monthly Status Report genuinely
+  // represents about a month of story time (the scene's own title says
+  // "x3" reports covering the project), so report N's reporting week is
+  // simply N * WEEKS_PER_REPORT — real, deterministic, and independent of
+  // the flawed forecast. Report #1 opens at week 4, #2 at week 8, #3 at
+  // week 12, leaving plenty of the 24-week plan still genuinely ahead.
+  const currentWeek = Math.min(24, (gameState.statusReports.length + 1) * WEEKS_PER_REPORT);
 
   const ganttTool = toolScreen.ganttToolId ? getToolScreen(toolScreen.ganttToolId) : null;
   const ganttPlacements = ganttTool ? (gameState.toolPlacements[ganttTool.toolId] ?? {}) : {};

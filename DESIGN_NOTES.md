@@ -471,3 +471,40 @@ milestones while including in-progress ones, at two different simulated
 `currentWeek` values against real placed Gantt data — e.g. at week 9
 (mid-Equipment), only Equipment's real WBS task cards appear; pushing to
 week 14 correctly swaps the window to Validation/Training instead.
+
+---
+
+## Monthly Status Report — stopped reusing the HUD's flawed week forecast for `currentWeek`
+
+**Status:** Implemented. Direct consequence of this file's own "HUD
+'current week' is a forecast, not real elapsed time" entry — read that
+one first, since this is exactly the failure mode it warned about,
+now actually hit by a real feature.
+
+**The bug, as reported:** report #1's "Upcoming Milestones" table showed
+"None remaining" — every single Gantt milestone read as already complete,
+even on the very first report, regardless of what the player had placed.
+Cause: `currentWeek` reused `computeWeeksRemaining(scheduleHealth)` (the
+same forecast the HUD's "Est. Completion" chip shows), clamped to 24.
+That's explicitly a forecast ("if this pace holds, the project would take
+about X weeks total"), not a real elapsed-time clock — it can already
+read close to 24 very early in a playthrough with anything less than
+excellent schedule health, which is exactly what was happening here.
+
+**The fix — deliberately scoped to the status report only, not a general
+fix for the HUD's own use of the same forecast (still open, still
+tracked in the entry above):** each Monthly Status Report now represents
+a real, fixed ~4 weeks of story time (`WEEKS_PER_REPORT` in
+`StatusReportBuilder.tsx`) — matching the scene's own title ("Monthly
+Status Reports (x3)"). `currentWeek` is now simply `(state.statusReports
+.length + 1) * WEEKS_PER_REPORT`, clamped to 24: report #1 opens at week
+4, #2 at week 8, #3 at week 12 — real, deterministic, and completely
+independent of `scheduleHealth`/the forecast. `computeWeeksRemaining`
+import removed from this file entirely; the HUD's own use of it for "Est.
+Completion" and "Current Objective" is untouched.
+
+**Verified** via a throwaway scripted check (written, run, deleted):
+confirmed report #1 now opens at week 4 (not 24), and that with the same
+placed Gantt data used in the Upcoming Activities check above, all 6
+milestones correctly show as upcoming at that week — the reported "None
+remaining" symptom is gone.
