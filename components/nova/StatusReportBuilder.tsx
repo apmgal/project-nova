@@ -622,9 +622,9 @@ export default function StatusReportBuilder({
         <div className="mt-3.5 flex justify-end">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/assets/branding/astrazeneca_icon_logo.png"
+            src="/assets/branding/astrazeneca_icon_logo_transparent.png"
             alt="AstraZeneca logo"
-            className="h-12 w-auto rounded bg-black px-2.5 py-1"
+            className="h-12 w-auto"
           />
         </div>
       </div>
