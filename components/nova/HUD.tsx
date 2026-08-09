@@ -33,9 +33,9 @@ const METRIC_HELP: { label: string; description: string }[] = [
       "How much of your £12M starting budget is left. Spent through your MoSCoW choices, any Cost Breakdown cut, and who you hired.",
   },
   {
-    label: "Schedule",
+    label: "Delivery Pace",
     description:
-      "How your timeline is tracking. Rises when choices speed delivery up, drops when they slow it down — this is what the Week counter is built from.",
+      "How fast the project is moving against its 24-week plan. Rises when choices speed delivery up, drops when they slow it down — the Est. finish week is projected straight from this.",
   },
   {
     label: "Risk",
@@ -145,8 +145,8 @@ function TutorialPopover({
  *
  * A "?" toggle (re)starts a sequential coach-mark tour: one chip
  * highlighted at a time (the rest dimmed), a callout underneath naming it
- * and explaining what it measures, "Got it" advancing Budget -> Schedule
- * -> Risk -> Quality -> Benefits, "Skip tutorial" ending it immediately.
+ * and explaining what it measures, "Got it" advancing Budget -> Delivery
+ * Pace -> Risk -> Quality -> Benefits, "Skip tutorial" ending it immediately.
  * It auto-starts the first time the HUD ever mounts (gated by
  * flags.hud_tutorial_seen, set via onDismissTutorial once the tour ends
  * or is skipped for the first time) and can be replayed from the start
@@ -223,7 +223,7 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
         </div>
         <div className="relative">
           <Chip
-            label="Schedule"
+            label="Delivery Pace"
             value={`${metrics.scheduleHealth}`}
             band={metricBand(metrics.scheduleHealth, true)}
             state={chipState(1)}
