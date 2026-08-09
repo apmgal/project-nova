@@ -890,3 +890,44 @@ task-order):**
 5. Only then decide whether the interrupt pattern and/or a
    location-per-event system are actually needed, based on whether the
    prototype already closes most of the gap.
+
+**Step 2 (audit) result: partially reusable — components are generic,
+the attachment point isn't.**
+
+`EmailInboxPanel`/`TeamsThreadPanel`/`SharePointBrowserPanel` are all
+thin renderers over one shared shape (`RiskInvestigationBank`/
+`RiskInvestigationQuestion` — id/dimension/questionText/answerText/
+flagOnAsk). None of them know they're Act 1 content; they just render
+whatever bank they're handed. `TeamsThreadPanel` shows a full thread at
+once (not click-to-reveal, auto-marks everything read on mount), which
+is architecturally closer to "a message just arrived" than
+`EmailInboxPanel`'s browsable-inbox pattern is.
+
+The real constraint isn't the components, it's how a bank gets shown at
+all: currently strictly via `ChoiceBlock.riskInvestigationId` — a bank
+plays as an interstitial in front of a *choice's* own options
+(`atInvestigation` in GameRoot.tsx gates on `pendingChoice.block
+.riskInvestigationId`). There's no scene-level or event-level hook.
+Several Act 4 events don't even have a `choicesId` (EV-R2, EV-R4 are
+pure narration beats) so "attach a bank to the existing choice" doesn't
+reach them regardless. Clean fix, not yet built: extend the same
+mechanism `precedingDialogueId`/`EVENT_FRAME_SUFFIX` already uses for
+lead-in scenes so an event can optionally lead in with a bank panel
+instead of (or alongside) plain dialogue — same shape of change as the
+`toolId` passthrough already added for the RAID card, reusing the
+existing queue/scene machinery rather than adding a new one.
+
+Two real (if small) costs, not blockers: `TeamsThreadPanel`'s
+(`TEAMS_META`, `AVATAR_COLORS`) and `SharePointBrowserPanel`'s
+(`FILE_META`) per-message chrome are keyed by hardcoded ids/character
+names local to each component — cheap to extend (one map entry per new
+message) but not zero-touch. `DocumentDiscoveredCard` is the one
+genuinely NOT cheap: tied to `ARTEFACT_REGISTRY`'s pre-rendered
+incomplete/complete PNG pairs, so using it for a new Act 4 "document"
+means real art assets, not just JSON/data work.
+
+**Conclusion:** reusable for single-message (email/Teams-style)
+delivery once one small new engine hook exists (bank-panel lead-in).
+Document-reveal specifically carries real production cost per document,
+separate from the code question. Step 3 (prototype 2-3 major events)
+is unblocked and cheap; not yet started, pending go-ahead.
