@@ -176,8 +176,11 @@ export default function StatusReportBuilder({
         m !== null
     );
 
+  // "Upcoming" means genuinely hasn't started yet — a milestone already
+  // under way (start <= currentWeek < end) isn't upcoming just because
+  // it's unfinished, so this checks start, not end.
   const upcomingMilestones = resolvedMilestones
-    .filter((m) => m.end > currentWeek)
+    .filter((m) => m.start > currentWeek)
     .sort((a, b) => a.start - b.start);
   const completedMilestones = resolvedMilestones.filter((m) => m.end <= currentWeek);
 

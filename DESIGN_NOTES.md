@@ -508,3 +508,18 @@ confirmed report #1 now opens at week 4 (not 24), and that with the same
 placed Gantt data used in the Upcoming Activities check above, all 6
 milestones correctly show as upcoming at that week — the reported "None
 remaining" symptom is gone.
+
+**Follow-up:** Upcoming Milestones originally filtered on `end >
+currentWeek` (not yet finished), which let an already-in-progress
+milestone (started before currentWeek but not yet complete) still show as
+"upcoming" — reported as incorrect, since something already under way
+isn't upcoming. Changed to `start > currentWeek` (genuinely hasn't
+started yet). Verified via another throwaway scripted check: an
+in-progress milestone (start before currentWeek, end after) is now
+excluded from Upcoming Milestones. Note this leaves in-progress
+milestones absent from BOTH Upcoming Milestones (correctly, they've
+started) and Key Accomplishments (correctly, they're not finished) — no
+"in progress" section exists in the report yet; Upcoming Activities is
+the only place in-progress work is deliberately still visible (see the
+entry above — its near-term window intentionally includes `start <=
+currentWeek`, by design, unaffected by this change).
