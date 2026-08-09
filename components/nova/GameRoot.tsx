@@ -59,6 +59,9 @@ import {
   resolveEventQueueEntryScene,
   isActiveQueuedEventScene,
   supplierTemplateValues,
+  getEffectString,
+  applyHonestyReport,
+  applyDeferredHonestyPenalty,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -297,6 +300,11 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
+    // A no-op outside ACT4_SCENE05B/05C — see the Monthly Status Report
+    // honesty mechanic's own section comment in state.ts for why this
+    // lives here (scene-entry) rather than inside the report's own choice
+    // handler.
+    next = applyDeferredHonestyPenalty(next, sceneId);
     return next;
   }
 
@@ -613,7 +621,18 @@ export default function GameRoot() {
 
   function handleSelectChoice(option: ChoiceOption, choiceId: string) {
     if (!gameState) return;
-    let next = applyEffects(gameState, option.effects);
+    // honestyTone (CHOICE_ACT4_SCENE05_M1/M2) is a string, not a metric
+    // delta applyEffects can apply — pulled out and handled by its own
+    // mechanic first; whatever's left of option.effects (nothing, for
+    // those two, but kept generic for any future content that combines
+    // honestyTone with ordinary numeric effects) goes through applyEffects
+    // exactly as before.
+    const honestyTone = getEffectString(option.effects, "honestyTone");
+    let next = honestyTone ? applyHonestyReport(gameState, honestyTone) : gameState;
+    const remainingEffects = honestyTone
+      ? Object.fromEntries(Object.entries(option.effects ?? {}).filter(([key]) => key !== "honestyTone"))
+      : option.effects;
+    next = applyEffects(next, remainingEffects);
     next = applyFlags(next, option.flags);
     next = {
       ...next,

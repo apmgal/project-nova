@@ -108,6 +108,22 @@ export function applyFlags(state: GameState, flags: Flags | undefined): GameStat
   return { ...state, flags: { ...state.flags, ...flags } };
 }
 
+/** Reads an `effects` entry whose value is a string rather than the usual
+ * number — e.g. honestyTone ("optimistic"/"measured"/"transparent"), a
+ * per-choice signal a few scenes need to hand off to their own bespoke
+ * logic instead of a flat metric delta applyEffects could apply. Effects
+ * is typed as Record<string, number> since that's what every ordinary
+ * effect actually is; this is the narrow, explicit escape hatch for the
+ * handful that aren't — mirrors getFlagString below for the same reason. */
+export function getEffectString(
+  effects: Record<string, number> | undefined,
+  key: string
+): string | undefined {
+  if (!effects) return undefined;
+  const value = (effects as unknown as Record<string, unknown>)[key];
+  return typeof value === "string" ? value : undefined;
+}
+
 /** Applies a scene's own `flagsSet` array (flags that become true simply by
  * reaching/completing the scene, independent of any choice). */
 export function applySceneFlagsSet(
@@ -125,6 +141,86 @@ export function applySceneFlagsSet(
     }
   }
   return { ...state, flags: nextFlags };
+}
+
+// ---------------------------------------------------------------------------
+// Monthly Status Report honesty mechanic (ACT4_SCENE05/05B/05C) —
+// CHOICE_ACT4_SCENE05_M1/M2 both carry an `effects: { honestyTone: ... }`
+// that's never a fixed marcusTrust delta (per their own identical
+// engineNote): the real question is whether the CHOSEN tone matches the
+// ACTUAL project state at report time, and if it doesn't, the cost is
+// deferred to the START of the next report rather than charged
+// immediately — the delay between the lie and its consequence is the
+// mechanic's whole point (DIALOGUE_ACT4_SCENE05C even narrates it: "you've
+// learned whether honesty costs you less than the alternative — or more").
+//
+// Two flags do two different jobs, deliberately kept separate:
+//   - hid_problem_from_marcus: purely a DISPLAY flag. DIALOGUE_ACT4_SCENE05B
+//     already keys its own reaction lines ("I asked for one thing...") off
+//     it — untouched by this mechanic beyond setting/clearing it at the
+//     right moments, exactly as if it had been hand-authored as a plain
+//     choice-set flag.
+//   - honesty_penalty_pending: pure bookkeeping. Tracks whether a
+//     marcusTrust penalty is still owed from an earlier misleading report.
+//     Consumed (and cleared) the instant the next report scene is entered,
+//     independent of hid_problem_from_marcus's own display-driven
+//     lifecycle — keeping these separate is what stops a penalty from
+//     applying twice for the same lie (see applyDeferredHonestyPenalty).
+// ---------------------------------------------------------------------------
+
+const HONESTY_REPORT_SCENES = new Set(["ACT4_SCENE05B", "ACT4_SCENE05C"]);
+const HONESTY_ACCURATE_TRUST_GAIN = 5;
+const HONESTY_DEFERRED_TRUST_PENALTY = -10;
+
+/** Whether the project's true state is bad enough that a rosy status
+ * report would be misleading — the exact pair of conditions named in
+ * CHOICE_ACT4_SCENE05_M1/M2's own engineNote. */
+function isProjectStateBad(metrics: GameState["projectMetrics"]): boolean {
+  return metrics.riskExposure > 60 || metrics.scheduleHealth < 40;
+}
+
+/**
+ * Applies a Monthly Status Report's honestyTone choice against the
+ * project's ACTUAL state at report time (passed-in `state`, i.e. BEFORE
+ * this same choice's other effects, if any, are merged in):
+ * - Truth isn't bad, regardless of tone chosen: nothing to hide either
+ *   way — no effect. Matches DIALOGUE_ACT4_SCENE05's own framing ("the
+ *   first report is easy... nothing's gone wrong enough yet to be a real
+ *   test") — Month 1 is expected to land here most playthroughs.
+ * - Rosy tone ("optimistic"/"measured") while the truth IS bad:
+ *   misleading. No immediate consequence — sets hid_problem_from_marcus
+ *   (display) and honesty_penalty_pending (bookkeeping) both true, so the
+ *   real cost lands the moment the NEXT report scene is entered instead
+ *   of this one.
+ * - "transparent" tone while the truth IS bad: accurately flagged real
+ *   trouble — small immediate marcusTrust gain, and hid_problem_from_marcus
+ *   is cleared (this report redeems whatever the last one was hiding).
+ *   Deliberately does NOT touch honesty_penalty_pending — a penalty
+ *   already deferred from an earlier report is still owed regardless of
+ *   how well this one goes.
+ */
+export function applyHonestyReport(state: GameState, honestyTone: string | undefined): GameState {
+  if (!honestyTone || !isProjectStateBad(state.projectMetrics)) return state;
+  if (honestyTone === "transparent") {
+    const withGain = applyEffects(state, { marcusTrust: HONESTY_ACCURATE_TRUST_GAIN });
+    return applyFlags(withGain, { hid_problem_from_marcus: false });
+  }
+  return applyFlags(state, { hid_problem_from_marcus: true, honesty_penalty_pending: true });
+}
+
+/** Consumes any honesty debt left over from the PREVIOUS report — called
+ * from enterScene on every scene transition (a no-op outside
+ * HONESTY_REPORT_SCENES), so the trust hit lands at exactly the moment a
+ * new report scene is entered, alongside whatever reaction dialogue that
+ * scene's own hid_problem_from_marcus condition already shows. Safe from
+ * double-applying: enterScene only ever runs once per real transition
+ * (never on resume-from-save), and this clears honesty_penalty_pending
+ * the instant it's paid — see the section comment above for why that's a
+ * separate flag from hid_problem_from_marcus rather than reusing it. */
+export function applyDeferredHonestyPenalty(state: GameState, sceneId: string): GameState {
+  if (!HONESTY_REPORT_SCENES.has(sceneId) || !state.flags.honesty_penalty_pending) return state;
+  const withPenalty = applyEffects(state, { marcusTrust: HONESTY_DEFERRED_TRUST_PENALTY });
+  return applyFlags(withPenalty, { honesty_penalty_pending: false });
 }
 
 /** Adds or upgrades an entry in the player's artefacts drawer. Never

@@ -36,17 +36,16 @@ import type {
 // Currently: the Opening Curveball Wave (ACT4_SCENE01 + its Ellis Fragment
 // #4 bridge, ACT4_SCENE01B), Change Control (ACT4_SCENE02), THE BIG
 // CURVEBALL (ACT4_SCENE03, dialogue/choices content keyed as "BIG-01"), and
-// the Main Curveball Wave (ACT4_SCENE04) — the first consumer of the Event
-// Library checkpoint system (see EVENT_WAVE_MEMBERS/computeEventQueue in
-// state.ts, and Scene.eventWaveId/getEvent below): its own intro dialogue
-// plays first, then GameRoot routes through whichever of MAIN_WAVE's events
-// are eligible right now, one at a time, before continuing on to
-// nextScenes. What's still not added: the Monthly Status Reports
-// (ACT4_SCENE05/05B/05C), which need a new honesty-vs-actual-state
-// delayed-consequence mechanic, and the Late Wave (ACT4_SCENE06) — reuses
-// this same checkpoint system once ACT4_SCENE05 is reachable. All of that
-// content is itself already written (needsWriting: false throughout) —
-// only the engine support for those two pieces is still missing.
+// the Main Curveball Wave (ACT4_SCENE04, using the Event Library checkpoint
+// system — see EVENT_WAVE_MEMBERS/computeEventQueue in state.ts, and
+// Scene.eventWaveId/getEvent below), and the Monthly Status Reports
+// (ACT4_SCENE05/05B/05C), which use the honesty-vs-actual-state
+// delayed-consequence mechanic (applyHonestyReport/
+// applyDeferredHonestyPenalty in state.ts). What's still not added: the
+// Late Wave (ACT4_SCENE06) — reuses the same Event Library checkpoint
+// system Main Wave already does, now that ACT4_SCENE05 is reachable. All
+// of that content is itself already written (needsWriting: false
+// throughout) — only the engine support for that last piece is missing.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
@@ -57,6 +56,9 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT4_SCENE02",
   "ACT4_SCENE03",
   "ACT4_SCENE04",
+  "ACT4_SCENE05",
+  "ACT4_SCENE05B",
+  "ACT4_SCENE05C",
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
