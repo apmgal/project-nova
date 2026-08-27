@@ -1182,16 +1182,40 @@
         "condition": "filling_line_approved"
       },
       {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "Show me how the deferral was documented, and what happened to the requirement.",
+        "condition": "filling_line_deferred"
+      },
+      {
         "speaker": "narrator",
         "emotion": null,
-        "text": "There's no approved change to show, because you didn't approve one.",
-        "condition": "filling_line_deferred_or_rejected"
+        "text": "You produce the deferral note \u2014 logged, dated, with a re-review point flagged for after commissioning. The requirement didn't disappear. It's just not now.",
+        "condition": "filling_line_deferred"
       },
       {
         "speaker": "whitfield",
         "emotion": "neutral",
-        "text": "Then there's nothing to review here. Also acceptable.",
-        "condition": "filling_line_deferred_or_rejected"
+        "text": "A decision, not a delay you forgot to make. Noted.",
+        "condition": "filling_line_deferred"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "What was the basis for rejecting it?",
+        "condition": "filling_line_rejected"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You produce the rejection rationale \u2014 the revalidation risk, weighed against the benefit, and found not worth it this late.",
+        "condition": "filling_line_rejected"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "A case someone could actually defend. That's the bar.",
+        "condition": "filling_line_rejected"
       },
       {
         "speaker": "whitfield",
@@ -1201,12 +1225,50 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "You hand over the power/interest map you built in your second week \u2014 the one where you first noticed Daniel and Camille had more real leverage than the room let on."
+        "text": "You hand over the power/interest map you built in your second week.",
+        "condition": "daniel_power_recognized_and_camille_power_recognized"
       },
       {
         "speaker": "whitfield",
         "emotion": "neutral",
-        "text": "...You mapped Daniel's budget authority correctly. Most people miss that one."
+        "text": "...You mapped both Daniel's budget authority and Camille's quality leverage correctly. Most people miss at least one of those.",
+        "condition": "daniel_power_recognized_and_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You hand over the power/interest map you built in your second week.",
+        "condition": "daniel_power_recognized_and_not_camille_power_recognized"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "You mapped Daniel's budget authority correctly. Camille's influence over quality sign-off, less so \u2014 that one bit you later, didn't it.",
+        "condition": "daniel_power_recognized_and_not_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You hand over the power/interest map you built in your second week.",
+        "condition": "not_daniel_power_recognized_and_camille_power_recognized"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "You had Camille's quality leverage right. Daniel's budget authority, less so \u2014 finance rarely announces itself.",
+        "condition": "not_daniel_power_recognized_and_camille_power_recognized"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You hand over the power/interest map you built in your second week.",
+        "condition": "not_daniel_power_recognized_and_not_camille_power_recognized"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "This doesn't reflect who actually had authority over this project. Neither Daniel's budget nor Camille's quality sign-off is where you put them.",
+        "condition": "not_daniel_power_recognized_and_not_camille_power_recognized"
       },
       {
         "speaker": "whitfield",
@@ -1238,38 +1300,68 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Whitfield finds it before you can explain it away \u2014 the month you said \u201con track\u201d while your own risk log said otherwise.",
-        "condition": "hid_problem_from_marcus"
+        "text": "Whitfield opens {mismatchReportLabel}. \u201c{mismatchDimensionLabel} \u2014 {mismatchReportedRag}.\u201d",
+        "condition": "report_mismatch_material"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "She sets it beside what was actually true that week: {mismatchEvidence}.",
+        "condition": "report_mismatch_material"
       },
       {
         "speaker": "whitfield",
         "emotion": "serious",
-        "text": "This one concerns me more than the others.",
-        "condition": "hid_problem_from_marcus"
+        "text": "Walk me through that judgement.",
+        "condition": "report_mismatch_material"
       },
       {
         "speaker": "narrator",
         "emotion": null,
         "text": "You don't have a good answer. There isn't one.",
-        "condition": "hid_problem_from_marcus"
+        "condition": "report_mismatch_material"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "serious",
+        "text": "This one concerns me more than the others.",
+        "condition": "report_mismatch_material"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "Whitfield checks. Checks again. Doesn't find anything.",
-        "condition": "not_hid_problem_from_marcus"
+        "text": "Whitfield opens {mismatchReportLabel}. \u201c{mismatchDimensionLabel} \u2014 {mismatchReportedRag}.\u201d Against it: {mismatchEvidence}.",
+        "condition": "report_mismatch_borderline"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "Walk me through that judgement.",
+        "condition": "report_mismatch_borderline"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "You give her the reasoning \u2014 not a full picture, but not nothing either. A call someone could have made in good faith.",
+        "condition": "report_mismatch_borderline"
+      },
+      {
+        "speaker": "whitfield",
+        "emotion": "neutral",
+        "text": "Defensible. Barely.",
+        "condition": "report_mismatch_borderline"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Whitfield checks all three reports against what was actually true, each time. Doesn't find anything.",
+        "condition": "report_mismatch_consistent"
       },
       {
         "speaker": "whitfield",
         "emotion": "neutral",
         "text": "No, they don't. That's rarer than you'd think.",
-        "condition": "not_hid_problem_from_marcus"
-      },
-      {
-        "speaker": "whitfield",
-        "emotion": "neutral",
-        "text": "For what it's worth \u2014 people here describe you fairly consistently. That's not nothing, in an audit.",
-        "condition": "has_reputation_tag"
+        "condition": "report_mismatch_consistent"
       },
       {
         "speaker": "whitfield",
@@ -1279,11 +1371,16 @@
       {
         "speaker": "narrator",
         "emotion": null,
+        "text": "[Player reviews the evidence exhibit.]"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
         "text": "She doesn't say anything else. Inspectors generally don't."
       }
     ],
     "needsWriting": false,
-    "engineNote": "This scene is fully dynamic, not scripted branching \u2014 each condition reads directly from gameState.flags/choiceHistory: filling_line_approved / filling_line_deferred_or_rejected (from ACT4_SCENE02), isolator_expedited / isolator_absorbed (add these flags to ACT4_SCENE01's choice effects \u2014 not yet present, needs a small patch), hid_problem_from_marcus (from ACT4_SCENE05 status reports), has_reputation_tag (true if gameState.reputation.tags is non-empty). No dice roll, no hidden randomness \u2014 entirely a readout of the player's own decision history, per design intent."
+    "engineNote": "This scene is fully dynamic, not scripted branching \u2014 every condition reads directly from gameState.flags (filling_line_approved/deferred/rejected from ACT4_SCENE02; daniel_power_recognized/camille_power_recognized from the Act 3 stakeholder grid; isolator_expedited/isolator_absorbed from ACT4_SCENE01) or from effectiveDialogueFlags' synthetic report_mismatch_material/borderline/consistent (see findMostMaterialReportMismatch in state.ts, which replaced the old hid_problem_from_marcus boolean this build \u2014 see the \"Act 5 build\" entry in DESIGN_NOTES.md). {mismatchReportLabel}/{mismatchDimensionLabel}/{mismatchReportedRag}/{mismatchActualRag}/{mismatchEvidence} are template tokens from reportMismatchTemplateValues, same substitution mechanism as {currentWeek}/{chosenSupplier}. has_reputation_tag's closer was cut for this build \u2014 nothing in the engine populates gameState.reputation.tags yet (see DESIGN_NOTES.md); revisit once reputation is built as the cross-game feature world_memory.json describes, not just an inspection line. No dice roll, no hidden randomness \u2014 entirely a readout of the player's own decision history, per design intent."
   },
   "DIALOGUE_ACT5_SCENE04": {
     "dialogueId": "DIALOGUE_ACT5_SCENE04",

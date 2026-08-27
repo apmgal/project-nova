@@ -365,6 +365,568 @@ export function submitStatusReport(
 }
 
 // ---------------------------------------------------------------------------
+// Act 5 — report mismatch detection. Replaces the old hid_problem_from_marcus
+// boolean (removed alongside the honesty mechanic earlier this project) as
+// the input to Inspector Whitfield's fourth inspection question — see the
+// "Act 5 build" entry in DESIGN_NOTES.md. Walks every submitted report's
+// OWN actualSnapshot (captured at submission time by submitStatusReport,
+// above) against what the player independently chose to report, and finds
+// the single most material discrepancy across the whole run. Deliberately
+// only flags cases where the player's reported RAG was BETTER than the
+// truth (understating a problem) — a report that's more cautious than
+// reality is conservative, not a governance issue, and shouldn't read as
+// one.
+// ---------------------------------------------------------------------------
+
+const RAG_SEVERITY: Record<RagStatus, number> = { green: 0, amber: 1, red: 2 };
+const RAG_LABEL: Record<RagStatus, string> = { green: "Green", amber: "Amber", red: "Red" };
+
+/** The four dimensions StatusReportRecord.reported and .actualSnapshot both
+ * carry — "overall" is reported-only (the player's own summary judgement,
+ * with no single ground-truth equivalent) so it's deliberately excluded
+ * from this comparison. */
+const REPORT_MISMATCH_DIMENSIONS = ["budget", "scope", "resource", "milestone"] as const;
+type ReportMismatchDimension = (typeof REPORT_MISMATCH_DIMENSIONS)[number];
+
+const REPORT_MISMATCH_DIMENSION_LABELS: Record<ReportMismatchDimension, string> = {
+  budget: "Budget",
+  scope: "Scope",
+  resource: "Resource",
+  milestone: "Milestone Plan",
+};
+
+export interface ReportMismatch {
+  reportIndex: number;
+  reportLabel: string;
+  dimension: ReportMismatchDimension;
+  dimensionLabel: string;
+  reportedRag: RagStatus;
+  actualRag: RagStatus;
+  actualEvidence: string[];
+  /** "material" = understated by two full bands (green reported, red
+   * actual) — the "this concerns me" case. "borderline" = understated by
+   * one band (green->amber or amber->red) — "questions it but accepts a
+   * defensible explanation" per the design brief. */
+  severity: "material" | "borderline";
+}
+
+/** The single most material "reported better than reality" discrepancy
+ * across every report the player has submitted so far, or null if none
+ * exists (every report was as-bad-or-worse than the truth, in every
+ * dimension, every time — the "consistent reporting" case). Ties broken
+ * toward the more recent report, since that's the one freshest in the
+ * player's — and the narrative's — memory going into the inspection. */
+export function findMostMaterialReportMismatch(state: GameState): ReportMismatch | null {
+  let best: ReportMismatch | null = null;
+  let bestDiff = 0;
+  state.statusReports.forEach((report, reportIndex) => {
+    for (const dimension of REPORT_MISMATCH_DIMENSIONS) {
+      const reportedRag = report.reported[dimension];
+      const actualRag = report.actualSnapshot[dimension].rag;
+      const diff = RAG_SEVERITY[actualRag] - RAG_SEVERITY[reportedRag];
+      if (diff <= 0) continue;
+      if (diff < bestDiff) continue;
+      if (diff === bestDiff && best && reportIndex < best.reportIndex) continue;
+      bestDiff = diff;
+      best = {
+        reportIndex,
+        reportLabel: `Report ${reportIndex + 1}`,
+        dimension,
+        dimensionLabel: REPORT_MISMATCH_DIMENSION_LABELS[dimension],
+        reportedRag,
+        actualRag,
+        actualEvidence: report.actualSnapshot[dimension].evidence,
+        severity: diff >= 2 ? "material" : "borderline",
+      };
+    }
+  });
+  return best;
+}
+
+/** Synthetic, never-persisted condition flags derived from
+ * findMostMaterialReportMismatch — merged into dialogue-visibility checks
+ * only (see effectiveDialogueFlags), never into gameState.flags itself,
+ * since this is a pure readout of state.statusReports and needs no
+ * separate storage. Exactly one is ever true. */
+function reportMismatchFlags(state: GameState): Record<string, boolean> {
+  const mismatch = findMostMaterialReportMismatch(state);
+  return {
+    report_mismatch_material: mismatch?.severity === "material",
+    report_mismatch_borderline: mismatch?.severity === "borderline",
+    report_mismatch_consistent: mismatch === null,
+  };
+}
+
+/** {token} values for the report-mismatch dialogue lines (see
+ * DIALOGUE_ACT5_SCENE03) — same substitution mechanism as {currentWeek}/
+ * {chosenSupplier} (supplierTemplateValues), just sourced from
+ * findMostMaterialReportMismatch instead. Empty object (no tokens) when
+ * there's no mismatch, since the "consistent" dialogue variant never
+ * references any of these. */
+export function reportMismatchTemplateValues(state: GameState): Record<string, string> {
+  const mismatch = findMostMaterialReportMismatch(state);
+  if (!mismatch) return {};
+  return {
+    mismatchReportLabel: mismatch.reportLabel,
+    mismatchDimensionLabel: mismatch.dimensionLabel,
+    mismatchReportedRag: RAG_LABEL[mismatch.reportedRag],
+    mismatchActualRag: RAG_LABEL[mismatch.actualRag],
+    mismatchEvidence: mismatch.actualEvidence[0] ?? "the record at the time",
+  };
+}
+
+/** The flags object dialogue visibility conditions (isLineVisible) should
+ * actually read — state.flags plus reportMismatchFlags' synthetic layer on
+ * top. Never persisted, never passed to applyFlags/saveGame; purely a
+ * render-time view. Used everywhere computeSceneLines is called (both the
+ * live render in GameRoot and resolveInitialLineIndex's resume-time
+ * fast-forward) so a scene's visible-line count can never disagree with
+ * itself between those two call sites — this is a pure function of
+ * state.statusReports, so calling it repeatedly is always safe and always
+ * gives the same answer. */
+export function effectiveDialogueFlags(state: GameState): Flags {
+  return { ...state.flags, ...reportMismatchFlags(state) };
+}
+
+// ---------------------------------------------------------------------------
+// Act 5.1 — Commissioning & Readiness. A read-only review of consequences
+// already in motion (see the "Act 5 build" entry in DESIGN_NOTES.md) — every
+// item here is DERIVED from decisions the player already made, never a new
+// pass/fail exercise of its own. Six categories per product line; only four
+// are ever gap-able (equipment/utilities are always clear — the physical
+// build itself was never in question, per Vaughn's own opening line this
+// scene). "Product B" only exists as a real product once BIG-01 has fired,
+// but this function is only ever called from ACT5_SCENE01, which is
+// unreachable before that, so no separate guard is needed.
+// ---------------------------------------------------------------------------
+
+export interface ReadinessItem {
+  id: string;
+  label: string;
+  status: "clear" | "gap";
+  detail: string;
+}
+
+export interface ReadinessBoard {
+  productA: ReadinessItem[];
+  productB: ReadinessItem[];
+}
+
+/** Category display labels, shared between computeReadinessBoard (per-item
+ * label) and computeReadinessInterventionOptions (gap-close option label) —
+ * kept as one map so the two never drift out of sync with each other. */
+const READINESS_CATEGORY_LABELS: Record<string, string> = {
+  training: "Operators trained",
+  validation: "Validation complete",
+  sops: "SOPs approved",
+  docs: "Batch documentation ready",
+};
+
+function computeReadinessColumn(product: "A" | "B", state: GameState): ReadinessItem[] {
+  const metrics = state.projectMetrics;
+  const validationResourcing = state.decisions.validationResourcing;
+  const trainingGap = metrics.scheduleHealth < 40;
+  const sopsGap = metrics.regulatoryReadiness < 60;
+  const docsGap = metrics.budgetRemaining < STARTING_BUDGET * 0.15;
+
+  let validationGap: boolean;
+  let validationDetail: string;
+  if (validationResourcing === "protect_a") {
+    validationGap = product === "B";
+    validationDetail =
+      product === "A"
+        ? "Fully validated on schedule."
+        : "Outstanding evidence — resource was protected for Product A instead.";
+  } else if (validationResourcing === "split_thin") {
+    validationGap = true;
+    validationDetail = "Partial — resource was split thin across both lines.";
+  } else if (validationResourcing === "premium_contract") {
+    validationGap = false;
+    validationDetail = "Fully validated — premium contract resource covered both lines.";
+  } else {
+    // Defensive default (EV-NP2 is always eligible once BIG-01 has fired,
+    // so this shouldn't be reachable in practice — see isEventEligible).
+    validationGap = false;
+    validationDetail = "Fully validated.";
+  }
+
+  return [
+    {
+      id: `equipment_${product}`,
+      label: "Equipment commissioned",
+      status: "clear",
+      detail: "Physically installed and commissioned.",
+    },
+    {
+      id: `utilities_${product}`,
+      label: "Utilities qualified",
+      status: "clear",
+      detail: "Utilities qualified against spec.",
+    },
+    {
+      id: `training_${product}`,
+      label: READINESS_CATEGORY_LABELS.training,
+      status: trainingGap ? "gap" : "clear",
+      detail: trainingGap
+        ? "Partial — training got compressed under schedule pressure."
+        : "Operators trained and signed off.",
+    },
+    {
+      id: `validation_${product}`,
+      label: READINESS_CATEGORY_LABELS.validation,
+      status: validationGap ? "gap" : "clear",
+      detail: validationDetail,
+    },
+    {
+      id: `sops_${product}`,
+      label: READINESS_CATEGORY_LABELS.sops,
+      status: sopsGap ? "gap" : "clear",
+      detail: sopsGap ? "Outstanding — regulatory readiness hasn't cleared the bar yet." : "Approved.",
+    },
+    {
+      id: `docs_${product}`,
+      label: READINESS_CATEGORY_LABELS.docs,
+      status: docsGap ? "gap" : "clear",
+      detail: docsGap ? "Incomplete — budget pressure pushed documentation down the list." : "Ready.",
+    },
+  ];
+}
+
+export function computeReadinessBoard(state: GameState): ReadinessBoard {
+  return {
+    productA: computeReadinessColumn("A", state),
+    productB: computeReadinessColumn("B", state),
+  };
+}
+
+export interface ReadinessInterventionOption {
+  /** Also the flag name applyReadinessIntervention sets on pick (prefixed
+   * "readiness_") — e.g. "readiness_close_training". */
+  id: string;
+  label: string;
+}
+
+/** The player's one constrained pick — "you have two days of recovery
+ * capacity, where do you put it" — built ONLY from gaps computeReadinessBoard
+ * actually found, so the choice is never wider than what this specific
+ * playthrough left outstanding. A category gapped on both products still
+ * yields one option, not two (closing it closes it everywhere at once);
+ * a category gapped on only one (currently only ever `validation`, via
+ * `protect_a`) says which. Empty if the run is clean — nothing to spend the
+ * two days on. */
+export function computeReadinessInterventionOptions(state: GameState): ReadinessInterventionOption[] {
+  const board = computeReadinessBoard(state);
+  const options: ReadinessInterventionOption[] = [];
+  for (const category of ["training", "validation", "sops", "docs"]) {
+    const aGap = board.productA.find((item) => item.id === `${category}_A`)?.status === "gap";
+    const bGap = board.productB.find((item) => item.id === `${category}_B`)?.status === "gap";
+    if (!aGap && !bGap) continue;
+    const productSuffix = aGap && bGap ? "" : aGap ? " (Product A)" : " (Product B)";
+    options.push({
+      id: `readiness_close_${category}`,
+      label: `Close the gap: ${READINESS_CATEGORY_LABELS[category]}${productSuffix}`,
+    });
+  }
+  return options;
+}
+
+/** Applies the player's pick — either a specific gap-close option's id (from
+ * computeReadinessInterventionOptions) or null for "push forward on the
+ * compressed schedule instead." Effects match the two magnitudes the
+ * original static CHOICE_ACT5_SCENE01 always used (scheduleHealth -5 /
+ * regulatoryReadiness +10 for spending the time; regulatoryReadiness -10 for
+ * not) — this replaces that binary with a targeted version of the same
+ * trade-off, not a new balance. The set flag (the option's own id) is what
+ * computeAuditTrailEvidence later reads to know a gap was actually closed
+ * before the audit, not just left outstanding. */
+export function applyReadinessIntervention(state: GameState, interventionId: string | null): GameState {
+  if (interventionId === null) {
+    return applyEffects(state, { regulatoryReadiness: -10 });
+  }
+  let next = applyEffects(state, { scheduleHealth: -5, regulatoryReadiness: 10 });
+  next = applyFlags(next, { [interventionId]: true });
+  return next;
+}
+
+// ---------------------------------------------------------------------------
+// Act 5.2 — Audit Trail. Truth/data layer first, presentation second (same
+// split the Monthly Status Report was built with) — see the "Act 5 build"
+// entry in DESIGN_NOTES.md. computeAuditTrailEvidence(state) is the ONLY
+// thing AuditTrailBuilder.tsx is allowed to read from; it aggregates across
+// every part of the save that currently lives somewhere different
+// (choiceHistory/flags/decisions/statusReports) into one flat list of
+// cards. Deliberately never invents evidence that doesn't exist — a card
+// whose underlying decision was never made reads "missing", not absent
+// from the list entirely, so the gap itself is what the player has to
+// organise around, not something they can quietly avoid seeing.
+// ---------------------------------------------------------------------------
+
+export type AuditTrailCategory =
+  | "change_control"
+  | "risk_and_issues"
+  | "validation_and_quality"
+  | "governance_and_reporting";
+
+export interface AuditTrailEvidenceCard {
+  id: string;
+  title: string;
+  category: AuditTrailCategory;
+  status: "present" | "partial" | "missing";
+  detail: string;
+}
+
+export function computeAuditTrailEvidence(state: GameState): AuditTrailEvidenceCard[] {
+  const cards: AuditTrailEvidenceCard[] = [];
+
+  // --- Change Control ---
+  if (state.flags.filling_line_approved) {
+    cards.push({
+      id: "filling_line",
+      title: "Filling line change control",
+      category: "change_control",
+      status: "present",
+      detail: "Approved — cost, schedule, and quality impact assessed before Mike E. signed off.",
+    });
+  } else if (state.flags.filling_line_deferred) {
+    cards.push({
+      id: "filling_line",
+      title: "Filling line change control",
+      category: "change_control",
+      status: "present",
+      detail: "Deferred — logged with a documented re-review point after commissioning.",
+    });
+  } else if (state.flags.filling_line_rejected) {
+    cards.push({
+      id: "filling_line",
+      title: "Filling line change control",
+      category: "change_control",
+      status: "present",
+      detail: "Rejected — revalidation risk weighed against benefit and recorded.",
+    });
+  } else {
+    cards.push({
+      id: "filling_line",
+      title: "Filling line change control",
+      category: "change_control",
+      status: "missing",
+      detail: "No decision on record.",
+    });
+  }
+
+  if (state.flags.isolator_expedited) {
+    cards.push({
+      id: "isolator",
+      title: "Isolator delay response",
+      category: "change_control",
+      status: "present",
+      detail: "Expedited — costed and signed off the same day.",
+    });
+  } else if (state.flags.isolator_absorbed) {
+    cards.push({
+      id: "isolator",
+      title: "Isolator delay response",
+      category: "change_control",
+      status: "present",
+      detail: "Absorbed — the schedule slip was flagged to Mike E. in writing before it happened.",
+    });
+  } else {
+    cards.push({
+      id: "isolator",
+      title: "Isolator delay response",
+      category: "change_control",
+      status: "missing",
+      detail: "No decision on record.",
+    });
+  }
+
+  const big01Response = state.decisions.big01Response;
+  if (big01Response) {
+    cards.push({
+      id: "big01",
+      title: "BIG-01 re-scoping record",
+      category: "change_control",
+      status: big01Response === "phase_b_quietly" ? "partial" : "present",
+      detail:
+        big01Response === "full_replan"
+          ? "Full re-plan, both lines, same week."
+          : big01Response === "renegotiate"
+            ? "Timeline renegotiated before absorbing new scope."
+            : "Product B absorbed without a formal re-plan.",
+    });
+  } else {
+    cards.push({
+      id: "big01",
+      title: "BIG-01 re-scoping record",
+      category: "change_control",
+      status: "missing",
+      detail: "No decision on record.",
+    });
+  }
+
+  // --- Risk & Issues ---
+  cards.push({
+    id: "contractor_risk",
+    title: "Electrical contractor reliability — risk register entry",
+    category: "risk_and_issues",
+    status: state.flags.contractor_risk_logged ? "present" : "missing",
+    detail: state.flags.contractor_risk_logged
+      ? "Logged formally in Act 2, with a named mitigation."
+      : "Never formally logged.",
+  });
+
+  cards.push({
+    id: "validation_risk",
+    title: "Validation timeline — risk register entry",
+    category: "risk_and_issues",
+    status: state.flags.validation_risk_logged ? "present" : "missing",
+    detail: state.flags.validation_risk_logged
+      ? "Logged formally in Act 2, with a named mitigation."
+      : "Never formally logged.",
+  });
+
+  const raidOwner = state.decisions["raid_ev06_owner"];
+  cards.push({
+    id: "raid_ev06",
+    title: "RAID log — electrical contractor",
+    category: "risk_and_issues",
+    status: raidOwner ? "present" : "missing",
+    detail: raidOwner
+      ? `Owner: ${raidOwner}. Escalated: ${state.flags["raid_ev06_escalated"] ? "yes" : "no"}.`
+      : "No RAID record on file.",
+  });
+
+  // --- Validation & Quality ---
+  const validationResourcing = state.decisions.validationResourcing;
+  cards.push({
+    id: "validation_resourcing",
+    title: "Validation resourcing decision",
+    category: "validation_and_quality",
+    status: validationResourcing ? "present" : "missing",
+    detail:
+      validationResourcing === "protect_a"
+        ? "Product A fully validated on time; Product B delayed."
+        : validationResourcing === "split_thin"
+          ? "Resource split thin across both lines."
+          : validationResourcing === "premium_contract"
+            ? "Premium contract resource covered both lines."
+            : "No decision on record.",
+  });
+
+  const trainingClosed = Boolean(state.flags.readiness_close_training);
+  const trainingStillGapped = state.projectMetrics.scheduleHealth < 40;
+  cards.push({
+    id: "training_evidence",
+    title: "Operator training evidence",
+    category: "validation_and_quality",
+    status: trainingClosed || !trainingStillGapped ? "present" : "partial",
+    detail: trainingClosed
+      ? "Closed during the final readiness review — two days spent, signed off."
+      : trainingStillGapped
+        ? "Partial — training was compressed and the gap was never closed."
+        : "Complete — no schedule pressure to compress it.",
+  });
+
+  // --- Governance & Reporting ---
+  const supplierChosen = getFlagString(state.flags, "supplier_chosen");
+  cards.push({
+    id: "supplier_decision",
+    title: "Supplier decision / goods-in record",
+    category: "governance_and_reporting",
+    status: supplierChosen ? "present" : "missing",
+    detail: supplierChosen
+      ? `${SUPPLIER_NAMES[supplierChosen] ?? supplierChosen} selected in the Act 3 Procurement Pitch.`
+      : "No decision on record.",
+  });
+
+  const reportCount = state.statusReports.length;
+  cards.push({
+    id: "status_reports",
+    title: "Monthly Status Reports (x3)",
+    category: "governance_and_reporting",
+    status: reportCount >= 3 ? "present" : reportCount > 0 ? "partial" : "missing",
+    detail:
+      reportCount >= 3
+        ? "All three reports on file."
+        : reportCount > 0
+          ? `${reportCount} of 3 reports on file.`
+          : "No reports on file.",
+  });
+
+  const danielMapped = Boolean(state.flags.daniel_power_recognized);
+  const camilleMapped = Boolean(state.flags.camille_power_recognized);
+  cards.push({
+    id: "stakeholder_map",
+    title: "Stakeholder power/interest map",
+    category: "governance_and_reporting",
+    status: "present",
+    detail:
+      danielMapped && camilleMapped
+        ? "Both Daniel's budget authority and Camille's quality leverage correctly mapped."
+        : danielMapped
+          ? "Daniel's budget authority mapped; Camille's influence underestimated."
+          : camilleMapped
+            ? "Camille's influence mapped; Daniel's budget authority underestimated."
+            : "Neither Daniel's budget authority nor Camille's influence correctly mapped.",
+  });
+
+  return cards;
+}
+
+/** One item in the closing evidence exhibit at the end of ACT5_SCENE03 —
+ * the four things Whitfield actually asked about, in the order she asked
+ * about them, rather than the full 11-card Audit Trail pack (that's
+ * ACT5_SCENE02's screen; showing it again here would just be redundant).
+ * Deliberately a thin readout, not a new data source: three of the four
+ * items are computeAuditTrailEvidence cards looked up by id, and the
+ * fourth is findMostMaterialReportMismatch formatted the same way a card
+ * would be. */
+export interface InspectionExhibitItem {
+  id: string;
+  title: string;
+  detail: string;
+}
+
+export function computeInspectionExhibit(state: GameState): InspectionExhibitItem[] {
+  const evidence = computeAuditTrailEvidence(state);
+  const byId = (id: string) => evidence.find((card) => card.id === id);
+  const items: InspectionExhibitItem[] = [];
+
+  const fillingLine = byId("filling_line");
+  if (fillingLine) {
+    items.push({ id: fillingLine.id, title: fillingLine.title, detail: fillingLine.detail });
+  }
+
+  const stakeholderMap = byId("stakeholder_map");
+  if (stakeholderMap) {
+    items.push({ id: stakeholderMap.id, title: stakeholderMap.title, detail: stakeholderMap.detail });
+  }
+
+  const isolator = byId("isolator");
+  if (isolator) {
+    items.push({ id: isolator.id, title: isolator.title, detail: isolator.detail });
+  }
+
+  const mismatch = findMostMaterialReportMismatch(state);
+  items.push(
+    mismatch
+      ? {
+          id: "report_mismatch",
+          title: `${mismatch.reportLabel} — ${mismatch.dimensionLabel}`,
+          detail: `Reported ${RAG_LABEL[mismatch.reportedRag]}. Actual: ${RAG_LABEL[mismatch.actualRag]} — ${
+            mismatch.actualEvidence[0] ?? "the record at the time"
+          }.`,
+        }
+      : {
+          id: "report_mismatch",
+          title: "Status reports vs. the record",
+          detail: "All three reports checked against what was actually true — no discrepancy found.",
+        },
+  );
+
+  return items;
+}
+
+// ---------------------------------------------------------------------------
 // Report-builder risk picker — a DELIBERATELY separate model from
 // computeActiveRisks/ActualStatusReport.risks above. That truth-engine pool
 // exists to answer "what does the event system know is eligible right now"

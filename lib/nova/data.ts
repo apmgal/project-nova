@@ -45,11 +45,15 @@ import type {
 // the EV-06 RAID follow-up) between reports #2/#3, and ACT4_SCENE06 as a
 // pure post-report-#3 transition with no event wave of its own anymore —
 // see the "Act 4 event redistribution" entry in DESIGN_NOTES.md for why.
-// That's the whole of Act 4 as currently written — ACT4_SCENE06's own
-// nextScenes points at ACT5_SCENE01, which isn't part of any BUILT_ACTS/
-// OVERRIDES entry, so reaching it correctly shows end-of-built-content
-// rather than a broken scene, exactly like every other staged
-// boundary in this build.
+// That's the whole of Act 4 as currently written. Act 5 ("readiness,
+// evidence, defensibility" — see the "Act 5 build" entry in
+// DESIGN_NOTES.md) is staged in as a full four-scene block via
+// BUILT_SCENE_OVERRIDES below (ACT5_SCENE01-04) rather than a whole
+// BUILT_ACTS entry, same reasoning as the Act 4 overrides above. Act 5's
+// own closing scene, ACT5_SCENE04, points its nextScenes at ACT6_SCENE01,
+// which isn't part of any BUILT_ACTS/OVERRIDES entry, so reaching it
+// correctly shows end-of-built-content rather than a broken scene, exactly
+// like every other staged boundary in this build.
 // ---------------------------------------------------------------------------
 
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
@@ -66,6 +70,14 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT4_SCENE05B_MID",
   "ACT4_SCENE05C",
   "ACT4_SCENE06",
+  // Act 5 — "readiness, evidence, defensibility" (see the "Act 5 build" entry
+  // in DESIGN_NOTES.md). All four scenes staged in together, unlike Act 4's
+  // wave-at-a-time rollout, since Act 5 has no event-wave complexity of its
+  // own to stage incrementally.
+  "ACT5_SCENE01",
+  "ACT5_SCENE02",
+  "ACT5_SCENE03",
+  "ACT5_SCENE04",
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;

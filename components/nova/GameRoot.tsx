@@ -61,6 +61,9 @@ import {
   supplierTemplateValues,
   applyDecisions,
   submitStatusReport,
+  effectiveDialogueFlags,
+  reportMismatchTemplateValues,
+  applyReadinessIntervention,
 } from "@/lib/nova/state";
 import type {
   ChoiceBlock,
@@ -85,6 +88,9 @@ import GanttBoard from "./GanttBoard";
 import BenefitsBuilder from "./BenefitsBuilder";
 import StatusReportBuilder from "./StatusReportBuilder";
 import RaidUpdateCard from "./RaidUpdateCard";
+import ReadinessChecklist from "./ReadinessChecklist";
+import AuditTrailBuilder from "./AuditTrailBuilder";
+import InspectionEvidenceExhibit from "./InspectionEvidenceExhibit";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -232,11 +238,11 @@ function resolveInitialLineIndex(state: GameState, sceneId: string): number {
   const scene = getScene(sceneId);
   if (!scene) return 0;
   if (scene.displayStyle === "announcement") {
-    const { preLines, postLines } = computeSceneLines(scene, state.flags);
+    const { preLines, postLines } = computeSceneLines(scene, effectiveDialogueFlags(state));
     return preLines.length + postLines.length;
   }
   if (scene.toolId && hasReachedToolScreen(state, scene.toolId)) {
-    const { preLines } = computeSceneLines(scene, state.flags);
+    const { preLines } = computeSceneLines(scene, effectiveDialogueFlags(state));
     return preLines.length;
   }
   return 0;
@@ -496,7 +502,7 @@ export default function GameRoot() {
   // final action. lineIndex is a single running index over the pre-tool +
   // post-tool lines combined; the tool screen is an interstitial that
   // blocks advancing past the boundary between them until it's complete.
-  const { preLines, postLines, markerText } = computeSceneLines(scene, gameState.flags);
+  const { preLines, postLines, markerText } = computeSceneLines(scene, effectiveDialogueFlags(gameState));
   const combinedLines = [...preLines, ...postLines];
   const toolBreakIndex = preLines.length;
 
@@ -798,6 +804,40 @@ export default function GameRoot() {
     }
   }
 
+  function handlePickReadiness(interventionId: string | null) {
+    if (!gameState || !scene || !toolScreen) return;
+    let next = applyReadinessIntervention(gameState, interventionId);
+    next = submitTool(next, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
+  function handleSubmitAuditTrail() {
+    if (!gameState || !scene || !toolScreen) return;
+    const next = submitTool(gameState, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
+  function handleContinueEvidenceExhibit() {
+    if (!gameState || !scene || !toolScreen) return;
+    const next = submitTool(gameState, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
@@ -870,6 +910,7 @@ export default function GameRoot() {
   const templateValues = {
     currentWeek: String(computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)),
     ...supplierTemplateValues(gameState),
+    ...reportMismatchTemplateValues(gameState),
   };
   const displayLines = combinedLines.map((line) => ({
     ...line,
@@ -1007,6 +1048,16 @@ export default function GameRoot() {
               />
             ) : atToolBreak && toolScreen && toolType === "raid_update_card" ? (
               <RaidUpdateCard toolScreen={toolScreen} onSubmitUpdate={handleSubmitRaidUpdate} />
+            ) : atToolBreak && toolScreen && toolType === "readiness_checklist" ? (
+              <ReadinessChecklist toolScreen={toolScreen} gameState={gameState} onPick={handlePickReadiness} />
+            ) : atToolBreak && toolScreen && toolType === "audit_trail_builder" ? (
+              <AuditTrailBuilder toolScreen={toolScreen} gameState={gameState} onSubmit={handleSubmitAuditTrail} />
+            ) : atToolBreak && toolScreen && toolType === "inspection_evidence_exhibit" ? (
+              <InspectionEvidenceExhibit
+                toolScreen={toolScreen}
+                gameState={gameState}
+                onContinue={handleContinueEvidenceExhibit}
+              />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
                 toolScreen={toolScreen}

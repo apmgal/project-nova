@@ -806,9 +806,10 @@
       "Schedule Health"
     ],
     "dialogueId": "DIALOGUE_ACT5_SCENE01",
-    "choicesId": "CHOICE_ACT5_SCENE01",
+    "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE01_READINESS",
     "trigger": {
-      "previousScene": null
+      "previousScene": "ACT4_SCENE06"
     },
     "nextScenes": [
       "ACT5_SCENE02"
@@ -831,6 +832,7 @@
     ],
     "dialogueId": "DIALOGUE_ACT5_SCENE02",
     "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE02_AUDIT_TRAIL",
     "trigger": {
       "previousScene": "ACT5_SCENE01"
     },
@@ -858,6 +860,7 @@
     ],
     "dialogueId": "DIALOGUE_ACT5_SCENE03",
     "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE03_EVIDENCE_EXHIBIT",
     "trigger": {
       "previousScene": "ACT5_SCENE02"
     },

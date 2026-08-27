@@ -1019,3 +1019,131 @@ after that, decide whether to convert more medium events through the
 same hook, and whether `TeamsThreadPanel`/`SharePointBrowserPanel`'s
 hardcoded per-message chrome maps are worth generalising yet (still "not
 yet — one map entry per message is a reasonable cost" per the audit).
+
+---
+
+## Act 5 build — "readiness, evidence, defensibility"
+
+**Status:** Shipped. All four scenes (ACT5_SCENE01-04) wired into
+`BUILT_SCENE_OVERRIDES`, verified via `tsc`/`eslint` and a scripted
+scene-chain + data-layer check, ready to commit.
+
+**Framing, locked during brainstorm:** "Act 4 = can you run the project
+under pressure? Act 5 = can you prove what you did?" Every Act 5
+mechanic is a readout of decisions the player already made earlier in
+the game — no new randomness, no new choices that retroactively fix
+history. The three scenes with mechanics:
+
+- **5.1 Commissioning & Training (ACT5_SCENE01)** — `computeReadinessBoard`
+  derives a read-only 6-item × 2-product board from existing signals
+  (`decisions.validationResourcing`, `scheduleHealth`,
+  `regulatoryReadiness`, `budgetRemaining`). `ReadinessChecklist.tsx`
+  renders it, then offers exactly one constrained choice —
+  `computeReadinessInterventionOptions` — built only from gaps this
+  specific playthrough actually left outstanding ("You have two days.
+  Where do you put it?" per the locked copy direction). No gaps, no
+  choice to make. `applyReadinessIntervention` reuses the original
+  static `CHOICE_ACT5_SCENE01`'s two effect magnitudes
+  (scheduleHealth -5/regulatoryReadiness +10 for closing a gap;
+  regulatoryReadiness -10 for pushing forward instead) and sets a flag
+  named after the intervention id, which `computeAuditTrailEvidence`
+  later reads. `CHOICE_ACT5_SCENE01` itself was removed from
+  `choices.json` — fully superseded by the tool's internal pick.
+
+- **5.2 Validation & Documentation Sweep (ACT5_SCENE02)** —
+  `computeAuditTrailEvidence(state)` is the sole truth/data layer (same
+  split as the Monthly Status Report), aggregating 11 cards across four
+  categories (change control, risk & issues, validation & quality,
+  governance & reporting) from wherever the underlying decision already
+  lives (`flags`/`decisions`/`statusReports`). Deliberately never
+  invents evidence — a decision never made reads `status: "missing"` in
+  the list, not absent from it, per the locked "missing evidence stays
+  missing" principle. `AuditTrailBuilder.tsx` renders it as a
+  click-card-then-click-folder filing exercise (not drag-and-drop, no
+  correctness bounce-back) — filing every card, including the missing
+  ones, is all that's required to continue; nothing here is graded.
+
+- **5.3 MHRA Inspection (ACT5_SCENE03)** — `DIALOGUE_ACT5_SCENE03`
+  rewritten as four fully dynamic questions reading straight off
+  `gameState.flags`/`effectiveDialogueFlags`, no scripted branching:
+  filling line change control (3-way, `filling_line_approved/deferred/
+  rejected`), the stakeholder power/interest map (4-way compound,
+  reusing the `daniel_power_recognized_and_camille_power_recognized`
+  pattern already established for Act 3), the isolator delay response
+  (2-way), and — new this build — whether any status report understated
+  a problem, via `findMostMaterialReportMismatch(state)`. That function
+  walks `state.statusReports[]`, diffs `report.reported[dim]` against
+  `report.actualSnapshot[dim].rag` across the four shared dimensions,
+  and classifies the single most material gap as `"material"` (2-band,
+  e.g. green reported/red actual) or `"borderline"` (1-band) — ties
+  broken toward the more recent report. This **replaces** the old
+  `hid_problem_from_marcus` boolean, which was orphaned when the honesty
+  mechanic was removed in an earlier session. The reputation-tag closer
+  that used to end this scene was cut (nothing populates
+  `gameState.reputation.tags` yet) — noted in the dialogue's own
+  `engineNote`, revisit once reputation is built as the cross-game
+  feature `world_memory.json` describes, not just an inspection line.
+  After the four questions, a closing **evidence exhibit**
+  (`InspectionEvidenceExhibit.tsx`, `computeInspectionExhibit(state)`)
+  shows exactly the four things Whitfield reviewed — filling line,
+  stakeholder map, isolator, and the report-mismatch verdict — reusing
+  `computeAuditTrailEvidence` card lookups plus
+  `findMostMaterialReportMismatch` rather than inventing a second data
+  source. **Scope decision made during the build, not explicitly
+  re-confirmed in chat:** this is one consolidated closing screen after
+  all four questions, not four inline evidence pull-ups interleaved with
+  Whitfield's individual questions. The brainstorm's "one generic
+  inspection evidence viewer" didn't specify inline-vs-closing; closing
+  keeps the Audit Trail Builder and this viewer independent build steps
+  rather than making one a prerequisite for the other, per the build
+  order's own stated rationale.
+
+- **5.4 The Waiting (ACT5_SCENE04)** — pure scripted cinematic, no
+  mechanic, deliberately withholds every variable from the player. No
+  engine work needed.
+
+**Engine additions (`lib/nova/state.ts`):** `findMostMaterialReportMismatch`
++ `reportMismatchFlags` (synthetic, never persisted) +
+`reportMismatchTemplateValues` (the `{mismatchReportLabel}`/etc. tokens
+DIALOGUE_ACT5_SCENE03 substitutes) + `effectiveDialogueFlags(state)` —
+`{...state.flags, ...reportMismatchFlags(state)}`, now merged into all
+three `computeSceneLines` call sites in `GameRoot.tsx` (both inside
+`resolveInitialLineIndex`'s resume fast-forward and the main render-time
+call) so resume and live-render can never disagree about visible-line
+counts. Plus `computeReadinessBoard`/`computeReadinessInterventionOptions`/
+`applyReadinessIntervention`, `computeAuditTrailEvidence`, and
+`computeInspectionExhibit`.
+
+**Not done / surfaced but not actioned:**
+- `callback_marcus_never_surprise_me` — an Act 4 world-memory callback
+  (`ACT4_SCENE05B.worldMemoryBeat`) whose payoff line ("I asked for one
+  thing") was removed alongside the old honesty mechanic. Possibly wants
+  the same `findMostMaterialReportMismatch`-style detection reused at
+  that Act 4 call site. Flagged, no decision made yet.
+- `data/world_memory.json`'s stakeholder-map and status-report Whitfield
+  callbacks are confirmed-authored design intent (re-read in full this
+  session after an earlier miss where a grep for "world memory" as a
+  phrase failed to surface the file) — this build satisfies that intent
+  functionally but doesn't read `world_memory.json` directly, since
+  no engine code anywhere currently does (only
+  `Scene.worldMemoryBeat?: string | null` exists as documentation).
+- Whether the inspection's 4th question should ever become fully
+  dynamic in a different sense (e.g. reflecting the RAID log or PESTLE
+  work too) was explicitly deferred to "only after playtest" in the
+  locked build order — not started.
+
+**Verification:** `tsc --noEmit` and `eslint .` both clean. A throwaway
+`scripts/verify-act5-exhibit.ts` (deleted after running) confirmed: the
+scene chain resolves `ACT4_SCENE06 → ACT5_SCENE01 → ACT5_SCENE02 →
+ACT5_SCENE03 → ACT5_SCENE04`, with `ACT5_SCENE04.nextScenes` correctly
+pointing at the still-unbuilt `ACT6_SCENE01` (confirmed `getScene`
+returns `null` there, matching the engine's existing EndOfContent
+branch); all three tool screens resolve to the right `type`;
+`computeInspectionExhibit` always returns exactly 4 items in the fixed
+question order, reads "No decision on record."/"no discrepancy found"
+correctly when nothing was decided, and reflects a synthetic material
+mismatch correctly when one is injected; and the readiness → audit-trail
+→ exhibit chain reads the same underlying flags consistently across all
+three views (readiness board sizes, audit-trail 11-card count stable
+before/after an intervention, exhibit's `stakeholder_map` item matching
+the audit-trail card's detail text verbatim).

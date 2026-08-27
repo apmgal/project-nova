@@ -983,27 +983,5 @@
     ],
     "needsWriting": false,
     "engineNote": "validationResourcing ('protect_a'/'split_thin'/'premium_contract') is evidence-only for the Monthly Status Report's Resource dimension (lib/nova/state.ts computeResourceDimension) — deliberately does NOT drive the RAG itself, since a one-time categorical choice can never become 'current' state again the way team morale can."
-  },
-  "CHOICE_ACT5_SCENE01": {
-    "choiceId": "CHOICE_ACT5_SCENE01",
-    "sourceScene": "ACT5_SCENE01",
-    "options": [
-      {
-        "text": "Take the extra two days to get training right.",
-        "effects": {
-          "scheduleHealth": -5,
-          "regulatoryReadiness": 10
-        },
-        "nextScene": "ACT5_SCENE02"
-      },
-      {
-        "text": "Stick to the compressed schedule — we're out of runway.",
-        "effects": {
-          "regulatoryReadiness": -10
-        },
-        "nextScene": "ACT5_SCENE02"
-      }
-    ],
-    "needsWriting": false
   }
 }

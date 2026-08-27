@@ -894,5 +894,38 @@
     "onComplete": {
       "nextScene": "ACT4_SCENE05B_MID"
     }
+  },
+  "TOOL_ACT5_SCENE01_READINESS": {
+    "toolId": "TOOL_ACT5_SCENE01_READINESS",
+    "sourceScene": "ACT5_SCENE01",
+    "type": "readiness_checklist",
+    "instructions": "Review where both product lines actually stand, then decide where your last two days go.",
+    "onComplete": {
+      "nextScene": "ACT5_SCENE02"
+    }
+  },
+  "TOOL_ACT5_SCENE02_AUDIT_TRAIL": {
+    "toolId": "TOOL_ACT5_SCENE02_AUDIT_TRAIL",
+    "sourceScene": "ACT5_SCENE02",
+    "type": "audit_trail_builder",
+    "instructions": "File each piece of evidence into the folder it belongs in. Missing evidence stays missing — this isn't the moment to go fix it.",
+    "auditTrailFolders": [
+      "Change Control",
+      "Risk & Issues",
+      "Validation & Quality",
+      "Governance & Reporting"
+    ],
+    "onComplete": {
+      "nextScene": "ACT5_SCENE03"
+    }
+  },
+  "TOOL_ACT5_SCENE03_EVIDENCE_EXHIBIT": {
+    "toolId": "TOOL_ACT5_SCENE03_EVIDENCE_EXHIBIT",
+    "sourceScene": "ACT5_SCENE03",
+    "type": "inspection_evidence_exhibit",
+    "instructions": "The evidence Whitfield actually reviewed.",
+    "onComplete": {
+      "nextScene": "ACT5_SCENE04"
+    }
   }
 }

@@ -713,6 +713,10 @@ export interface ToolScreenBlock {
   raidIssueLabel?: string;
   raidOwnerOptions?: string[];
   raidResponseOptions?: string[];
+  /** audit_trail_builder only (ACT5_SCENE02) — the fixed folder names the
+   * player files computeAuditTrailEvidence's cards into. See
+   * AuditTrailBuilder.tsx. */
+  auditTrailFolders?: string[];
 
   onComplete: {
     nextScene: string;
