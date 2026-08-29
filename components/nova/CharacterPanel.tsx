@@ -58,7 +58,7 @@ export default function CharacterPanel({ charactersMet }: CharacterPanelProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-              <span className="text-sm font-semibold text-zinc-200">Team</span>
+              <span className="text-sm font-semibold text-zinc-200">Meet the Team</span>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close the team panel"
