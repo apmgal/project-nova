@@ -1,28 +1,4 @@
 {
-  "TUTORIAL_CHARACTER_BOARD": {
-    "sceneId": "TUTORIAL_CHARACTER_BOARD",
-    "title": "Meet the Team",
-    "act": "Tutorial",
-    "screenRange": "0 (tutorial)",
-    "screenType": "Tutorial / Character Board",
-    "location": null,
-    "charactersInvolved": [],
-    "pmConcept": "Stakeholder awareness",
-    "contentSummary": "A browsable roster introducing the people the player will be working with at Project NOVA, before Act 1 begins.",
-    "worldMemoryBeat": null,
-    "variablesTouched": [],
-    "dialogueId": "DIALOGUE_TUTORIAL_CHARACTER_BOARD",
-    "choicesId": null,
-    "toolId": "TOOL_TUTORIAL_CHARACTER_BOARD",
-    "trigger": {
-      "previousScene": null
-    },
-    "nextScenes": [
-      "ACT1_SCENE01"
-    ],
-    "needsWriting": false,
-    "note": "Non-canonical engine-only tutorial scene, not one of the original 32 Excel beats. Inserted between the Reception Intro cinematic and ACT1_SCENE01 (see the 'Tutorial character board' entry in DESIGN_NOTES.md). act is deliberately \"Tutorial\", not \"Act 1\" \u2014 keeps it out of BUILT_ACTS (added via BUILT_SCENE_OVERRIDES instead) and stops the header/HUD chrome from labelling it as part of Act 1."
-  },
   "ACT1_SCENE01": {
     "sceneId": "ACT1_SCENE01",
     "title": "Arrival & Handover",
@@ -43,7 +19,7 @@
     "dialogueId": "DIALOGUE_ACT1_SCENE01",
     "choicesId": "CHOICE_ACT1_SCENE01",
     "trigger": {
-      "previousScene": "TUTORIAL_CHARACTER_BOARD"
+      "previousScene": null
     },
     "nextScenes": [
       "ACT1_SCENE02"

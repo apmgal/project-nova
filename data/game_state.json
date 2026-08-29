@@ -1,5 +1,5 @@
 {
-  "currentScene": "TUTORIAL_CHARACTER_BOARD",
+  "currentScene": "ACT1_SCENE01",
   "projectMetrics": {
     "budgetRemaining": 12000000,
     "scheduleHealth": 100,
@@ -22,6 +22,7 @@
   "reputation": {
     "tags": []
   },
+  "charactersMet": ["mike_smith", "ben"],
   "flags": {
     "ellis_fragment_1": false,
     "ellis_fragment_2": false,

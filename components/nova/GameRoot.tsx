@@ -22,6 +22,7 @@ import {
   applyEffects,
   applyFlags,
   applySceneFlagsSet,
+  markCharactersMet,
   isLineVisible,
   splitAroundToolMarker,
   isToolMarkerLine,
@@ -91,7 +92,7 @@ import RaidUpdateCard from "./RaidUpdateCard";
 import ReadinessChecklist from "./ReadinessChecklist";
 import AuditTrailBuilder from "./AuditTrailBuilder";
 import InspectionEvidenceExhibit from "./InspectionEvidenceExhibit";
-import CharacterBoard from "./CharacterBoard";
+import CharacterPanel from "./CharacterPanel";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -310,6 +311,7 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     let next: GameState = { ...state, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
+    next = markCharactersMet(next, scene?.charactersInvolved ?? []);
     return next;
   }
 
@@ -839,16 +841,6 @@ export default function GameRoot() {
     }
   }
 
-  function handleContinueCharacterBoard() {
-    if (!gameState || !scene || !toolScreen) return;
-    const next = submitTool(gameState, toolScreen);
-    setGameState(next);
-    saveGame(next);
-
-    if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
-    }
-  }
 
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
@@ -1070,8 +1062,6 @@ export default function GameRoot() {
                 gameState={gameState}
                 onContinue={handleContinueEvidenceExhibit}
               />
-            ) : atToolBreak && toolScreen && toolType === "character_board" ? (
-              <CharacterBoard toolScreen={toolScreen} onContinue={handleContinueCharacterBoard} />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
                 toolScreen={toolScreen}
@@ -1223,6 +1213,7 @@ export default function GameRoot() {
       >
         <Pause size={11} className="fill-current" />
       </button>
+      <CharacterPanel charactersMet={gameState.charactersMet} />
       <PauseOverlay open={paused} onResume={() => setPaused(false)} />
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (

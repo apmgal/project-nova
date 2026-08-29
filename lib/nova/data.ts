@@ -59,11 +59,6 @@ import type {
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
 
 const BUILT_SCENE_OVERRIDES = new Set([
-  // Pre-Act-1 tutorial character board (see the "Tutorial character
-  // board" entry in DESIGN_NOTES.md). act is "Tutorial", not "Act 1", so
-  // it needs an explicit override rather than riding in via BUILT_ACTS —
-  // deliberate, so the header/HUD chrome never labels it as part of Act 1.
-  "TUTORIAL_CHARACTER_BOARD",
   "ACT4_SCENE01",
   "ACT4_SCENE01B",
   "ACT4_SCENE02",
@@ -288,5 +283,10 @@ export function getDefaultGameState(): GameState {
   if (!state.decisions) state.decisions = {};
   if (!state.statusReports) state.statusReports = [];
   if (!state.eventsResolved) state.eventsResolved = [];
+  // Pre-existing saves predate charactersMet — backfill with the two
+  // people met during the Reception Intro cinematic (mike_smith, ben),
+  // same as the fresh-game seed in game_state.json, since every save
+  // has necessarily been through that cinematic already.
+  if (!state.charactersMet) state.charactersMet = ["mike_smith", "ben"];
   return state;
 }

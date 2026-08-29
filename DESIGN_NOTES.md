@@ -1150,11 +1150,89 @@ the audit-trail card's detail text verbatim).
 
 ---
 
+## Persistent character panel — "Team" side panel
+
+**Status:** Shipped. Supersedes the earlier one-time
+`TUTORIAL_CHARACTER_BOARD` scene (see that entry above). `tsc`/`eslint`
+clean, verified via a scripted check, ready to commit.
+
+**Why it changed:** a one-time gate between Reception Intro and Act 1
+isn't the right shape for a reference tool players will want to check
+back on mid-scene — direction after review was to make it a persistent
+side panel instead, "like the ArtefactsDrawer."
+
+**What it is:** `CharacterPanel.tsx`, mounted unconditionally in
+`GameRoot` next to `ArtefactsDrawer`/`DebugDrawer`/the pause button —
+same self-contained pattern (owns its own `open` state, no scene/toolId
+gating), available from any scene in the game, any act, regardless of
+whether the HUD is active. A small circular toggle sits at the left-edge
+middle (mirroring the pause button's right-edge middle), opening a
+slide-in side panel from the left edge — an actual side panel, not
+`ArtefactsDrawer`'s compact dropdown-plus-modal-viewer shape, since the
+carousel content (full bio paragraphs) needs more room. `CharacterBoard.tsx`
+was kept as the carousel content itself, stripped of its old
+`toolScreen`/`onContinue` props down to `{ characterIds, metIds }` —
+pure presentation, no longer anything to do with tool-screen submission.
+
+**"Already met" is now live, not a fixed snapshot.** The old tool-gated
+version hardcoded `characterBoardMetIds: ["mike_smith", "ben"]` forever.
+Since this is a real reference tool now, `GameState.charactersMet:
+string[]` tracks who the player has actually encountered: `state.ts`'s
+new `markCharactersMet(state, characterIds)` unions ids in
+(deduplicated, no-op if nothing's new), called from `GameRoot`'s
+`enterScene` with the entered scene's `Scene.charactersInvolved` on
+every scene transition — the same place `applySceneFlagsSet` already
+runs. Seeded with `["mike_smith", "ben"]` in `game_state.json` (met
+during the Reception Intro cinematic, which isn't itself a `Scene` and
+so never runs through `markCharactersMet`), with a matching backfill in
+`getDefaultGameState()` for saves that predate the field.
+
+**What was removed, cleanly:** `TUTORIAL_CHARACTER_BOARD` (scenes.json),
+`DIALOGUE_TUTORIAL_CHARACTER_BOARD` (dialogue.json),
+`TOOL_TUTORIAL_CHARACTER_BOARD` (tool_screens.json), the
+`BUILT_SCENE_OVERRIDES` entry and its comment (data.ts),
+`ToolScreenBlock.characterBoardIds`/`characterBoardMetIds` (types.ts,
+now dead since the panel isn't scene-configured — the roster order lives
+as a plain constant in `CharacterPanel.tsx` instead), and
+`ACT1_SCENE01.trigger.previousScene` reverted from
+`"TUTORIAL_CHARACTER_BOARD"` back to `null`. `game_state.json`'s
+`currentScene` reverted to `"ACT1_SCENE01"`. `Character.publicBio`/
+`whatMatters` and every roster correction from the original build
+(Priya/Tomasz kept matching their shipped characterisation, Ben's role
+elevated, `mike_smith` added, Dr Olivia never added) carried forward
+unchanged — none of that was scene-specific.
+
+**Not done / worth a future pass:** no first-time nudge pointing new
+players at the toggle (flagged as an option — a coach-mark glow, same
+pattern as the HUD tutorial — but not built, since nothing was
+explicitly confirmed for it). No dev tool exists yet to jump straight to
+"has met everyone" for testing the fully-populated panel state; the
+scripted verification checks `markCharactersMet`'s mechanics directly
+instead of playing through scenes.
+
+**Verification:** `tsc --noEmit` and `eslint .` both clean. A throwaway
+scripted check (deleted after running) confirmed:
+`TUTORIAL_CHARACTER_BOARD`/`TOOL_TUTORIAL_CHARACTER_BOARD` no longer
+resolve at all; `ACT1_SCENE01.trigger.previousScene` is back to `null`;
+`getDefaultGameState()` has `currentScene: "ACT1_SCENE01"` and
+`charactersMet: ["mike_smith", "ben"]`; `markCharactersMet` is a true
+no-op (same object reference) when nothing new is added, returns a new
+immutable object when it unions in new ids, dedups correctly, and never
+mutates the original state; and all 11 roster characters still resolve
+with a role/publicBio/whatMatters.
+
+---
+
 ## Tutorial character board — pre-Act-1 "Meet the team"
 
-**Status:** Shipped. `TUTORIAL_CHARACTER_BOARD` staged into
-`BUILT_SCENE_OVERRIDES`, verified via `tsc`/`eslint` and a scripted
-check, ready to commit.
+**Status:** Superseded — see the "Persistent character panel" entry
+below. After playtesting the one-time gated scene, direction changed to
+a persistent side panel available throughout the game instead. The
+scene/dialogue/tool-screen apparatus described below was fully removed;
+`Character.publicBio`/`whatMatters` and the roster reconciliation work
+(Priya/Tomasz/Ben/mike_smith) carried forward unchanged into the new
+design. Left in place as a record of that reasoning, not as a
+description of what's currently wired.
 
 **What it is:** a new, non-canonical engine-only scene inserted between
 the Reception Intro cinematic (Ben & Mike Smith) and `ACT1_SCENE01`

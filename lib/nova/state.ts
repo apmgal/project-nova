@@ -144,6 +144,20 @@ export function applySceneFlagsSet(
   return { ...state, flags: nextFlags };
 }
 
+/** Unions `characterIds` into state.charactersMet (deduplicated, order
+ * preserved from first appearance). Called from GameRoot's enterScene
+ * with the entered scene's Scene.charactersInvolved, so the persistent
+ * character panel's "Already met" badge (CharacterPanel.tsx) is a live
+ * readout of real story progress rather than a fixed snapshot. A no-op
+ * if every id is already present — returns `state` unchanged so callers
+ * don't need to guard against unnecessary re-renders themselves. */
+export function markCharactersMet(state: GameState, characterIds: string[]): GameState {
+  if (characterIds.length === 0) return state;
+  const newIds = characterIds.filter((id) => !state.charactersMet.includes(id));
+  if (newIds.length === 0) return state;
+  return { ...state, charactersMet: [...state.charactersMet, ...newIds] };
+}
+
 // ---------------------------------------------------------------------------
 // Monthly Status Report honesty mechanic — REMOVED. Used to live here
 // (CHOICE_ACT4_SCENE05_M1/M2's honestyTone vs. actual-state comparison,

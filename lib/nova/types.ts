@@ -26,6 +26,15 @@ export interface GameState {
   relationships: Relationships;
   reputation: { tags: string[] };
   flags: Flags;
+  /** characters.json ids the player has actually encountered so far —
+   * unioned in on every scene entry from Scene.charactersInvolved (see
+   * markCharactersMet in state.ts). Drives the persistent character
+   * panel's "Already met" badge (CharacterPanel.tsx) as a live readout
+   * of real story progress, not a fixed one-time snapshot. Seeded with
+   * ["mike_smith", "ben"] by default (met during the Reception Intro
+   * cinematic, which isn't itself a Scene so never runs through
+   * markCharactersMet). */
+  charactersMet: string[];
   choiceHistory: ChoiceHistoryEntry[];
   /** Key into assets.json's `backgrounds` map for whatever backdrop is
    * currently in effect, carried forward across lines/scenes until a line
@@ -726,18 +735,6 @@ export interface ToolScreenBlock {
    * player files computeAuditTrailEvidence's cards into. See
    * AuditTrailBuilder.tsx. */
   auditTrailFolders?: string[];
-  /** character_board only (the pre-Act-1 tutorial roster) — ordered list
-   * of characters.json ids to show, one per carousel entry. Deliberately
-   * an id list rather than inlined bio text, so the board always reads
-   * straight from characters.json (see Character.publicBio/whatMatters)
-   * rather than duplicating/forking character data into tool_screens.json.
-   * See CharacterBoard.tsx. */
-  characterBoardIds?: string[];
-  /** character_board only — subset of characterBoardIds already met by
-   * this point in the story (shown with an "Already met" badge instead of
-   * being introduced fresh). Scene-specific framing, not a character
-   * property, so it lives here rather than on Character itself. */
-  characterBoardMetIds?: string[];
 
   onComplete: {
     nextScene: string;
