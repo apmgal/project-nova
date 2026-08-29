@@ -59,6 +59,11 @@ import type {
 const BUILT_ACTS = new Set(["Act 1", "Act 2", "Act 3"]);
 
 const BUILT_SCENE_OVERRIDES = new Set([
+  // Pre-Act-1 tutorial character board (see the "Tutorial character
+  // board" entry in DESIGN_NOTES.md). act is "Tutorial", not "Act 1", so
+  // it needs an explicit override rather than riding in via BUILT_ACTS —
+  // deliberate, so the header/HUD chrome never labels it as part of Act 1.
+  "TUTORIAL_CHARACTER_BOARD",
   "ACT4_SCENE01",
   "ACT4_SCENE01B",
   "ACT4_SCENE02",

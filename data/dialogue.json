@@ -1,4 +1,16 @@
 {
+  "DIALOGUE_TUTORIAL_CHARACTER_BOARD": {
+    "dialogueId": "DIALOGUE_TUTORIAL_CHARACTER_BOARD",
+    "sourceScene": "TUTORIAL_CHARACTER_BOARD",
+    "lines": [
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Before your first day properly begins, it's worth knowing who you'll actually be working with."
+      }
+    ],
+    "needsWriting": false
+  },
   "DIALOGUE_ACT1_SCENE01": {
     "dialogueId": "DIALOGUE_ACT1_SCENE01",
     "sourceScene": "ACT1_SCENE01",

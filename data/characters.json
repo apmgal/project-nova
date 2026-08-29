@@ -16,7 +16,9 @@
       "frustrated": "marcus_displeased.jpg",
       "warm": "marcus_pleased.jpg"
     },
-    "portraitStatus": "real art"
+    "portraitStatus": "real art",
+    "publicBio": "Mike is the senior sponsor behind Project NOVA and ultimately accountable for the £12m investment. The project matters to him personally as well as commercially: the organisation has made a significant commitment, an NHS supply contract depends on delivery, and senior eyes are watching. Direct, demanding and occasionally dry, Mike has little appetite for unnecessary detail — but even less patience for being surprised. He'll back a credible plan, provided you can defend it.",
+    "whatMatters": "Getting the facility operational, protecting the business case, and being able to stand behind the project when it reaches the Board."
   },
   "camille": {
     "id": "camille",
@@ -35,7 +37,9 @@
       "serious": "camille.jpg",
       "warm": "camille.jpg"
     },
-    "portraitStatus": "real art"
+    "portraitStatus": "real art",
+    "publicBio": "Camille leads Quality and Validation and is one of the strongest voices for regulatory rigour on Project NOVA. Measured, technical and unflinchingly honest, she takes patient safety and GMP compliance seriously and is unwilling to sign off something simply because the schedule is under pressure. Camille isn't trying to make delivery difficult; she knows what happens when organisations convince themselves that a shortcut is harmless.",
+    "whatMatters": "Evidence, quality, and knowing that when the facility begins producing medicine, it is genuinely ready to do so safely."
   },
   "vaughn": {
     "id": "vaughn",
@@ -53,7 +57,9 @@
       "warm": "vaughn.jpg",
       "frustrated": "vaughn.jpg"
     },
-    "portraitStatus": "real art"
+    "portraitStatus": "real art",
+    "publicBio": "Vaughn leads the construction and engineering work required to turn NOVA from a plan into a functioning manufacturing facility. Practical, experienced and grounded, he tends to look at ambitious schedules through the lens of what can actually be built, installed and commissioned. He'll work with you to turn high-level plans into real packages of work, but he has little patience for assumptions that ignore what is happening on the ground.",
+    "whatMatters": "A plan that works in the real world — with enough time, people and coordination to build the facility properly."
   },
   "daniel": {
     "id": "daniel",
@@ -71,7 +77,9 @@
       "concerned": "daniel_concerned.png",
       "warm": "daniel_warm.png"
     },
-    "portraitStatus": "placeholder — no real art yet"
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Daniel keeps a close eye on the commercial side of Project NOVA and, increasingly, on whether the original £12m investment still stacks up. Analytical and quietly sceptical, he is unlikely to be persuaded by optimism alone. As costs move and decisions accumulate, Daniel will want to understand not only what has been spent, but what the organisation is getting in return.",
+    "whatMatters": "Financial control, credible forecasts, and ultimately being able to demonstrate that the investment delivered the benefits it promised."
   },
   "priya": {
     "id": "priya",
@@ -90,7 +98,9 @@
       "frustrated": "priya.jpg",
       "warm": "priya.jpg"
     },
-    "portraitStatus": "real art"
+    "portraitStatus": "real art",
+    "publicBio": "Priya leads Manufacturing and Operations, and is usually the person pushing hardest for the facility to do more than the plan currently asks of it — more automation, more throughput, one more improvement while everyone's already in the room. Energetic and persuasive, she has a knack for making a stretch goal sound like it was always the plan. Not every idea she raises will fit your budget or timeline, but she's rarely wrong that it would help.",
+    "whatMatters": "A facility that runs efficiently from day one, and a project team willing to hear out the improvement she's already thinking about."
   },
   "tomasz": {
     "id": "tomasz",
@@ -107,7 +117,9 @@
       "neutral": "tomasz_neutral.png",
       "concerned": "tomasz_concerned.png"
     },
-    "portraitStatus": "placeholder — no real art yet"
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Tomasz leads the supply chain and procurement activity supporting NOVA, working across suppliers, contracts and the commercial decisions needed to keep delivery moving. Understated and composed, he is good at seeing the consequences hidden behind an apparently simple purchasing decision, and tends to flag a supplier risk early rather than wait for it to become a crisis. The cheapest option isn't always the best one — but neither is paying a premium without understanding what you're actually buying.",
+    "whatMatters": "Making defensible supplier decisions that balance cost, capability, delivery confidence and risk."
   },
   "aisha": {
     "id": "aisha",
@@ -125,7 +137,9 @@
       "serious": "aisha_serious.png",
       "warm": "aisha_warm.png"
     },
-    "portraitStatus": "placeholder — no real art yet"
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Aisha owns the technology and automation behind the new facility, including the building management system and the risks surrounding its integration. Sharp, methodical and rarely comfortable with \"we'll figure it out later\", she has a habit of spotting technical dependencies that others overlook. She's supportive when the plan makes sense, but if deadlines begin driving technical decisions, expect her to ask difficult questions before putting her name behind them.",
+    "whatMatters": "Clear requirements, reliable integration, and enough time to prove that critical systems will work when the facility goes live."
   },
   "ellis": {
     "id": "ellis",
@@ -141,12 +155,14 @@
     "portraits": null,
     "asset": "ellis_notebook_icon.png",
     "note": "Never appears on screen — represented via handwriting/voicemail icon, not a portrait",
-    "portraitStatus": "placeholder — no real art yet"
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Ellis led Project NOVA before you arrived, and much of the project's existing structure, correspondence and history still carries his fingerprints. He was responsible for steering the project through its earlier stages, but by the time you inherit it, NOVA is already behind schedule and Ellis is no longer there to explain every decision that was made. You'll have to piece together much of that history yourself.",
+    "whatMatters": "Understanding the project you've inherited — and working out which assumptions, decisions and loose ends from the past still matter now."
   },
   "ben": {
     "id": "ben",
     "name": "Ben",
-    "role": "Colleague, Group Tax Innovation & Change",
+    "role": "Governance, Digital & Change Lead",
     "professionalFunction": "Points the player toward the artefacts that matter when an investigation could sprawl in any direction",
     "personalArc": null,
     "discoveredVia": null,
@@ -158,7 +174,25 @@
       "neutral": "benneutral.png",
       "warm": "bensmile.png"
     },
-    "portraitStatus": "real art"
+    "portraitStatus": "real art",
+    "publicBio": "Ben leads Governance, Digital and Change and sits at a more senior level, with Project NOVA forming only one part of the wider landscape he oversees. Strategic, confident and outcomes-focused, he is less involved in the project's day-to-day activity and tends to appear when decisions have wider implications or senior attention is required. Ben is interested in whether the project is genuinely under control — not simply whether the paperwork says it is.",
+    "whatMatters": "Strong governance, clear accountability, and confidence that major projects are delivering what the organisation expects."
+  },
+  "mike_smith": {
+    "id": "mike_smith",
+    "name": "Mike Smith",
+    "role": "Group Tax Portfolio PMO Lead",
+    "professionalFunction": "One of the player's main connections into Project NOVA, with a good view of what's happening across the wider portfolio",
+    "personalArc": null,
+    "discoveredVia": null,
+    "visualDescription": "Provisional — no visual description drafted yet",
+    "voiceStyle": "Approachable and pragmatic; direct without being blunt",
+    "recurringBeats": null,
+    "startingRelationship": 50,
+    "portraits": null,
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Mike leads the Group Tax Portfolio PMO and is one of your main connections into Project NOVA. Experienced, approachable and pragmatic, he has a good view of what is happening across the wider portfolio and knows when a project is beginning to attract attention for the wrong reasons. He won't manage NOVA for you, but he'll help you navigate the organisation, challenge your thinking and expect you to keep him informed when something important changes.",
+    "whatMatters": "A project team that understands its position, communicates clearly and doesn't allow problems to become surprises."
   },
   "joan": {
     "id": "joan",
@@ -190,7 +224,9 @@
     "portraits": {
       "neutral": "whitfield_neutral.png"
     },
-    "portraitStatus": "placeholder — no real art yet"
+    "portraitStatus": "placeholder — no real art yet",
+    "publicBio": "Whitfield enters NOVA from outside the project team, with no investment in its internal politics, pressures or excuses. Calm, observant and precise, Whitfield is less interested in what the team intended to do than in what it can demonstrate was actually done. By the time the inspection begins, months of project decisions have already been made — and some of them may be much more visible than the team expects.",
+    "whatMatters": "Evidence that the facility, its processes and its controls meet the required regulatory standard."
   },
   "steritech_rep": {
     "id": "steritech_rep",

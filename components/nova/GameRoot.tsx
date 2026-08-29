@@ -91,6 +91,7 @@ import RaidUpdateCard from "./RaidUpdateCard";
 import ReadinessChecklist from "./ReadinessChecklist";
 import AuditTrailBuilder from "./AuditTrailBuilder";
 import InspectionEvidenceExhibit from "./InspectionEvidenceExhibit";
+import CharacterBoard from "./CharacterBoard";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -838,6 +839,17 @@ export default function GameRoot() {
     }
   }
 
+  function handleContinueCharacterBoard() {
+    if (!gameState || !scene || !toolScreen) return;
+    const next = submitTool(gameState, toolScreen);
+    setGameState(next);
+    saveGame(next);
+
+    if (postLines.length === 0) {
+      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+    }
+  }
+
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const next = placePriorityCard(gameState, toolScreen, cardId, bucket);
@@ -1058,6 +1070,8 @@ export default function GameRoot() {
                 gameState={gameState}
                 onContinue={handleContinueEvidenceExhibit}
               />
+            ) : atToolBreak && toolScreen && toolType === "character_board" ? (
+              <CharacterBoard toolScreen={toolScreen} onContinue={handleContinueCharacterBoard} />
             ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
               <WBSBlueprint
                 toolScreen={toolScreen}

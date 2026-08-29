@@ -1147,3 +1147,104 @@ mismatch correctly when one is injected; and the readiness → audit-trail
 three views (readiness board sizes, audit-trail 11-card count stable
 before/after an intervention, exhibit's `stakeholder_map` item matching
 the audit-trail card's detail text verbatim).
+
+---
+
+## Tutorial character board — pre-Act-1 "Meet the team"
+
+**Status:** Shipped. `TUTORIAL_CHARACTER_BOARD` staged into
+`BUILT_SCENE_OVERRIDES`, verified via `tsc`/`eslint` and a scripted
+check, ready to commit.
+
+**What it is:** a new, non-canonical engine-only scene inserted between
+the Reception Intro cinematic (Ben & Mike Smith) and `ACT1_SCENE01`
+("Arrival & Handover" — the scene where the player actually arrives at
+NOVA and meets Mike Elloian). A read-only, browsable carousel
+(`CharacterBoard.tsx`) lets the player click through the people they're
+about to work with — an initials avatar (several of these characters
+have no real portrait art yet, so initials read consistently across all
+of them), name, role, a spoiler-free public bio paragraph, and a "What
+matters" one-liner — before Act 1 begins. Back/Next, no forced gate, a
+Continue button always available.
+
+**Single source of truth, per direction during brainstorm:** the board
+reads `name`/`role`/`publicBio`/`whatMatters` straight off
+`characters.json` via `getCharacter`, rather than duplicating bio text
+into `tool_screens.json`. `ToolScreenBlock.characterBoardIds` is
+deliberately just an ordered list of ids, not inlined content — the
+scene decides *who* and *in what order*, characters.json decides *what
+it says about them*. `characterBoardMetIds` is scene-specific framing
+(who the player has already met by this point in the story), so it
+lives on the tool screen, not on `Character` itself.
+
+**Two new fields added to `Character`:** `publicBio` (a short paragraph
+safe to show before the player has met someone) and `whatMatters` (a
+one-line summary), both explicitly separate from the pre-existing
+`personalArc` field — `personalArc` is narrative payoff meant to be
+discovered through play (Camille's old GMP warning letter, Vaughn's
+daughter, Daniel's team being downsized, etc.), and handing any of that
+out upfront in a tutorial would spoil it. Every board character got
+both fields added this build; `personalArc`/`discoveredVia`/etc. were
+left untouched.
+
+**Roster reconciliation — the real content decision this build made:**
+the bios were originally drafted with Priya labelled "Procurement Lead"
+and Tomasz labelled "Technical Specialist", which directly conflicted
+with their already-shipped characterisation elsewhere in the game
+(Priya as Manufacturing & Operations — champions throughput/automation,
+central to BIG-01; Tomasz as Supply Chain & Procurement — surfaces
+supplier risk, central to the EV-R1 supplier reversal event). Confirmed
+with direction: keep `characters.json`'s existing roles for both, don't
+touch the shipped dialogue. Concretely: Priya's `publicBio` was
+rewritten from scratch to actually describe Manufacturing/Ops (not
+reused from either original draft); Tomasz's `publicBio` reuses what
+was originally drafted as Priya's procurement-flavoured paragraph,
+since that content was actually describing his domain, not hers, with
+pronouns adjusted. Ben's `role` **was** updated, from "Colleague, Group
+Tax Innovation & Change" to "Governance, Digital & Change Lead" — this
+one was an intentional elevation, confirmed as not conflicting with his
+existing hands-on "points the player toward the artefacts that matter"
+behaviour in the Act 1 investigation feature (`professionalFunction`
+left untouched). A new character, Mike Smith ("Group Tax Portfolio PMO
+Lead"), was added to `characters.json` in full — same field shape as
+every other character, `startingRelationship: 50` but not added to
+`game_state.json`'s `relationships` object, matching the existing
+precedent that Ben (also `startingRelationship: 50`) isn't in that
+object either. A second proposed new character, Dr Olivia (Manufacturing
+Owner), was explicitly cut — never added anywhere.
+
+**Already-met framing:** `characterBoardMetIds` = `["mike_smith",
+"ben"]` — the two people from the Reception Intro's "Ben & Mike"
+cinematic (confirmed: this Mike is Mike Smith, not Mike Elloian, given
+Ben and Mike Smith share the Group Tax/PMO onboarding context and Mike
+Elloian is someone the player is still to meet once they arrive at
+NOVA). Everyone else reads as a fresh introduction; Ellis Grant gets a
+distinct "Never appears in person" badge instead, matching his existing
+`portraits: null` / never-on-screen characterisation.
+
+**Placement, architecturally:** Reception Intro runs on a separate
+cinematic layer (`NarrativeScene`) that exists before any save file is
+created; it hands off to the standard `GameRoot` layout only once it
+completes (`handleReceptionIntroComplete` → `newGameState()` →
+`enterScene`). The character board lives entirely inside that standard
+layout, using the same tool-screen slot every other interactive screen
+already uses — no new rendering primitive. `scene.act` is deliberately
+`"Tutorial"`, not `"Act 1"`, so the header/HUD chrome never mislabels it
+as part of Act 1; since `"Tutorial"` isn't in `BUILT_ACTS`, the scene is
+staged in via an explicit `BUILT_SCENE_OVERRIDES` entry instead. The
+actual navigational wiring is `game_state.json`'s `currentScene`, now
+`"TUTORIAL_CHARACTER_BOARD"` instead of `"ACT1_SCENE01"` — that's the
+one field `getDefaultGameState()` bootstraps from, so this single edit
+is what makes the new scene the true first scene the engine enters.
+
+**Verification:** `tsc --noEmit` and `eslint .` both clean. A throwaway
+scripted check (deleted after running) confirmed: the scene resolves,
+is `act: "Tutorial"` and in `BUILT_SCENE_IDS`, points at `ACT1_SCENE01`;
+its tool screen resolves to `type: "character_board"`; every id in
+`characterBoardIds` resolves to a real `characters.json` entry with a
+role, `publicBio`, and `whatMatters`; Priya/Tomasz's roles match
+`characters.json` exactly; Ben's role reads the updated title;
+`mike_smith` exists and both `mike_smith`/`ben` are the only
+already-met ids; `ACT1_SCENE01.trigger.previousScene` was updated for
+documentation accuracy; and `getDefaultGameState().currentScene` is now
+`TUTORIAL_CHARACTER_BOARD`.
