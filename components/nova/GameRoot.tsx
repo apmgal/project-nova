@@ -302,16 +302,25 @@ export default function GameRoot() {
     // in one scene and is only meant to cut off on a specific line in a
     // later one (see foldAmbient's own doc comment).
     let currentAmbient = state.currentAmbient;
+    // charactersMet folds in on the same guard, but reads the OUTGOING
+    // scene (prevScene), not the one being entered — a character counts
+    // as "met" once the player has actually left the scene they appeared
+    // in, not the instant that scene loads (which used to mark someone
+    // "already met" before a single line of their scene had even played —
+    // see the "Persistent character panel" entry in DESIGN_NOTES.md).
+    // Same bootstrap skip as the carry-forward above: nothing's been left
+    // yet on the very first scene.
+    let next: GameState = state;
     if (state.currentScene !== sceneId) {
       const prevScene = getScene(state.currentScene);
       const prevLines = prevScene ? getDialogue(prevScene.dialogueId)?.lines ?? [] : [];
       currentBackground = foldBackground(currentBackground, prevLines, state.flags, prevLines.length - 1);
       currentAmbient = foldAmbient(currentAmbient, prevLines, state.flags, prevLines.length - 1);
+      next = markCharactersMet(next, prevScene?.charactersInvolved ?? []);
     }
     const scene = getScene(sceneId);
-    let next: GameState = { ...state, currentScene: sceneId, currentBackground, currentAmbient };
+    next = { ...next, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
-    next = markCharactersMet(next, scene?.charactersInvolved ?? []);
     return next;
   }
 

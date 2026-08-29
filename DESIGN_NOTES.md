@@ -1210,6 +1210,18 @@ explicitly confirmed for it). No dev tool exists yet to jump straight to
 scripted verification checks `markCharactersMet`'s mechanics directly
 instead of playing through scenes.
 
+**Fix shipped same day: met-on-entry bug.** The first version above
+marked `charactersMet` from `enterScene`'s incoming scene — meaning
+`ACT1_SCENE01` ("Arrival & Handover", `charactersInvolved: ["ellis",
+"marcus"]`) marked Mike Elloian "already met" the instant the game
+booted into it, before a single line had played. Fixed by moving the
+fold onto the *outgoing* scene instead, on the exact same
+`state.currentScene !== sceneId` guard `enterScene` already uses for
+background/ambient carry-forward (skipped on the one-time bootstrap
+call, where nothing's been left yet). A character now reads "met" once
+the player has actually left the scene they appeared in, not the moment
+it loads.
+
 **Verification:** `tsc --noEmit` and `eslint .` both clean. A throwaway
 scripted check (deleted after running) confirmed:
 `TUTORIAL_CHARACTER_BOARD`/`TOOL_TUTORIAL_CHARACTER_BOARD` no longer
