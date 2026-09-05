@@ -1,4 +1,6 @@
 {
+  "_comment": "v2 — gate-based ending architecture. Replaces the old v1 single-composite-'Overall Verdict' model (8 flat endings, see git history for the prior version). See lib/nova/endings.ts for the pure evaluateEnding() function this config drives, and DESIGN_NOTES.md's 'Four-family ending architecture' entry for the full design rationale. All numeric fields under gateThresholds are PROVISIONAL — centralised here specifically so they can be recalibrated after real playthroughs without touching code.",
+
   "deliveryStructure": [
     {
       "beat": "Inspection Ends",
@@ -17,76 +19,113 @@
     },
     {
       "beat": "\"Three Weeks Later\"",
-      "whatHappens": "Hard cut forward. The facility is now shown fully operational (Facility Progress final reel). Consequences of the inspection finally play out.",
+      "whatHappens": "Hard cut forward. The facility is now shown fully operational (Facility Progress final reel). Consequences of the inspection finally play out. If the Contract Gate resolved to LOST, the NHS Procurement notice renders here (see engineNote) — otherwise this beat plays with no commercial interruption.",
       "withheld": "This is the first point any outcome is confirmed"
     },
     {
       "beat": "Personalised Ending",
-      "whatHappens": "One of the 8 endings below plays, using the same composite scoring model as v1 (Tab 3 in v1 / carried forward unchanged)",
+      "whatHappens": "evaluateEnding(state) resolves exactly one endingFamily (+ variant, where applicable) via the three-gate model below — see lib/nova/endings.ts.",
       "withheld": "—"
     },
     {
-      "beat": "Ellis Grant Epilogue (END-8, if unlocked)",
-      "whatHappens": "Full reveal of Ellis's final notebook entry / unsent status report, layered onto whichever primary ending played",
+      "beat": "Ellis Grant Epilogue",
+      "whatHappens": "Full reveal of Ellis's final notebook entry / unsent status report, layered onto whichever primary ending played.",
       "withheld": "—"
     }
   ],
-  "endings": {
-    "END-1": {
-      "endingId": "END-1",
+
+  "gateThresholds": {
+    "contractGate": {
+      "_purpose": "Gate 1 — did delivery happen in time to keep the NHS contract? External-customer-facing only: deliberately excludes boardConfidence (the Board liking you doesn't change what the customer does) and stakeholderGoodwill's ordinary range (only a severe, investigation-level collapse counts here — anything milder is Gate 3's 'scrutiny' flavor, not a contract-losing event).",
+      "scheduleHealthFloor": 40,
+      "scheduleHealthFloorNote": "scheduleHealth < this at Gate-evaluation time (Act 6 open) => contract lost, unless the grace decision below applies.",
+      "graceDecision": {
+        "key": "big01Response",
+        "value": "phase_b_quietly",
+        "scheduleHealthFloorOverride": 30,
+        "note": "Choosing to protect Product A fully and phase Product B in quietly (CHOICE in BIG-01) is an explicit customer-facing decision to protect the core NHS-relevant delivery — lowers the floor rather than granting a flat bonus, so a genuinely catastrophic schedule can still lose the contract even with the grace applied."
+      },
+      "severeGoodwillFloor": 20,
+      "severeGoodwillFloorNote": "stakeholderGoodwill at/below this at Gate-evaluation time is treated as an external investigation having actually delayed/prevented launch (the 'did it delay launch?' branch in the design brief) — an independent OR condition alongside the schedule floor, not folded into scrutiny scoring. A milder goodwill dip that never crossed this floor is NOT a contract-losing event; it can still show up as Gate 3's 'scrutiny' Pyrrhic flavor."
+    },
+    "qualityGate": {
+      "_purpose": "Gate 2 — can the facility safely release the batch? Only evaluated if Gate 1 = SECURED. Regulatory Readiness / Risk Exposure are the ambient baseline; the Act 5 inspection's report-mismatch severity (findMostMaterialReportMismatch) is a major determinant of RECOVERABILITY specifically, not a universal override of the release decision by itself.",
+      "releaseRegulatoryReadinessFloor": 70,
+      "releaseRiskExposureCeiling": 40,
+      "releaseNote": "regulatoryReadiness >= floor AND riskExposure <= ceiling AND mismatchSeverity !== 'material' => batchResult 'released'. A material mismatch alone can block a release that the ambient metrics would otherwise have allowed — Whitfield's inspection actually mattering to the ending — but it is evaluated jointly with the metrics, not as a standalone kill switch.",
+      "recoverableRegulatoryReadinessFloor": 50,
+      "recoverableNote": "If not released: regulatoryReadiness >= this floor AND mismatchSeverity !== 'material' => the rejection is RECOVERABLE (strong-enough evidence trail + no governance dishonesty compounding the failure) => routes to PYRRHIC_VICTORY / recoverable_quality_failure, matching the existing END-4 beat (fast root-cause, second batch succeeds). Otherwise => BATCH_REJECTED (weak evidence and/or a material mismatch on top of the failure — unrecoverable, matching existing END-5)."
+    },
+    "deliveryComposite": {
+      "_purpose": "Gate 3 — only reached when Gate 1 = SECURED and Gate 2 = RELEASED. Decides Triumphant Launch vs. Pyrrhic Victory, then (if Pyrrhic) which of the non-recoverable-quality variants explains why: financial, political, or scrutiny. Political is checked first as a near-categorical signal (a Cold sponsor/QA relationship is decisive on its own, per the design brief's 'project succeeded, you didn't survive it' framing) rather than folded into the weighted average — so it can never be quietly averaged away by a good budget number.",
+      "weights": {
+        "budgetRemainingPct": 0.2,
+        "benefitsRealisationScore": 0.15,
+        "stakeholderGoodwill": 0.15,
+        "teamMorale": 0.15,
+        "boardConfidence": 0.2,
+        "honesty": 0.15
+      },
+      "weightsNote": "Each dimension is normalised to a 0-100 subscore before weighting: budgetRemainingPct = budgetRemaining / STARTING_BUDGET * 100 (clamped); benefitsRealisationScore/stakeholderGoodwill/teamMorale/boardConfidence are used as-is (already 0-100); honesty is derived from findMostMaterialReportMismatch — consistent=100, borderline=55, material=0 — never a separately-tracked counter.",
+      "triumphantThreshold": 72,
+      "politicalRelationshipFloor": "WARM_RELATIONSHIP_THRESHOLD (65, lib/nova/state.ts) — reused, not a new constant. min(relationships.marcus, relationships.camille) below this => variantSource 'political', checked before the weighted comparison.",
+      "variantSelectionNote": "If not political: compare the budgetRemainingPct subscore against the stakeholderGoodwill subscore (both already computed above) and pick whichever is lower as 'financial' or 'scrutiny' respectively. Ties resolve to 'financial'."
+    }
+  },
+
+  "endingFamilies": {
+    "TRIUMPHANT_LAUNCH": {
       "name": "Triumphant Launch",
-      "triggerCondition": "Overall Verdict 80–100, Regulatory Readiness ≥ 80",
+      "sourceEndingIds": ["END-1"],
       "narrativeSummary": "The batch (or both batches, if BIG-01 was handled well) is released cleanly and the NHS contract is confirmed. Mike E. privately admits the project nearly broke Ellis in the same seat — an offer of succession, not just closure.",
       "tone": "Earned, warm, quietly bittersweet about Ellis"
     },
-    "END-2": {
-      "endingId": "END-2",
+    "PYRRHIC_VICTORY": {
       "name": "Pyrrhic Victory",
-      "triggerCondition": "Overall Verdict 60–79, Budget Remaining < 10%",
-      "narrativeSummary": "Contract secured, but the cost is visible — Daniel notes the margin is thinner than promised, and the team is visibly depleted in the control-room scene.",
-      "tone": "Success shadowed by cost"
+      "variants": {
+        "financial": {
+          "sourceEndingIds": ["END-2"],
+          "narrativeSummary": "Contract secured, but the cost is visible — Daniel notes the margin is thinner than promised, and the team is visibly depleted in the control-room scene.",
+          "tone": "Success shadowed by cost"
+        },
+        "political": {
+          "sourceEndingIds": ["END-6"],
+          "narrativeSummary": "The physical build succeeds but the political battle is lost — a rival executive uses the friction to have the player quietly moved off the project just before launch, exactly as happened to Ellis. Framed as a personal-outcome variant: the project itself is NOT a failure here.",
+          "tone": "The game's core thesis made explicit — technical success, political failure, kept separate"
+        },
+        "scrutiny": {
+          "sourceEndingIds": ["END-7"],
+          "narrativeSummary": "Unresolved external concerns (e.g. an unanswered social media safety claim) draw formal scrutiny, but not enough to overtake the project's own timeline — the facility still launches under a cloud, not under a stopped clock.",
+          "tone": "Tense, cautionary, but survivable"
+        },
+        "recoverable_quality_failure": {
+          "sourceEndingIds": ["END-4"],
+          "narrativeSummary": "The first batch is rejected on a quality technicality, but the strong documentation trail means the root cause is found fast and a second batch succeeds within weeks.",
+          "tone": "Setback overcome through good governance",
+          "gateOrigin": "Gate 2 (quality), not Gate 3 — batchResult is 'rejected' even though endingFamily is Pyrrhic. See qualityGate.recoverableNote."
+        }
+      }
     },
-    "END-3": {
-      "endingId": "END-3",
-      "name": "Contract Lost, Lesson Learned",
-      "triggerCondition": "Overall Verdict 40–59, Schedule Health < 40",
-      "narrativeSummary": "The batch is fine but arrives too late — a competitor wins the contract. Mike E. is disappointed but respects the player's honesty, leaving the door open for a future project.",
+    "CONTRACT_LOST": {
+      "name": "Contract Lost",
+      "sourceEndingIds": ["END-3"],
+      "narrativeSummary": "The batch may well be fine, but delivery arrived too late (or a severe external investigation overtook the timeline) — a competitor wins the contract. Mike E. is disappointed but respects the player's honesty, leaving the door open for a future project.",
       "tone": "Sober, not punishing"
     },
-    "END-4": {
-      "endingId": "END-4",
-      "name": "Batch Rejected — Redemption Arc",
-      "triggerCondition": "Overall Verdict 40–59, Regulatory Readiness ≥ 60",
-      "narrativeSummary": "The first batch is rejected on a quality technicality, but the strong documentation trail means the root cause is found fast and a second batch succeeds within weeks.",
-      "tone": "Setback overcome through good governance"
-    },
-    "END-5": {
-      "endingId": "END-5",
-      "name": "Batch Rejected — Project Paused",
-      "triggerCondition": "Overall Verdict 20–39, Regulatory Readiness < 40",
+    "BATCH_REJECTED": {
+      "name": "Batch Rejected",
+      "sourceEndingIds": ["END-5"],
       "narrativeSummary": "The batch is rejected and the evidence trail is too thin to diagnose quickly. The Board pauses the programme pending external review. The player is reassigned — an explicit mirror of Ellis's fate.",
       "tone": "Consequential, not villainised"
-    },
-    "END-6": {
-      "endingId": "END-6",
-      "name": "Politically Undermined",
-      "triggerCondition": "Mike E. Trust OR Camille Trust at Cold band by Act 6, regardless of Delivery Score",
-      "narrativeSummary": "The physical build succeeds but the political battle is lost — a rival executive uses the friction to have the player quietly moved off the project just before launch, exactly as happened to Ellis.",
-      "tone": "The game's core thesis made explicit"
-    },
-    "END-7": {
-      "endingId": "END-7",
-      "name": "The Whistleblower Ending",
-      "triggerCondition": "Stakeholder Goodwill falls to its lowest band at any point in Act 4",
-      "narrativeSummary": "Unresolved external concerns (e.g. an unanswered social media safety claim) escalate into a formal external investigation that overtakes the project's own timeline.",
-      "tone": "Tense, cautionary"
-    },
-    "END-8": {
-      "endingId": "END-8",
-      "name": "Ellis Grant's Understanding",
-      "triggerCondition": "Epilogue — unlocked whenever all 6 notebook fragments are found; layers onto whichever primary ending played",
-      "narrativeSummary": "The player reads Ellis's final, unsent status report. Ellis wasn't a bad PM — they carried the exact same pressures the player just survived, alone, for far longer. The core lesson lands explicitly: PM isn't about perfect answers, it's about informed decisions under uncertainty, made by people who don't always agree with you.",
-      "tone": "Reflective, empathetic — the emotional capstone"
     }
+  },
+
+  "epilogue": {
+    "name": "Ellis Grant's Understanding",
+    "sourceEndingIds": ["END-8"],
+    "conditionFlag": "all_ellis_fragments_found",
+    "narrativeSummary": "The player reads Ellis's final, unsent status report. Ellis wasn't a bad PM — they carried the exact same pressures the player just survived, alone, for far longer. The core lesson lands explicitly: PM isn't about perfect answers, it's about informed decisions under uncertainty, made by people who don't always agree with you.",
+    "tone": "Reflective, empathetic — the emotional capstone",
+    "note": "NOT one of the four ending families — an overlay layered onto whichever family/variant resolved, unlocked purely by all_ellis_fragments_found regardless of outcome. Every ending reads Ellis differently depending on what just happened, which is the point."
   }
 }

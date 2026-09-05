@@ -2240,8 +2240,10 @@ function computeGapEventQueue(waveId: string, state: GameState): string[] {
 
 /** Starting budgetRemaining every playthrough begins with (see
  * game_state.json) — EV-10's "Budget Remaining < 15%" trigger is relative
- * to this baseline, not a live-recomputed total. */
-const STARTING_BUDGET = 12000000;
+ * to this baseline, not a live-recomputed total. Exported so lib/nova/
+ * endings.ts's deliveryComposite gate can compute the same
+ * percent-of-starting-budget reading without duplicating the constant. */
+export const STARTING_BUDGET = 12000000;
 
 /**
  * Per-event eligibility, straight from each event's own `trigger` prose in

@@ -1338,3 +1338,111 @@ role, `publicBio`, and `whatMatters`; Priya/Tomasz's roles match
 already-met ids; `ACT1_SCENE01.trigger.previousScene` was updated for
 documentation accuracy; and `getDefaultGameState().currentScene` is now
 `TUTORIAL_CHARACTER_BOARD`.
+
+## Four-family ending architecture (Act 6 gate model, v2)
+
+**Problem:** `data/endings.json` (a v1 design artefact, never wired to
+any code) modelled Act 6 as 8 flat, mutually-exclusive endings selected
+by a single blended "Overall Verdict" composite, with END-6/END-7 as
+ad-hoc overrides on top. Never implemented — `dialogue.json`'s
+`ending_END-1`..`ending_END-7` condition flags were written and are
+fully playable-content-ready, but nothing has ever computed them. A
+single composite also has a real design flaw: it lets strong metrics on
+one dimension arithmetically average away a catastrophic failure on
+another (e.g. excellent stakeholder goodwill masking a regulatory
+failure), which is both bad game design and a bad PM lesson — different
+project dimensions aren't interchangeable.
+
+**Direction (confirmed):** collapse to 4 player-facing outcome
+*families* — Triumphant Launch, Pyrrhic Victory, Contract Lost, Batch
+Rejected — evaluated via three sequential gates rather than one score,
+so a catastrophic failure on one dimension can't be bought back by
+strength elsewhere:
+
+1. **Contract Gate** — did delivery happen in time to keep the NHS
+   contract? Customer-facing only: `scheduleHealth` against a floor
+   (with a grace override if `decisions.big01Response ===
+   "phase_b_quietly"`, which explicitly protects NHS-relevant supply),
+   OR `stakeholderGoodwill` collapsing past a severe floor (an external
+   investigation actually delaying/preventing launch). Deliberately
+   excludes `boardConfidence` — the Board liking you doesn't change
+   what an external customer does; `boardConfidence` is reserved for
+   Gate 3 (your personal/political outcome), a deliberate separation of
+   "did the project succeed" from "did you survive it."
+2. **Quality Gate** — only runs if Gate 1 = secured. `regulatoryReadiness`
+   / `riskExposure` against release floors decide `batchResult`
+   (released/rejected); if rejected, `findMostMaterialReportMismatch`'s
+   existing severity band (material/borderline/consistent — already
+   built for Whitfield's inspection, no new tracking added) is a major
+   determinant of whether the rejection is *recoverable* (→ Pyrrhic
+   Victory, `recoverable_quality_failure` variant, matching the
+   existing END-4 beat) or not (→ Batch Rejected, matching END-5). A
+   material mismatch can also block an otherwise-clean release outright
+   — evaluated jointly with the metrics, not as a standalone override.
+3. **Delivery composite** — only runs if Gate 1 = secured AND Gate 2 =
+   released. Weighted read of budget%/benefits/goodwill/morale/
+   boardConfidence/honesty (honesty = `findMostMaterialReportMismatch`
+   again, not a new counter) against a threshold. **Political isolation
+   is checked before this threshold, not as a fallback when the
+   composite is already low** — `min(relationships.marcus,
+   relationships.camille) < WARM_RELATIONSHIP_THRESHOLD` (the existing
+   Cold/Cool constant, reused rather than inventing a new one) routes
+   straight to Pyrrhic/`political` regardless of how strong the
+   composite reads. This was a real bug caught by the archetype
+   verification script, not a hypothetical: the first implementation
+   checked the threshold first, which meant a cold sponsor relationship
+   could be arithmetically buried under an otherwise-strong composite
+   and still read as Triumphant — exactly the failure mode this whole
+   redesign exists to avoid, just pointed the other direction.
+
+END-2/END-4/END-6/END-7 are preserved, not discarded — they become
+`variantSource`-tagged flavours under Pyrrhic Victory
+(financial/political/scrutiny/recoverable_quality_failure) rather than
+competing top-level endings, so none of the existing writing is wasted.
+Batch event (`batchResult: "released" | "rejected"`) and ending family
+(`endingFamily`) are kept as two separate fields on purpose — a
+rejected-then-recovered batch is `batchResult: "rejected"` but
+`endingFamily: "PYRRHIC_VICTORY"`, and conflating the two was flagged
+explicitly as a terminology trap to avoid. Ellis's epilogue (old END-8)
+is not a family — it's an overlay, gated purely on
+`all_ellis_fragments_found`, layered onto whichever family/variant
+resolved.
+
+**What shipped this pass:** `data/endings.json` rewritten from the old
+flat-8/single-composite v1 doc into the v2 spec — `gateThresholds`
+(all three gates' inputs, floors, and weights, explicitly marked
+provisional/centralised pending real playthrough calibration) +
+`endingFamilies` (narrative content remapped from the old END-ids,
+tagged with `sourceEndingIds` so the mapping back to already-written
+`dialogue.json` content is traceable) + `epilogue`. New
+`lib/nova/endings.ts`: one pure function, `evaluateEnding(state):
+EndingResult`, containing all the branching logic and zero thresholds
+of its own (every number lives in the JSON), returning
+`{contractGateResult, batchResult, endingFamily, endingVariant,
+diagnostics}` — `diagnostics` is a plain-English trace of why each gate
+resolved the way it did, for the debug panel and future calibration,
+not player-facing copy. Reuses `findMostMaterialReportMismatch`,
+`WARM_RELATIONSHIP_THRESHOLD`, and (newly exported) `STARTING_BUDGET`
+from `state.ts` rather than tracking anything new — `hid_problem_from_
+marcus`/`honesty_penalty_pending` were checked and confirmed already
+dead (superseded by the mismatch function per that function's own
+comment) before concluding no new honesty state was needed.
+
+**Explicitly NOT done this pass** (by design — scoped to the ending
+system only, confirmed with direction before proceeding further): no
+changes to `GameRoot.tsx`, `scenes.json`, or `dialogue.json`. The
+existing `ending_END-1`..`ending_END-7` flags are not yet set anywhere;
+`ACT6_SCENE02`'s `batch_released`/`batch_rejected` still needs wiring
+to `evaluateEnding(state).batchResult`; the conditional NHS Procurement
+notice (Contract Gate = lost only) doesn't exist as content yet. See
+the wiring plan given alongside this entry for the intended next step.
+
+**Verification:** `tsc --noEmit` and `eslint .` both clean. A throwaway
+archetype script (deleted after running) exercised one scenario per
+gate-tree leaf — clean Triumphant; financial/political/scrutiny/
+recoverable-quality Pyrrhic variants; unrecoverable Batch Rejected both
+via weak evidence and via a material report mismatch overriding an
+otherwise-recoverable readiness band; Contract Lost via schedule floor,
+via the `phase_b_quietly` grace override, and via severe goodwill
+collapse — all 9 passed, including the political-ordering bug found and
+fixed mid-verification (see above).
