@@ -1447,6 +1447,52 @@ via the `phase_b_quietly` grace override, and via severe goodwill
 collapse — all 9 passed, including the political-ordering bug found and
 fixed mid-verification (see above).
 
+**Follow-up shipped same day: wired into GameRoot + dialogue, and one
+more bug found during end-to-end playtest.** `lib/nova/endings.ts`
+gained `endingConditionFlags(state)` — a synthetic, never-persisted
+overlay mirroring `state.ts`'s `reportMismatchFlags` exactly. It isn't
+folded into `effectiveDialogueFlags` itself (that would create a
+`state.ts` <-> `endings.ts` circular import, since `evaluateEnding`
+already depends on `findMostMaterialReportMismatch`/`STARTING_BUDGET`
+from `state.ts`) — instead `GameRoot.tsx` gained a local
+`dialogueFlagsFor(state)` wrapper merging both, used at all three of
+its `effectiveDialogueFlags` call sites (live render + both branches of
+`resolveInitialLineIndex`'s resume fast-forward), so live play and
+resume can never disagree about how many lines a scene has.
+`DIALOGUE_ACT6_SCENE02`'s `batch_released`/`batch_rejected` conditions
+needed no changes (already the right names); `DIALOGUE_ACT6_SCENE03`'s
+`ending_END-1`..`ending_END-7` were retagged 1:1 to the new family/
+variant flag names — text untouched. A new, minimal 3-line NHS
+Procurement notice was added to `DIALOGUE_ACT6_SCENE01`, gated on
+`contract_lost`.
+
+The playtest script (walking `DIALOGUE_ACT6_SCENE01` →`02`→`03` via
+`getDialogue`+`isLineVisible` against real `evaluateEnding` output, one
+archetype per gate-tree leaf) caught a real content gap before it ever
+shipped: when Gate 1 failed, `evaluateEnding` short-circuited straight
+to `CONTRACT_LOST` with `batchResult: null` — meaning
+`DIALOGUE_ACT6_SCENE02`'s control-room scene would show neither "BATCH
+RELEASED." nor "BATCH REJECTED.", just the atmospheric build-up lines
+and then silence. This contradicts the design brief directly: "the
+batch can succeed; the business outcome didn't" is exactly the
+poignancy END-3 is supposed to have. Fixed: Gate 2 now always runs even
+when Gate 1 has already failed, purely to populate `batchResult` for
+Scene 02's conditions — its family suggestion is discarded, Contract
+Lost still wins regardless of how the batch itself turns out. Re-ran
+the full playtest with this fix in place: 9/9 archetypes now correctly
+show gate result -> control room -> batch result -> exactly one ending
+variant (with all 6 other variants' text confirmed absent, not just the
+right one confirmed present) -> benefits readout -> Ellis overlay when
+unlocked. `tsc --noEmit`/`eslint .` clean throughout.
+
+**Not done, deliberately out of scope this pass:** `ACT6_SCENE01`/`02`/
+`03` are not yet in `lib/nova/data.ts`'s `BUILT_SCENE_OVERRIDES`, so
+Act 6 is still unreachable by playing the live game in a browser —
+verification so far is entirely scripted (`getDialogue`+`isLineVisible`
++`evaluateEnding`) rather than a real click-through. Flipping that is a
+small, separate, easily-reversible decision, not folded in here without
+asking first.
+
 **Follow-up shipped same day: political isolation threshold split from
 WARM_RELATIONSHIP_THRESHOLD.** Flagged in review: reusing 65 for the
 political-isolation check meant a relationship the player simply never

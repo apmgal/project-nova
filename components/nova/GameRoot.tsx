@@ -66,6 +66,7 @@ import {
   reportMismatchTemplateValues,
   applyReadinessIntervention,
 } from "@/lib/nova/state";
+import { endingConditionFlags } from "@/lib/nova/endings";
 import type {
   ChoiceBlock,
   ChoiceOption,
@@ -240,14 +241,25 @@ function resolveInitialLineIndex(state: GameState, sceneId: string): number {
   const scene = getScene(sceneId);
   if (!scene) return 0;
   if (scene.displayStyle === "announcement") {
-    const { preLines, postLines } = computeSceneLines(scene, effectiveDialogueFlags(state));
+    const { preLines, postLines } = computeSceneLines(scene, dialogueFlagsFor(state));
     return preLines.length + postLines.length;
   }
   if (scene.toolId && hasReachedToolScreen(state, scene.toolId)) {
-    const { preLines } = computeSceneLines(scene, effectiveDialogueFlags(state));
+    const { preLines } = computeSceneLines(scene, dialogueFlagsFor(state));
     return preLines.length;
   }
   return 0;
+}
+
+/** effectiveDialogueFlags plus the Act 6 ending system's synthetic overlay
+ * (see lib/nova/endings.ts's endingConditionFlags doc comment for why this
+ * lives here rather than being folded into effectiveDialogueFlags itself —
+ * a state.ts<->endings.ts circular import). Used at every call site that
+ * used to call effectiveDialogueFlags directly, so live render and the
+ * resume-time fast-forward in resolveInitialLineIndex never disagree with
+ * each other about how many lines a scene has. */
+function dialogueFlagsFor(state: GameState) {
+  return { ...effectiveDialogueFlags(state), ...endingConditionFlags(state) };
 }
 
 export default function GameRoot() {
@@ -514,7 +526,7 @@ export default function GameRoot() {
   // final action. lineIndex is a single running index over the pre-tool +
   // post-tool lines combined; the tool screen is an interstitial that
   // blocks advancing past the boundary between them until it's complete.
-  const { preLines, postLines, markerText } = computeSceneLines(scene, effectiveDialogueFlags(gameState));
+  const { preLines, postLines, markerText } = computeSceneLines(scene, dialogueFlagsFor(gameState));
   const combinedLines = [...preLines, ...postLines];
   const toolBreakIndex = preLines.length;
 

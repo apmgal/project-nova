@@ -190,6 +190,38 @@ function evaluateDeliveryComposite(state: GameState): { family: EndingFamily; va
 }
 
 /**
+ * Synthetic, never-persisted condition flags derived from evaluateEnding —
+ * mirrors state.ts's reportMismatchFlags/effectiveDialogueFlags pattern
+ * exactly (pure readout of existing GameState, no separate storage). Not
+ * merged into effectiveDialogueFlags itself to avoid a state.ts<->endings.ts
+ * circular import (evaluateEnding needs findMostMaterialReportMismatch/
+ * STARTING_BUDGET from state.ts) — GameRoot.tsx merges this in locally at
+ * every effectiveDialogueFlags call site instead (see dialogueFlagsFor).
+ * batch_released/batch_rejected reuse the exact flag names
+ * DIALOGUE_ACT6_SCENE02 already authored against; contract_secured/
+ * contract_lost likewise for ACT6_SCENE03's benefits readout — only how
+ * they're computed changed (Gate 1 directly, not inferred from which of 7
+ * endings fired). Exactly one ending_* family/variant flag is ever true.
+ */
+export function endingConditionFlags(state: GameState): Record<string, boolean> {
+  const result = evaluateEnding(state);
+  const isPyrrhic = result.endingFamily === "PYRRHIC_VICTORY";
+  return {
+    contract_secured: result.contractGateResult === "secured",
+    contract_lost: result.contractGateResult === "lost",
+    batch_released: result.batchResult === "released",
+    batch_rejected: result.batchResult === "rejected",
+    ending_TRIUMPHANT_LAUNCH: result.endingFamily === "TRIUMPHANT_LAUNCH",
+    ending_PYRRHIC_financial: isPyrrhic && result.endingVariant === "financial",
+    ending_PYRRHIC_political: isPyrrhic && result.endingVariant === "political",
+    ending_PYRRHIC_scrutiny: isPyrrhic && result.endingVariant === "scrutiny",
+    ending_PYRRHIC_recoverable_quality_failure: isPyrrhic && result.endingVariant === "recoverable_quality_failure",
+    ending_CONTRACT_LOST: result.endingFamily === "CONTRACT_LOST",
+    ending_BATCH_REJECTED: result.endingFamily === "BATCH_REJECTED",
+  };
+}
+
+/**
  * Resolves Act 6's ending in one pass: Gate 1 (Contract) → Gate 2 (Quality,
  * only if secured) → Gate 3 (Delivery composite, only if released). Every
  * branch is documented in data/endings.json's gateThresholds — this
@@ -203,9 +235,19 @@ export function evaluateEnding(state: GameState): EndingResult {
   diagnostics.push(contract.diagnostic);
 
   if (contract.result === "lost") {
+    // The commercial outcome is already decided, but the facility still
+    // runs its batch regardless — ACT6_SCENE02's control-room scene plays
+    // out either way ("the batch can succeed; the business outcome
+    // didn't" per the design brief), so Gate 2 still runs here purely to
+    // populate batchResult for that scene's batch_released/batch_rejected
+    // conditions. Its family suggestion is discarded — Contract Lost
+    // always wins as the ending family once Gate 1 has failed, regardless
+    // of how the batch itself turns out.
+    const quality = evaluateQualityGate(state);
+    diagnostics.push(`(Gate 2 still evaluated for batchResult only, contract already lost) ${quality.diagnostic}`);
     return {
       contractGateResult: "lost",
-      batchResult: null,
+      batchResult: quality.batchResult,
       endingFamily: "CONTRACT_LOST",
       endingVariant: null,
       diagnostics,
