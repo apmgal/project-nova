@@ -78,6 +78,14 @@ const BUILT_SCENE_OVERRIDES = new Set([
   "ACT5_SCENE02",
   "ACT5_SCENE03",
   "ACT5_SCENE04",
+  // Act 6 — the ending system (see DESIGN_NOTES.md's "Four-family ending
+  // architecture" entry). Staged in once evaluateEnding + the retagged
+  // dialogue conditions were verified end-to-end via script; this is what
+  // makes Act 6 reachable by actually playing the live game, not just via
+  // the scripted playtest.
+  "ACT6_SCENE01",
+  "ACT6_SCENE02",
+  "ACT6_SCENE03",
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
