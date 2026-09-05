@@ -1485,13 +1485,81 @@ variant (with all 6 other variants' text confirmed absent, not just the
 right one confirmed present) -> benefits readout -> Ellis overlay when
 unlocked. `tsc --noEmit`/`eslint .` clean throughout.
 
-**Not done, deliberately out of scope this pass:** `ACT6_SCENE01`/`02`/
-`03` are not yet in `lib/nova/data.ts`'s `BUILT_SCENE_OVERRIDES`, so
-Act 6 is still unreachable by playing the live game in a browser —
-verification so far is entirely scripted (`getDialogue`+`isLineVisible`
-+`evaluateEnding`) rather than a real click-through. Flipping that is a
-small, separate, easily-reversible decision, not folded in here without
-asking first.
+**Follow-up shipped same day: Act 6 made reachable + a temporary dev
+playtest nav.** `ACT6_SCENE01`–`03` were added to `BUILT_SCENE_OVERRIDES`
+(no other ending-system changes) so Act 6 can now actually be played
+through in the live game, not just verified by script.
+
+## Dev playtest navigation (temporary, DEV_MODE-only)
+
+Added a developer-only ← Previous / Next → control for stepping through
+scene history with full `GameState` snapshots, so an earlier choice can
+be replayed and its downstream effect on later activities/metrics/the
+Act 6 ending observed directly, without restarting the whole game.
+
+**Architecture (per the inspection done before building):** every real
+scene transition already funnels through one function, `goToRealScene`,
+in `GameRoot.tsx` — direct choices, tool submissions, and the Event
+Library's queued-event advances all end up there exactly once. Rather
+than editing that function (or `enterScene`/`goToScene`/
+`advanceEventQueue`, all of which remain byte-for-byte untouched), the
+new `useDevPlaytestHistory` hook (`lib/nova/devHistory.ts`) purely
+*observes* `gameState.currentScene` via a `useEffect` and records a
+`{sceneId, lineIndex, snapshot: gameState}` entry every time it
+actually changes. Since every state-producing function elsewhere in
+this codebase already returns a new `GameState` via spread rather than
+mutating in place, keeping a plain object reference is already a
+complete, independent snapshot — metrics, flags, relationships,
+`statusReports`, `toolProgress`/`toolPlacements`/`toolSelections`,
+`decisions` (supplier choice etc.), `eventsResolved`, all of it, with no
+manual enumeration or cloning needed. Intra-scene updates (tool
+placements, interstitial choice effects) call `setGameState` too but
+don't change `currentScene`, so they don't spawn spurious history
+entries — which is exactly what makes "Previous" discard everything
+since scene entry without needing to hook every individual state
+mutation in `GameRoot`.
+
+History is a single array + index pointer, standard undo/redo-with-
+branching: Previous/Next move the pointer and restore that entry's
+`snapshot`/`lineIndex` (restoring the stored `lineIndex` — the exact
+value `resolveInitialLineIndex` computed at that scene's real entry —
+is what lands back at the true start of a scene's dialogue rather than
+wherever the player had scrolled to). A `restoringRef` guard stops the
+hook's own restore calls from being recorded as new history. Making a
+*different* choice after going back drives a genuinely new transition
+through the normal path, which the effect observes like any other
+transition; recording truncates everything after the current pointer
+first, discarding the stale future — the branch-and-discard behaviour.
+Verified the truncate/restore arithmetic in isolation via a throwaway
+script (linear play; two Previous; one Next/redo; back again then a
+different choice correctly discards the stale future) — all passed.
+
+**Isolation, exactly as scoped:** `DEV_MODE` is tied to `NODE_ENV !==
+"production"`, so it's automatically off in any real build. Dev-nav
+moves call `setGameState`/`setLineIndex` directly and never call
+`saveGame` — the real localStorage save is untouched by rewinding;
+history itself is in-memory only, explicitly not persisted (lost on
+reload), and reset on every fresh game/continue/restart. No state-
+editing controls — the `DevPlaytestNav` bar is read-only, deliberately
+loud/out-of-place styling (solid amber/black, monospace, "DEV /
+PLAYTEST" label) so it can't be mistaken for player UI, with a
+collapsible detail panel showing current scene id, history position,
+key `projectMetrics`, and a live `evaluateEnding()` projection (family/
+variant/contract/batch) computed from wherever the player currently is
+— not gated on having reached Act 6, since seeing that projection move
+in response to an earlier replayed choice is the actual point of the
+tool. Everything lives in two new files
+(`lib/nova/devHistory.ts`, `components/nova/DevPlaytestNav.tsx`); the
+only other changes were a dozen or so lines in `GameRoot.tsx` (one hook
+call, two conditional renders, three `reset()` calls on fresh-game
+paths) — removing the feature later means deleting the two files and
+reverting those lines. `tsc --noEmit`/`eslint .` both clean.
+
+**Not verified by me:** actually clicking through the live UI — this
+sandbox's browser tooling can't reach the Next dev server's localhost.
+The branching *logic* was verified in isolation; the actual manual
+Act 6 playthrough (and dev-nav click-through) is the next step, by the
+person, per their own stated intent.
 
 **Follow-up shipped same day: political isolation threshold split from
 WARM_RELATIONSHIP_THRESHOLD.** Flagged in review: reusing 65 for the

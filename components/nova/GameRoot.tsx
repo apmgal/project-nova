@@ -67,6 +67,8 @@ import {
   applyReadinessIntervention,
 } from "@/lib/nova/state";
 import { endingConditionFlags } from "@/lib/nova/endings";
+import { DEV_MODE, useDevPlaytestHistory } from "@/lib/nova/devHistory";
+import DevPlaytestNav from "./DevPlaytestNav";
 import type {
   ChoiceBlock,
   ChoiceOption,
@@ -299,6 +301,25 @@ export default function GameRoot() {
   // player it's safe to stop for a moment.
   const [paused, setPaused] = useState(false);
 
+  // Temporary DEV_MODE-only playtesting nav — see lib/nova/devHistory.ts
+  // for the full rationale. Calling the hook unconditionally (rather than
+  // only when DEV_MODE) keeps this a valid hook call per React's rules;
+  // the hook itself no-ops internally whenever `enabled` is false.
+  const devHistory = useDevPlaytestHistory({
+    enabled: DEV_MODE,
+    gameState,
+    lineIndex,
+    setGameState,
+    setLineIndex,
+    resetEphemeralUI: () => {
+      setReactionText(null);
+      setEndInfo(null);
+      setResolvedChoiceIds(new Set());
+      setResolvedInvestigationIds(new Set());
+      setViewingArtefactId(null);
+    },
+  });
+
   function enterScene(state: GameState, sceneId: string): GameState {
     // Carry the outgoing scene's ending backdrop forward as the new
     // scene's baseline, so a scene whose own first line doesn't set a
@@ -351,6 +372,7 @@ export default function GameRoot() {
     setEndInfo(null);
     setResolvedChoiceIds(new Set());
     setResolvedInvestigationIds(new Set());
+    devHistory.reset();
   }
 
   function handleContinue() {
@@ -365,12 +387,14 @@ export default function GameRoot() {
     setEndInfo(null);
     setResolvedChoiceIds(new Set());
     setResolvedInvestigationIds(new Set());
+    devHistory.reset();
   }
 
   function handleRestart() {
     clearSavedGame();
     setGameState(null);
     setEndInfo(null);
+    devHistory.reset();
   }
 
   /** Transitions to nextSceneId — or shows the end-of-content screen if
@@ -499,12 +523,15 @@ export default function GameRoot() {
 
   if (endInfo) {
     return (
-      <EndOfContent
-        gameState={gameState}
-        reason={endInfo.reason}
-        targetScene={endInfo.targetScene}
-        onRestart={handleRestart}
-      />
+      <>
+        {DEV_MODE && <DevPlaytestNav gameState={gameState} history={devHistory} />}
+        <EndOfContent
+          gameState={gameState}
+          reason={endInfo.reason}
+          targetScene={endInfo.targetScene}
+          onRestart={handleRestart}
+        />
+      </>
     );
   }
 
@@ -1236,6 +1263,7 @@ export default function GameRoot() {
       </button>
       <CharacterPanel charactersMet={gameState.charactersMet} />
       <PauseOverlay open={paused} onResume={() => setPaused(false)} />
+      {DEV_MODE && <DevPlaytestNav gameState={gameState} history={devHistory} />}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (
           <div />
