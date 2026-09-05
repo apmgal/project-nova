@@ -68,7 +68,8 @@
       },
       "weightsNote": "Each dimension is normalised to a 0-100 subscore before weighting: budgetRemainingPct = budgetRemaining / STARTING_BUDGET * 100 (clamped); benefitsRealisationScore/stakeholderGoodwill/teamMorale/boardConfidence are used as-is (already 0-100); honesty is derived from findMostMaterialReportMismatch — consistent=100, borderline=55, material=0 — never a separately-tracked counter.",
       "triumphantThreshold": 72,
-      "politicalRelationshipFloor": "WARM_RELATIONSHIP_THRESHOLD (65, lib/nova/state.ts) — reused, not a new constant. min(relationships.marcus, relationships.camille) below this => variantSource 'political', checked before the weighted comparison.",
+      "politicalIsolationThreshold": 30,
+      "politicalIsolationThresholdNote": "Deliberately its OWN provisional constant, NOT WARM_RELATIONSHIP_THRESHOLD (65, lib/nova/state.ts, used for portrait mood-shading and the EV-R3/EV-14 Act 4 eligibility checks). Reusing 65 here would mean a relationship the player simply never invested in (starts at 50, per game_state.json) reads as 'politically isolated' by default, teaching 'you must make senior stakeholders like you' rather than 'a genuinely damaged relationship has consequences.' min(relationships.marcus, relationships.camille) below THIS floor => variantSource 'political', checked before the weighted comparison. 30 is a placeholder for 'meaningfully below neutral, i.e. actually Cold' — recalibrate after playtesting, same as every other number in this file.",
       "variantSelectionNote": "If not political: compare the budgetRemainingPct subscore against the stakeholderGoodwill subscore (both already computed above) and pick whichever is lower as 'financial' or 'scrutiny' respectively. Ties resolve to 'financial'."
     }
   },

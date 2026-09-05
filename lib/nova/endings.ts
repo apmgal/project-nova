@@ -12,7 +12,7 @@
 // in state.ts.
 
 import type { GameState } from "./types";
-import { findMostMaterialReportMismatch, STARTING_BUDGET, WARM_RELATIONSHIP_THRESHOLD } from "./state";
+import { findMostMaterialReportMismatch, STARTING_BUDGET } from "./state";
 import endingsConfig from "@/data/endings.json";
 
 export type ContractGateResult = "secured" | "lost";
@@ -156,16 +156,20 @@ function evaluateDeliveryComposite(state: GameState): { family: EndingFamily; va
   // Triumphant reading (see DESIGN_NOTES.md: "excellent everything else +
   // Camille cold" is exactly the disproportionate-punishment case this
   // design is meant to avoid IN THE OTHER DIRECTION — it can't become a
-  // hidden Triumphant either).
+  // hidden Triumphant either). Uses its own politicalIsolationThreshold,
+  // deliberately NOT WARM_RELATIONSHIP_THRESHOLD — see that field's note in
+  // data/endings.json for why (a never-cultivated-but-not-damaged default
+  // relationship must not read as "isolated").
   const marcusTrust = state.relationships.marcus ?? 0;
   const camilleTrust = state.relationships.camille ?? 0;
-  const politicallyIsolated = marcusTrust < WARM_RELATIONSHIP_THRESHOLD || camilleTrust < WARM_RELATIONSHIP_THRESHOLD;
+  const isolationFloor = cfg.politicalIsolationThreshold;
+  const politicallyIsolated = marcusTrust < isolationFloor || camilleTrust < isolationFloor;
 
   if (politicallyIsolated) {
     return {
       family: "PYRRHIC_VICTORY",
       variant: "political",
-      diagnostic: `Gate 3 (Delivery): PYRRHIC / political — min(marcus ${marcusTrust}, camille ${camilleTrust}) < WARM_RELATIONSHIP_THRESHOLD ${WARM_RELATIONSHIP_THRESHOLD} (checked before the composite; ${compositeSummary} not decisive here).`,
+      diagnostic: `Gate 3 (Delivery): PYRRHIC / political — min(marcus ${marcusTrust}, camille ${camilleTrust}) < politicalIsolationThreshold ${isolationFloor} (checked before the composite; ${compositeSummary} not decisive here).`,
     };
   }
 

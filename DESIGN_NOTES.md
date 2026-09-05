@@ -1446,3 +1446,17 @@ otherwise-recoverable readiness band; Contract Lost via schedule floor,
 via the `phase_b_quietly` grace override, and via severe goodwill
 collapse — all 9 passed, including the political-ordering bug found and
 fixed mid-verification (see above).
+
+**Follow-up shipped same day: political isolation threshold split from
+WARM_RELATIONSHIP_THRESHOLD.** Flagged in review: reusing 65 for the
+political-isolation check meant a relationship the player simply never
+invested in (starts at 50, per `game_state.json`) — not damaged, just
+neutral — would read as "isolated" by default, teaching "you must make
+senior stakeholders like you" rather than "a genuinely damaged
+relationship has consequences." Fixed by giving `deliveryComposite` its
+own `politicalIsolationThreshold` (provisional: 30 — "meaningfully
+below neutral, i.e. actually Cold") instead of reusing the Warm/Cool
+mood-shading constant. Reverified: default (uninvested, 50/50)
+relationships now resolve Triumphant when everything else is strong; a
+genuinely Cold relationship (15) still correctly triggers the political
+variant.
