@@ -57,20 +57,19 @@
       "recoverableNote": "If not released: regulatoryReadiness >= this floor AND mismatchSeverity !== 'material' => the rejection is RECOVERABLE (strong-enough evidence trail + no governance dishonesty compounding the failure) => routes to PYRRHIC_VICTORY / recoverable_quality_failure, matching the existing END-4 beat (fast root-cause, second batch succeeds). Otherwise => BATCH_REJECTED (weak evidence and/or a material mismatch on top of the failure — unrecoverable, matching existing END-5)."
     },
     "deliveryComposite": {
-      "_purpose": "Gate 3 — only reached when Gate 1 = SECURED and Gate 2 = RELEASED. Decides Triumphant Launch vs. Pyrrhic Victory, then (if Pyrrhic) which of the non-recoverable-quality variants explains why: financial, political, or scrutiny. Political is checked first as a near-categorical signal (a Cold sponsor/QA relationship is decisive on its own, per the design brief's 'project succeeded, you didn't survive it' framing) rather than folded into the weighted average — so it can never be quietly averaged away by a good budget number.",
+      "_purpose": "Gate 3 — only reached when Gate 1 = SECURED and Gate 2 = RELEASED. Decides Triumphant Launch vs. Pyrrhic Victory, then (if Pyrrhic) which of the non-recoverable-quality variants explains why: financial, political, scrutiny, or organisational. Political is checked first as a near-categorical signal (a Cold sponsor/QA relationship is decisive on its own, per the design brief's 'project succeeded, you didn't survive it' framing) rather than folded into the weighted average — so it can never be quietly averaged away by a good budget number.",
       "weights": {
-        "budgetRemainingPct": 0.2,
-        "benefitsRealisationScore": 0.15,
-        "stakeholderGoodwill": 0.15,
-        "teamMorale": 0.15,
-        "boardConfidence": 0.2,
-        "honesty": 0.15
+        "financialSubscore": 0.23,
+        "stakeholderGoodwill": 0.18,
+        "teamMorale": 0.18,
+        "boardConfidence": 0.23,
+        "honesty": 0.18
       },
-      "weightsNote": "Each dimension is normalised to a 0-100 subscore before weighting: budgetRemainingPct = budgetRemaining / STARTING_BUDGET * 100 (clamped); benefitsRealisationScore/stakeholderGoodwill/teamMorale/boardConfidence are used as-is (already 0-100); honesty is derived from findMostMaterialReportMismatch — consistent=100, borderline=55, material=0 — never a separately-tracked counter.",
+      "weightsNote": "Each dimension is normalised to a 0-100 subscore before weighting: financialSubscore = headroom / originalContingency * 100 (clamped) — see computeBudgetReconciliation in lib/nova/state.ts, NOT budgetRemaining / STARTING_BUDGET, which understated how exposed the £4.0M contingency actually was; stakeholderGoodwill/teamMorale/boardConfidence are used as-is (already 0-100); honesty is derived from findMostMaterialReportMismatch — consistent=100, borderline=55, material=0 — never a separately-tracked counter. benefitsRealisationScore has been removed from this composite entirely (not just re-weighted) and retired from ProjectMetrics altogether — it had no upward path anywhere in the game (exactly two negative-only touches), so it could only ever drag the composite down, never reward good benefits management. Benefits management is now assessed narratively in Act 6 via the Benefits Register artefact (honest per-benefit realised/not-realised statuses read off the player's own Measure/Evidence work from Act 3), not as a numeric term here. Its former 0.15 weight was redistributed evenly across the remaining five dimensions (+0.03 each) rather than proportionally, for simplicity — provisional, recalibrate after playtesting like every other number in this file.",
       "triumphantThreshold": 72,
       "politicalIsolationThreshold": 30,
       "politicalIsolationThresholdNote": "Deliberately its OWN provisional constant, NOT WARM_RELATIONSHIP_THRESHOLD (65, lib/nova/state.ts, used for portrait mood-shading and the EV-R3/EV-14 Act 4 eligibility checks). Reusing 65 here would mean a relationship the player simply never invested in (starts at 50, per game_state.json) reads as 'politically isolated' by default, teaching 'you must make senior stakeholders like you' rather than 'a genuinely damaged relationship has consequences.' min(relationships.marcus, relationships.camille) below THIS floor => variantSource 'political', checked before the weighted comparison. 30 is a placeholder for 'meaningfully below neutral, i.e. actually Cold' — recalibrate after playtesting, same as every other number in this file.",
-      "variantSelectionNote": "If not political: compare the budgetRemainingPct subscore against the stakeholderGoodwill subscore (both already computed above) and pick whichever is lower as 'financial' or 'scrutiny' respectively. Ties resolve to 'financial'."
+      "variantSelectionNote": "If not political: compute each dimension's weighted shortfall = weight * (100 - subscore) — how many composite points it cost versus a hypothetical perfect 100. 'scrutiny' is only eligible when GameState.flags.unresolved_public_scrutiny is true (set exclusively by CHOICE_EV-15's 'Board-only briefing, no public response' option — the one response to that event that leaves the claim genuinely unaddressed; the other two options actively defuse it and must not read as scrutiny even though EV-15 still fired). When eligible, scrutiny's shortfall is stakeholderGoodwill's. When not eligible, stakeholderGoodwill's shortfall instead competes inside the 'organisational' bucket alongside boardConfidence, teamMorale, and honesty — take whichever of those (up to) four is largest as the bucket's score and as the recorded dominantCause. Pick the variant (financial / organisational / scrutiny) whose bucket score is largest overall. Ties resolve financial > organisational > scrutiny. See lib/nova/endings.ts's evaluateDeliveryComposite for the implementation and OrganisationalDominantCause for the four possible causes."
     }
   },
 
@@ -98,6 +97,12 @@
           "sourceEndingIds": ["END-7"],
           "narrativeSummary": "Unresolved external concerns (e.g. an unanswered social media safety claim) draw formal scrutiny, but not enough to overtake the project's own timeline — the facility still launches under a cloud, not under a stopped clock.",
           "tone": "Tense, cautionary, but survivable"
+        },
+        "organisational": {
+          "sourceEndingIds": [],
+          "narrativeSummary": "The facility launches and the contract is secured, but the confidence around the project itself took the hit — whichever of the Board, the team, the player's own reporting credibility, or general stakeholder goodwill was weakest carried the cost. One of four short dominant-cause narrator lines plays (see dominantCause), so the ending never vaguely gestures at all four causes at once.",
+          "tone": "Success without confidence to spare.",
+          "dominantCause": "Set alongside this variant by evaluateDeliveryComposite (lib/nova/endings.ts) — one of boardConfidence / teamMorale / honesty / stakeholderGoodwill, whichever had the largest weighted shortfall. Selects one of four ending_PYRRHIC_organisational_<cause> dialogue conditions in DIALOGUE_ACT6_SCENE03."
         },
         "recoverable_quality_failure": {
           "sourceEndingIds": ["END-4"],

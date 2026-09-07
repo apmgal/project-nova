@@ -5,7 +5,6 @@
     "scheduleHealth": 100,
     "riskExposure": 20,
     "regulatoryReadiness": 0,
-    "benefitsRealisationScore": 0,
     "boardConfidence": 60,
     "stakeholderGoodwill": 50,
     "teamMorale": 70
@@ -95,16 +94,7 @@
     "sam_hired": false,
     "naomi_hired": false,
     "ben_hired": false,
-    "yuki_hired": false,
-    "descoped_wbs_foundations": false,
-    "descoped_wbs_cleanroom_panels": false,
-    "descoped_wbs_hvac": false,
-    "descoped_wbs_power_water": false,
-    "descoped_wbs_isolator": false,
-    "descoped_wbs_filling_equipment": false,
-    "descoped_wbs_iqoq": false,
-    "descoped_wbs_operator_training": false,
-    "descoped_wbs_validation_master_file": false
+    "yuki_hired": false
   },
   "choiceHistory": [],
   "derivedDisplayValues": {

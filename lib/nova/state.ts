@@ -12,8 +12,9 @@ import type {
   ActiveRisk,
   StatusReportRecord,
   ReportableRisk,
+  CbsClassification,
 } from "./types";
-import { getCharacter, getDefaultGameState, getEvent, EVENT_FRAME_SUFFIX } from "./data";
+import { getCharacter, getDefaultGameState, getEvent, getToolScreen, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
@@ -222,7 +223,6 @@ export const STATUS_REPORT_THRESHOLDS = {
  * Selection tool's own design clearly intends. */
 const CRITICAL_HIRE_IDS = ["ravi", "elin"];
 
-const CBS_TOOL_ID = "TOOL_ACT3_SCENE02_CBS";
 const MOSCOW_TOOL_ID = "TOOL_ACT2_SCENE02_MOSCOW";
 const MOSCOW_WONT_BUCKET = "Won't";
 
@@ -230,16 +230,18 @@ function ragFromBand(band: MetricBand): RagStatus {
   return band === "yellow" ? "amber" : band;
 }
 
-/** CBS's single descoped task (0 or 1 — see descopeTask) plus every
- * MoSCoW card that ended up in "Won't" (state.toolPlacements persists the
- * final bucket per card, confirmed against placePriorityCard itself
- * rather than assumed). */
+/** Every MoSCoW card that ended up in "Won't" (state.toolPlacements
+ * persists the final bucket per card, confirmed against
+ * placePriorityCard itself rather than assumed). Act 3's CBS used to
+ * contribute its own descoped task here too, but it no longer performs
+ * any actual descoping — see the "cost_review_with_descope (CBS)" module
+ * comment further down — so it correctly has nothing to add: a package
+ * the player merely classified as a potential lever hasn't been descoped
+ * under pressure, only flagged as somewhere pressure COULD land later. */
 function countDescopedItems(state: GameState): number {
-  const cbsCount = (state.toolProgress[CBS_TOOL_ID] ?? []).length;
-  const moscowWontCount = Object.values(state.toolPlacements[MOSCOW_TOOL_ID] ?? {}).filter(
+  return Object.values(state.toolPlacements[MOSCOW_TOOL_ID] ?? {}).filter(
     (bucket) => bucket === MOSCOW_WONT_BUCKET
   ).length;
-  return cbsCount + moscowWontCount;
 }
 
 function hasCriticalRoleCoverage(flags: Flags): boolean {
@@ -503,15 +505,30 @@ export function effectiveDialogueFlags(state: GameState): Flags {
 }
 
 // ---------------------------------------------------------------------------
-// Act 5.1 — Commissioning & Readiness. A read-only review of consequences
-// already in motion (see the "Act 5 build" entry in DESIGN_NOTES.md) — every
-// item here is DERIVED from decisions the player already made, never a new
-// pass/fail exercise of its own. Six categories per product line; only four
-// are ever gap-able (equipment/utilities are always clear — the physical
-// build itself was never in question, per Vaughn's own opening line this
-// scene). "Product B" only exists as a real product once BIG-01 has fired,
-// but this function is only ever called from ACT5_SCENE01, which is
-// unreachable before that, so no separate guard is needed.
+// Act 5.1 — Commissioning & Readiness. The board itself is a read-only
+// review of consequences already in motion (see the "Act 5 build" entry in
+// DESIGN_NOTES.md) — every item is DERIVED from decisions the player
+// already made, never a new pass/fail exercise of its own. Six categories
+// per product line; only four are ever gap-able (equipment/utilities are
+// always clear — the physical build itself was never in question, per
+// Vaughn's own opening line this scene). "Product B" only exists as a real
+// product once BIG-01 has fired, but this function is only ever called from
+// ACT5_SCENE01, which is unreachable before that, so no separate guard is
+// needed.
+//
+// The one real decision here — the readiness intervention, below — is
+// deliberately sequential across up to two picks ("two days of recovery
+// capacity", read literally rather than as a single flat choice): closing a
+// genuine gap is Act 5's own chance to demonstrate regulatory readiness
+// through fresh effort, not just inherit whatever Acts 1-4 already built.
+// See the "Regulatory Readiness provenance audit" entry in DESIGN_NOTES.md
+// for the full rationale and the four-archetype calibration this was tuned
+// against. A category closed via intervention is marked with its own
+// readiness_close_<category> flag (below) and computeReadinessColumn treats
+// that flag as authoritative over the live metric threshold from then on —
+// otherwise a gap closed by a partial (+15, not enough to cross e.g. the
+// SOPs 60-threshold) would still misleadingly show as an open gap on the
+// board immediately after being "fixed".
 // ---------------------------------------------------------------------------
 
 export interface ReadinessItem {
@@ -536,16 +553,46 @@ const READINESS_CATEGORY_LABELS: Record<string, string> = {
   docs: "Batch documentation ready",
 };
 
+/** Narrative-only framing for each category's intervention option — what
+ * the day buys and what it costs, in plain English, deliberately without
+ * the actual +15/-5 numbers (those live in the HUD's own colour bands and
+ * the Baseline Approved panel, not repeated here — see the Act 5
+ * attainability audit in DESIGN_NOTES.md). Every category reads the same
+ * two-clause shape ("closes X" / "further pressure on the delivery
+ * schedule") on purpose, since the trade-off itself is identical
+ * regardless of which category is picked — only what's being closed
+ * differs. */
+const READINESS_INTERVENTION_DESCRIPTIONS: Record<string, string> = {
+  training: "Spend one of the remaining days getting operators properly signed off, rather than compressed under schedule pressure. Improves inspection readiness, but puts further pressure on an already-strained delivery schedule.",
+  validation: "Spend one of the remaining days resolving the outstanding validation work. Improves regulatory readiness, but puts further pressure on the delivery schedule.",
+  sops: "Spend one of the remaining days getting SOPs formally approved rather than left outstanding. Improves regulatory readiness, but puts further pressure on the delivery schedule.",
+  docs: "Spend one of the remaining days completing the batch documentation that budget pressure pushed down the list. Improves regulatory readiness, but puts further pressure on the delivery schedule.",
+};
+
+/** Prefix shared with applyReadinessIntervention's flag naming
+ * (`readiness_close_<category>`) — a category closed via intervention
+ * reads as "clear" from then on regardless of the live metric threshold
+ * that originally flagged it. Necessary because a partial fix (+15) isn't
+ * always enough to cross an unrelated global threshold (e.g. SOPs' <60 on
+ * regulatoryReadiness) — without this override, a genuinely-closed gap
+ * would still misleadingly show "Gap" on the board one screen later. */
+function isClosedViaIntervention(state: GameState, category: string): boolean {
+  return Boolean(state.flags[`readiness_close_${category}`]);
+}
+
 function computeReadinessColumn(product: "A" | "B", state: GameState): ReadinessItem[] {
   const metrics = state.projectMetrics;
   const validationResourcing = state.decisions.validationResourcing;
-  const trainingGap = metrics.scheduleHealth < 40;
-  const sopsGap = metrics.regulatoryReadiness < 60;
-  const docsGap = metrics.budgetRemaining < STARTING_BUDGET * 0.15;
+  const trainingGap = metrics.scheduleHealth < 40 && !isClosedViaIntervention(state, "training");
+  const sopsGap = metrics.regulatoryReadiness < 60 && !isClosedViaIntervention(state, "sops");
+  const docsGap = metrics.budgetRemaining < STARTING_BUDGET * 0.15 && !isClosedViaIntervention(state, "docs");
 
   let validationGap: boolean;
   let validationDetail: string;
-  if (validationResourcing === "protect_a") {
+  if (isClosedViaIntervention(state, "validation")) {
+    validationGap = false;
+    validationDetail = "Closed during the final readiness review.";
+  } else if (validationResourcing === "protect_a") {
     validationGap = product === "B";
     validationDetail =
       product === "A"
@@ -618,16 +665,21 @@ export interface ReadinessInterventionOption {
    * "readiness_") — e.g. "readiness_close_training". */
   id: string;
   label: string;
+  /** Narrative-only framing of the trade-off — see
+   * READINESS_INTERVENTION_DESCRIPTIONS' own doc comment for why this
+   * deliberately never states the actual +15/-5 numbers. */
+  description: string;
 }
 
-/** The player's one constrained pick — "you have two days of recovery
- * capacity, where do you put it" — built ONLY from gaps computeReadinessBoard
- * actually found, so the choice is never wider than what this specific
- * playthrough left outstanding. A category gapped on both products still
- * yields one option, not two (closing it closes it everywhere at once);
- * a category gapped on only one (currently only ever `validation`, via
- * `protect_a`) says which. Empty if the run is clean — nothing to spend the
- * two days on. */
+/** The options offered for ONE intervention slot — built ONLY from gaps
+ * computeReadinessBoard actually found (which already excludes anything
+ * closed via an earlier slot this scene — see isClosedViaIntervention), so
+ * the choice is never wider than what's genuinely still outstanding, and a
+ * category can never be offered twice. A category gapped on both products
+ * still yields one option, not two (closing it closes it everywhere at
+ * once); a category gapped on only one (currently only ever `validation`,
+ * via `protect_a`) says which. Empty once the board's genuinely clean —
+ * nothing left to spend a day on. */
 export function computeReadinessInterventionOptions(state: GameState): ReadinessInterventionOption[] {
   const board = computeReadinessBoard(state);
   const options: ReadinessInterventionOption[] = [];
@@ -639,26 +691,62 @@ export function computeReadinessInterventionOptions(state: GameState): Readiness
     options.push({
       id: `readiness_close_${category}`,
       label: `Close the gap: ${READINESS_CATEGORY_LABELS[category]}${productSuffix}`,
+      description: READINESS_INTERVENTION_DESCRIPTIONS[category],
     });
   }
   return options;
 }
 
-/** Applies the player's pick — either a specific gap-close option's id (from
- * computeReadinessInterventionOptions) or null for "push forward on the
- * compressed schedule instead." Effects match the two magnitudes the
- * original static CHOICE_ACT5_SCENE01 always used (scheduleHealth -5 /
- * regulatoryReadiness +10 for spending the time; regulatoryReadiness -10 for
- * not) — this replaces that binary with a targeted version of the same
- * trade-off, not a new balance. The set flag (the option's own id) is what
- * computeAuditTrailEvidence later reads to know a gap was actually closed
- * before the audit, not just left outstanding. */
+/** readiness_intervention_<N>_used flags, in order — how ReadinessChecklist/
+ * GameRoot track which of the two sequential "days" have been spent this
+ * playthrough, independent of whether that day actually closed a gap (push-
+ * forward still consumes the slot). Exactly 2 slots, matching "two days of
+ * recovery capacity" read literally rather than as one flat choice — see
+ * the "Regulatory Readiness provenance audit" entry in DESIGN_NOTES.md. */
+const READINESS_INTERVENTION_SLOT_FLAGS = ["readiness_intervention_1_used", "readiness_intervention_2_used"];
+
+/** How many of the two intervention slots have been resolved so far. */
+export function readinessInterventionSlotsUsed(state: GameState): number {
+  return READINESS_INTERVENTION_SLOT_FLAGS.filter((flag) => state.flags[flag]).length;
+}
+
+/** True once ACT5_SCENE01's whole sequence is done and the scene can
+ * advance — either both slots are used, or nothing genuinely remains to
+ * offer a not-yet-used slot (so a clean board, or a board fully closed
+ * after just one pick, never forces a second empty prompt). Checked by
+ * GameRoot after every pick instead of always advancing on the first one. */
+export function isReadinessInterventionSequenceComplete(state: GameState): boolean {
+  if (readinessInterventionSlotsUsed(state) >= READINESS_INTERVENTION_SLOT_FLAGS.length) return true;
+  return computeReadinessInterventionOptions(state).length === 0;
+}
+
+/** Applies one intervention slot's pick — either a specific gap-close
+ * option's id (from computeReadinessInterventionOptions) or null for
+ * "move on and leave it unresolved." Closing a gap costs scheduleHealth -5
+ * / gains regulatoryReadiness +15 (provisional pending playtesting — see
+ * the "Regulatory Readiness provenance audit" DESIGN_NOTES.md entry for
+ * the calibration this was tuned against); moving on costs regulatoryReadiness
+ * -10, but ONLY when a genuine gap was actually available to skip — proceeding
+ * on an already-clean board costs nothing, matching ReadinessChecklist's own
+ * "the schedule doesn't need it" copy. Consumes exactly one of the two
+ * READINESS_INTERVENTION_SLOT_FLAGS per call; a defensive no-op once both are
+ * already used (GameRoot shouldn't call this once isReadinessInterventionSequenceComplete
+ * is true, but this keeps the function itself safe regardless). The closed
+ * category's own flag (the option's id) is what both computeReadinessColumn
+ * (this scene, immediately) and computeAuditTrailEvidence (Act 5.2) read to
+ * know a gap was actually closed, not just left outstanding. */
 export function applyReadinessIntervention(state: GameState, interventionId: string | null): GameState {
+  const slotsUsed = readinessInterventionSlotsUsed(state);
+  if (slotsUsed >= READINESS_INTERVENTION_SLOT_FLAGS.length) return state;
+  const slotFlag = READINESS_INTERVENTION_SLOT_FLAGS[slotsUsed];
+
   if (interventionId === null) {
-    return applyEffects(state, { regulatoryReadiness: -10 });
+    const wasGenuineGapAvailable = computeReadinessInterventionOptions(state).length > 0;
+    const next = wasGenuineGapAvailable ? applyEffects(state, { regulatoryReadiness: -10 }) : state;
+    return applyFlags(next, { [slotFlag]: true });
   }
-  let next = applyEffects(state, { scheduleHealth: -5, regulatoryReadiness: 10 });
-  next = applyFlags(next, { [interventionId]: true });
+  let next = applyEffects(state, { scheduleHealth: -5, regulatoryReadiness: 15 });
+  next = applyFlags(next, { [interventionId]: true, [slotFlag]: true });
   return next;
 }
 
@@ -1654,56 +1742,73 @@ export function substituteTemplate(text: string, values: Record<string, string>)
 }
 
 // ---------------------------------------------------------------------------
-// cost_review_with_descope (CBS) — auto-summed cost review; cut exactly one
-// task if the total exceeds descopeThreshold. The cut choice lives in
-// toolProgress[toolId] as a single-entry array (reuses the same "list of
-// resolved ids" shape as sort_into_buckets, just capped at one), so
-// changing your mind before continuing swaps the entry rather than
-// stacking cuts. Only ONE descoped_<taskId> flag is ever true at a time —
-// switching the pick clears the old one, since this is a live in-progress
-// decision, not a past narrative choice.
+// cost_review_with_descope (CBS) — fixed-total cost review; totalIfAllIncluded
+// is the accepted £8.0M cost baseline and never changes here (it's the same
+// figure the financial-reconciliation read-time function elsewhere treats as
+// referenceBaselineCost — nothing in this tool subtracts from it). The
+// player's actual task is a contingency-planning judgement: explicitly
+// classify every task in classifiableTaskIds as Protected or a Potential
+// lever, stored in GameState.decisions (categorical, not boolean, matching
+// every other named-outcome choice — see the field's own doc comment in
+// types.ts), keyed `cbsClassification_<taskId>` rather than a flag, since
+// this is Act 3's INTENT, not an event that happened. Deliberately never
+// writes anything that could later be mistaken for "this was actually
+// reduced" — that's a separate Act 4 decision (e.g. EV-10) this module
+// knows nothing about. A task absent from classifiableTaskIds (currently
+// Foundations and Filling Equipment — no consequence exists for either yet)
+// simply can't be classified at all; setCbsClassification no-ops for it.
 // ---------------------------------------------------------------------------
 
-/** The currently-chosen task to cut, if any. */
-export function getDescopedTaskId(state: GameState, toolId: string): string | undefined {
-  return state.toolProgress[toolId]?.[0];
+function cbsClassificationKey(taskId: string): string {
+  return `cbsClassification_${taskId}`;
 }
 
-/** Sum of every task's cost except the (optionally) cut one. */
-export function computeCbsTotal(toolScreen: ToolScreenBlock, cutTaskId: string | undefined): number {
-  const costs = toolScreen.costsByTask ?? {};
-  return Object.entries(costs).reduce(
-    (sum, [taskId, cost]) => (taskId === cutTaskId ? sum : sum + cost),
-    0
-  );
+/** The player's classification for one task, if they've made it. Reads
+ * GameState.decisions — see module note above for why that store rather
+ * than flags or toolProgress. */
+export function getCbsClassification(
+  state: GameState,
+  taskId: string
+): CbsClassification | undefined {
+  const value = state.decisions[cbsClassificationKey(taskId)];
+  return value === "protected" || value === "potentialLever" ? value : undefined;
 }
 
-export function isCbsComplete(state: GameState, toolScreen: ToolScreenBlock): boolean {
-  const cutTaskId = getDescopedTaskId(state, toolScreen.toolId);
-  const threshold = toolScreen.descopeThreshold ?? Infinity;
-  return computeCbsTotal(toolScreen, cutTaskId) <= threshold;
+/** Every classifiable task's current classification, keyed by taskId —
+ * what CBSReview.tsx actually renders from (undefined entries render as
+ * unclassified). */
+export function computeCbsClassifications(
+  state: GameState,
+  toolScreen: ToolScreenBlock
+): Record<string, CbsClassification | undefined> {
+  const ids = toolScreen.classifiableTaskIds ?? [];
+  const result: Record<string, CbsClassification | undefined> = {};
+  for (const id of ids) result[id] = getCbsClassification(state, id);
+  return result;
 }
 
-/** Cuts a task (or changes an earlier cut to a different task). Clears any
- * previously-set descoped_<taskId> flag for a task that's no longer the
- * pick, and sets the new one — see module note above. */
-export function descopeTask(
+/** True once every classifiableTaskIds entry has an explicit classification
+ * — deliberately NOT true by default (unlike most other tools' completion
+ * conditions, an untouched CBS must not be indistinguishable from one
+ * where the player considered every line and protected it). */
+export function isCbsClassificationComplete(state: GameState, toolScreen: ToolScreenBlock): boolean {
+  const ids = toolScreen.classifiableTaskIds ?? [];
+  return ids.every((id) => getCbsClassification(state, id) !== undefined);
+}
+
+/** Sets (or changes) one task's classification. A no-op if taskId isn't in
+ * classifiableTaskIds — see module note. Re-picking the same classification
+ * a task already has is harmless (just overwrites with the same value). */
+export function setCbsClassification(
   state: GameState,
   toolScreen: ToolScreenBlock,
-  taskId: string
+  taskId: string,
+  classification: CbsClassification
 ): GameState {
-  const toolId = toolScreen.toolId;
-  const previous = getDescopedTaskId(state, toolId);
-  if (previous === taskId) return state;
-
-  const nextFlags = { ...state.flags };
-  if (previous) delete nextFlags[`descoped_${previous}`];
-  nextFlags[`descoped_${taskId}`] = true;
-
+  if (!(toolScreen.classifiableTaskIds ?? []).includes(taskId)) return state;
   return {
     ...state,
-    flags: nextFlags,
-    toolProgress: { ...state.toolProgress, [toolId]: [taskId] },
+    decisions: { ...state.decisions, [cbsClassificationKey(taskId)]: classification },
   };
 }
 
@@ -2076,6 +2181,54 @@ export function supplierTemplateValues(
   return { chosenSupplier, alternateSupplier };
 }
 
+/** {token} values for Act 6's reconciled cost-performance line
+ * (DIALOGUE_ACT6_SCENE03) — deliberately its own line, separate from the
+ * unconditional "£12M Investment Justified — not yet demonstrable" ROI
+ * line right above it in that file. Cost performance (did the project
+ * land inside its approved budget) and investment justification (did the
+ * spend actually deliver value) are different questions — this answers
+ * only the first, honestly, without being read as evidence for the
+ * second. See computeBudgetReconciliation's own doc comment for what
+ * feeds it. */
+export function budgetReconciliationTemplateValues(state: GameState): Record<string, string> {
+  const r = computeBudgetReconciliation(state);
+  const formatMillions = (value: number) => `£${(value / 1_000_000).toFixed(1)}M`;
+  const delta = r.approvedBudget - r.forecastCostAgainstBaseline;
+  const costPerformanceLabel =
+    delta > 0
+      ? `${formatMillions(delta)} under budget`
+      : delta < 0
+        ? `${formatMillions(Math.abs(delta))} over budget`
+        : "exactly on budget";
+  return {
+    forecastCostFormatted: formatMillions(r.forecastCostAgainstBaseline),
+    approvedBudgetFormatted: formatMillions(r.approvedBudget),
+    costPerformanceLabel,
+  };
+}
+
+/** {token} values for Act 6's Benefits Register readout (DIALOGUE_ACT6_
+ * SCENE03) — a pure read of the Benefits Register tool's OWN Measure/
+ * Evidence/When data (TOOL_ACT3_SCENE06_BENEFITS in tool_screens.json),
+ * not a hand-authored restatement of it, so the ROI line always matches
+ * whatever that tool actually asks the player to prove. Only the ROI
+ * benefit needs this: NHS Contract Secured and More Patients Treated are
+ * assessed via endingConditionFlags' contract_secured/contract_lost and
+ * batch_released/batch_rejected (Gate 1/Gate 2 results are, unlike ROI,
+ * things the game's own timeline actually resolves by Act 6). Falls back
+ * to the tool's own authored defaults if the screen is ever missing, same
+ * defensive pattern as computeBudgetReconciliation's FALLBACK constant. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- state param kept for call-site consistency with its siblings (all spread as `...xTemplateValues(state)` in GameRoot's templateValues); this one just doesn't need it yet.
+export function benefitsRegisterTemplateValues(state: GameState): Record<string, string> {
+  const tool = getToolScreen("TOOL_ACT3_SCENE06_BENEFITS");
+  const roi = tool?.benefits?.find((b) => b.id === "benefit_roi");
+  return {
+    roiMeasure: roi?.correctMeasure ?? "ROI",
+    roiEvidence: roi?.correctEvidence ?? "Finance report",
+    roiWhen: roi?.correctWhen ?? "12 months after go-live",
+  };
+}
+
 export const EVENT_WAVE_MEMBERS: Record<string, string[]> = {
   MAIN_WAVE: ["EV-NP2", "EV-R2"],
 };
@@ -2244,6 +2397,80 @@ function computeGapEventQueue(waveId: string, state: GameState): string[] {
  * endings.ts's deliveryComposite gate can compute the same
  * percent-of-starting-budget reading without duplicating the constant. */
 export const STARTING_BUDGET = 12000000;
+
+/** Fallback only — used if TOOL_ACT3_SCENE02_CBS is ever missing from
+ * tool_screens.json (shouldn't happen; defensive, matching this file's
+ * usual style of never hard-crashing on a missing data lookup). The real
+ * value always comes from that tool's own totalIfAllIncluded, read fresh
+ * by computeBudgetReconciliation rather than duplicated here as a second
+ * hardcoded £8.0M. */
+const FALLBACK_REFERENCE_BASELINE_COST = 8000000;
+
+export interface BudgetReconciliation {
+  /** £12.0M — the Board-approved investment ceiling. Same figure as
+   * STARTING_BUDGET; named separately here since this whole struct exists
+   * to give the financial-model figures their own honest names, not to
+   * introduce a second source of truth. */
+  approvedBudget: number;
+  /** £8.0M, fixed — TOOL_ACT3_SCENE02_CBS's own totalIfAllIncluded, the
+   * uncut cost baseline Act 3 establishes. Deliberately NEVER the
+   * player's actual post-Act-3 committed cost (there isn't one — CBS
+   * doesn't cut anything, see the "CBS classification rework" entry in
+   * DESIGN_NOTES.md) and deliberately fixed for the whole game: the
+   * financial score must not move just because a package got classified
+   * differently, only because money was actually spent. */
+  referenceBaselineCost: number;
+  /** approvedBudget − referenceBaselineCost. £4.0M — the contingency
+   * Act 3 establishes exists, fixed for the same reason
+   * referenceBaselineCost is fixed. */
+  originalContingency: number;
+  /** approvedBudget − budgetRemaining — however much has actually been
+   * spent beyond zero so far, live. */
+  additionalSpend: number;
+  /** referenceBaselineCost + additionalSpend — what the project's actual
+   * total cost is forecast to be against the fixed baseline, independent
+   * of anything CBS did or didn't cut. */
+  forecastCostAgainstBaseline: number;
+  /** approvedBudget − forecastCostAgainstBaseline. Algebraically equal to
+   * budgetRemaining − referenceBaselineCost — how much of the £4.0M
+   * contingency is still unspent. This is the number Gate 3's financial
+   * subscore is built from (see evaluateDeliveryComposite in
+   * endings.ts), not budgetRemaining/approvedBudget directly: measuring
+   * against the full £12.0M approved figure understated how exposed the
+   * £4.0M contingency actually was (spending exactly the contingency
+   * still read as "66% of budget remaining, looks healthy" under the old
+   * formula, rather than the true "0% of contingency left"). */
+  headroom: number;
+}
+
+/** Pure, read-time reconciliation of the financial model established in
+ * Act 3 (approvedBudget/referenceBaselineCost/originalContingency) against
+ * whatever's actually happened to budgetRemaining since. No GameState
+ * field stores any of this — every call recomputes it fresh from
+ * projectMetrics.budgetRemaining and the CBS tool's own fixed baseline,
+ * same pattern as reportMismatchFlags/effectiveDialogueFlags elsewhere in
+ * this file. Safe to call before Act 3's CBS is ever reached (budgetRemaining
+ * is still STARTING_BUDGET then, so additionalSpend is 0 and headroom
+ * equals originalContingency) — callers that only want to change what they
+ * show once CBS is actually done should gate on that themselves (e.g. the
+ * HUD), not on anything in here. */
+export function computeBudgetReconciliation(state: GameState): BudgetReconciliation {
+  const cbsToolScreen = getToolScreen("TOOL_ACT3_SCENE02_CBS");
+  const approvedBudget = STARTING_BUDGET;
+  const referenceBaselineCost = cbsToolScreen?.totalIfAllIncluded ?? FALLBACK_REFERENCE_BASELINE_COST;
+  const originalContingency = approvedBudget - referenceBaselineCost;
+  const additionalSpend = approvedBudget - state.projectMetrics.budgetRemaining;
+  const forecastCostAgainstBaseline = referenceBaselineCost + additionalSpend;
+  const headroom = approvedBudget - forecastCostAgainstBaseline;
+  return {
+    approvedBudget,
+    referenceBaselineCost,
+    originalContingency,
+    additionalSpend,
+    forecastCostAgainstBaseline,
+    headroom,
+  };
+}
 
 /**
  * Per-event eligibility, straight from each event's own `trigger` prose in
@@ -2450,14 +2677,14 @@ export function resetTool(state: GameState, toolScreen: ToolScreenBlock): GameSt
     }
 
     case "cost_review_with_descope": {
-      const cutTaskId = getDescopedTaskId(state, toolId);
-      const nextFlags = { ...state.flags };
-      if (cutTaskId) delete nextFlags[`descoped_${cutTaskId}`];
-      result = {
-        ...state,
-        flags: nextFlags,
-        toolProgress: { ...state.toolProgress, [toolId]: [] },
-      };
+      // Clears every classification decision this tool's own classifiable
+      // ids set — nothing else to unwind, since classifying a task never
+      // touched flags, budget, or any other metric.
+      const nextDecisions = { ...state.decisions };
+      for (const id of toolScreen.classifiableTaskIds ?? []) {
+        delete nextDecisions[cbsClassificationKey(id)];
+      }
+      result = { ...state, decisions: nextDecisions };
       break;
     }
 

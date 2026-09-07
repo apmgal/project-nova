@@ -9,7 +9,6 @@ export interface ProjectMetrics {
   scheduleHealth: number;
   riskExposure: number;
   regulatoryReadiness: number;
-  benefitsRealisationScore: number;
   boardConfidence: number;
   stakeholderGoodwill: number;
   teamMorale: number;
@@ -520,8 +519,11 @@ export interface Character {
 //     of the plain dashed bucket grid — same placement/completion logic
 //     underneath, and a third consumer of the shared visualStyle field
 //     alongside WBS's warehouse_blueprint and MoSCoW's moscow_quadrant.
-//   - "cost_review_with_descope" (CBS): auto-summed costs, cut one task if
-//     over threshold.
+//   - "cost_review_with_descope" (CBS): auto-summed, fixed-total cost
+//     review — nothing is ever cut here. The player explicitly classifies
+//     each eligible task as Protected or Potential lever (a contingency-
+//     planning judgement, stored in GameState.decisions, never in flags —
+//     see the module comment above setCbsClassification in state.ts).
 //   - "pick_n_of_m_swipeable" (Team Selection): browse via swipe, toggle
 //     hire/un-hire independently, capped at maxHires.
 //   - "gantt_placement" (Milestone Timeline): place fixed-duration bars on
@@ -610,6 +612,13 @@ export interface ToolBenefit {
   evidenceTensionMoment?: BenefitTensionMoment;
 }
 
+/** cost_review_with_descope (CBS) — the player's Act 3 judgement on one
+ * classifiable task: keep it protected, or flag it as a potential lever if
+ * financial pressure emerges later. Deliberately NOT "was this actually
+ * reduced" — that's a separate, later, Act 4 event (e.g. EV-10) decision,
+ * which must be tracked its own way rather than overloading this value. */
+export type CbsClassification = "protected" | "potentialLever";
+
 export interface ToolScreenBlock {
   toolId: string;
   sourceScene: string;
@@ -666,8 +675,14 @@ export interface ToolScreenBlock {
   // cost_review_with_descope (CBS)
   costsByTask?: Record<string, number>;
   totalIfAllIncluded?: number;
-  descopeThreshold?: number;
-  descopeRule?: string;
+  /** Which task ids the player can classify as Protected/Potential lever —
+   * a strict subset of costsByTask's keys. Every id in this list must be
+   * explicitly classified before the tool counts as complete (see
+   * isCbsClassificationComplete). Ids left out (currently Foundations and
+   * Filling Equipment) still render as ordinary cost lines but aren't
+   * interactive — no consequence exists for them yet, so the UI shouldn't
+   * imply a decision is being made there. */
+  classifiableTaskIds?: string[];
 
   // pick_n_of_m_swipeable (Team Selection)
   maxHires?: number;

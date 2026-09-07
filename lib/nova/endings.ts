@@ -12,7 +12,7 @@
 // in state.ts.
 
 import type { GameState } from "./types";
-import { findMostMaterialReportMismatch, STARTING_BUDGET } from "./state";
+import { findMostMaterialReportMismatch, computeBudgetReconciliation } from "./state";
 import endingsConfig from "@/data/endings.json";
 
 export type ContractGateResult = "secured" | "lost";
@@ -22,7 +22,15 @@ export type EndingFamily =
   | "PYRRHIC_VICTORY"
   | "CONTRACT_LOST"
   | "BATCH_REJECTED";
-export type PyrrhicVariant = "financial" | "political" | "scrutiny" | "recoverable_quality_failure";
+export type PyrrhicVariant = "financial" | "political" | "scrutiny" | "organisational" | "recoverable_quality_failure";
+
+/** Only meaningful when endingVariant === "organisational" — which single
+ * dimension contributed the largest weighted shortfall within that bucket,
+ * so ACT6_SCENE03's dialogue can pick one honest, specific closing line
+ * instead of vaguely gesturing at board/team/trust simultaneously. See
+ * evaluateDeliveryComposite's variant-selection block and
+ * data/endings.json's variantSelectionNote for how this is chosen. */
+export type OrganisationalDominantCause = "boardConfidence" | "teamMorale" | "honesty" | "stakeholderGoodwill";
 
 export interface EndingResult {
   contractGateResult: ContractGateResult;
@@ -36,6 +44,9 @@ export interface EndingResult {
   endingFamily: EndingFamily;
   /** Only set when endingFamily === "PYRRHIC_VICTORY". */
   endingVariant: PyrrhicVariant | null;
+  /** Only set when endingVariant === "organisational"; null otherwise
+   * (including for every other Pyrrhic variant). */
+  organisationalDominantCause: OrganisationalDominantCause | null;
   /** Human-readable trace of exactly why each gate resolved the way it
    * did — every gate appends one line, in evaluation order, unconditionally
    * (including gates that never ran, so the array's length alone tells you
@@ -128,27 +139,46 @@ function evaluateQualityGate(
   };
 }
 
-function evaluateDeliveryComposite(state: GameState): { family: EndingFamily; variant: PyrrhicVariant; diagnostic: string } {
+function evaluateDeliveryComposite(state: GameState): {
+  family: EndingFamily;
+  variant: PyrrhicVariant;
+  organisationalDominantCause: OrganisationalDominantCause | null;
+  diagnostic: string;
+} {
   const cfg = gates.deliveryComposite;
   const w = cfg.weights;
   const metrics = state.projectMetrics;
 
-  const budgetPct = clamp((metrics.budgetRemaining / STARTING_BUDGET) * 100, 0, 100);
-  const benefits = clamp(metrics.benefitsRealisationScore, 0, 100);
+  // financialSubscore reads headroom against the £4.0M contingency Act 3
+  // establishes, not budgetRemaining against the full £12.0M approved
+  // figure — the latter understated exposure (spending exactly the
+  // contingency still read as "66% of budget remaining, looks healthy"
+  // rather than the true "0% of contingency left"). See
+  // computeBudgetReconciliation's own doc comment in state.ts.
+  const reconciliation = computeBudgetReconciliation(state);
+  const financialSubscore = clamp(
+    (reconciliation.headroom / reconciliation.originalContingency) * 100,
+    0,
+    100
+  );
   const goodwill = clamp(metrics.stakeholderGoodwill, 0, 100);
   const morale = clamp(metrics.teamMorale, 0, 100);
   const boardConfidence = clamp(metrics.boardConfidence, 0, 100);
   const honesty = honestySubscore(state);
 
+  // Benefits are deliberately NOT a term here. The old benefitsRealisationScore
+  // metric has been retired entirely (no upward path ever existed for it, so it
+  // could only ever drag the composite down) — see the weightsNote in
+  // data/endings.json. Benefits management is now assessed narratively in Act 6
+  // via the Benefits Register artefact, not folded into this numeric composite.
   const composite =
-    budgetPct * w.budgetRemainingPct +
-    benefits * w.benefitsRealisationScore +
+    financialSubscore * w.financialSubscore +
     goodwill * w.stakeholderGoodwill +
     morale * w.teamMorale +
     boardConfidence * w.boardConfidence +
     honesty * w.honesty;
 
-  const compositeSummary = `composite ${composite.toFixed(1)} (budget% ${budgetPct.toFixed(0)}, benefits ${benefits}, goodwill ${goodwill}, morale ${morale}, boardConfidence ${boardConfidence}, honesty ${honesty})`;
+  const compositeSummary = `composite ${composite.toFixed(1)} (financial ${financialSubscore.toFixed(0)}, goodwill ${goodwill}, morale ${morale}, boardConfidence ${boardConfidence}, honesty ${honesty})`;
 
   // Political isolation is checked BEFORE the composite threshold, not as a
   // fallback once the composite already reads low — a high composite must
@@ -169,6 +199,7 @@ function evaluateDeliveryComposite(state: GameState): { family: EndingFamily; va
     return {
       family: "PYRRHIC_VICTORY",
       variant: "political",
+      organisationalDominantCause: null,
       diagnostic: `Gate 3 (Delivery): PYRRHIC / political — min(marcus ${marcusTrust}, camille ${camilleTrust}) < politicalIsolationThreshold ${isolationFloor} (checked before the composite; ${compositeSummary} not decisive here).`,
     };
   }
@@ -177,15 +208,66 @@ function evaluateDeliveryComposite(state: GameState): { family: EndingFamily; va
     return {
       family: "TRIUMPHANT_LAUNCH",
       variant: "financial", // unused when family isn't Pyrrhic; see EndingResult.endingVariant
+      organisationalDominantCause: null,
       diagnostic: `Gate 3 (Delivery): TRIUMPHANT — ${compositeSummary} >= threshold ${cfg.triumphantThreshold}; relationships above WARM_RELATIONSHIP_THRESHOLD.`,
     };
   }
 
-  const variant: PyrrhicVariant = budgetPct <= goodwill ? "financial" : "scrutiny";
+  // Variant attribution: each dimension's "weighted shortfall" is how many
+  // composite points it costs versus a hypothetical perfect 100 — weight *
+  // (100 - subscore). This replaces the old two-way financial-vs-goodwill
+  // comparison (which silently ignored morale/boardConfidence/honesty
+  // entirely) with a proper dominant-cause read across all five dimensions.
+  // See data/endings.json's variantSelectionNote for the full rationale.
+  const shortfall = (weight: number, subscore: number) => weight * (100 - subscore);
+
+  const financialShortfall = shortfall(w.financialSubscore, financialSubscore);
+  const goodwillShortfall = shortfall(w.stakeholderGoodwill, goodwill);
+
+  // "scrutiny" is only eligible when the player left EV-15's social-media
+  // safety claim genuinely unresolved (CHOICE_EV-15's "Board-only briefing,
+  // no public response" option — the only one of its three options that
+  // doesn't actively defuse the claim). Without that flag, goodwill's
+  // shortfall — whatever caused it — folds into the organisational bucket
+  // instead of being mislabeled as an evidenced external-scrutiny event.
+  const scrutinyEligible = state.flags.unresolved_public_scrutiny === true;
+
+  const organisationalCandidates: Array<{ cause: OrganisationalDominantCause; value: number }> = [
+    { cause: "boardConfidence", value: shortfall(w.boardConfidence, boardConfidence) },
+    { cause: "teamMorale", value: shortfall(w.teamMorale, morale) },
+    { cause: "honesty", value: shortfall(w.honesty, honesty) },
+  ];
+  if (!scrutinyEligible) {
+    organisationalCandidates.push({ cause: "stakeholderGoodwill", value: goodwillShortfall });
+  }
+  const dominantOrganisational = organisationalCandidates.reduce((best, next) =>
+    next.value > best.value ? next : best
+  );
+  const organisationalShortfall = dominantOrganisational.value;
+  const scrutinyShortfall = scrutinyEligible ? goodwillShortfall : -1;
+
+  // Ties resolve financial > organisational > scrutiny (stable, arbitrary
+  // order — matches the old code's "ties resolve to financial" convention).
+  let variant: PyrrhicVariant;
+  let organisationalDominantCause: OrganisationalDominantCause | null = null;
+  let attributionNote: string;
+  if (financialShortfall >= organisationalShortfall && financialShortfall >= scrutinyShortfall) {
+    variant = "financial";
+    attributionNote = `financial shortfall ${financialShortfall.toFixed(1)} dominant`;
+  } else if (organisationalShortfall >= scrutinyShortfall) {
+    variant = "organisational";
+    organisationalDominantCause = dominantOrganisational.cause;
+    attributionNote = `organisational shortfall ${organisationalShortfall.toFixed(1)} dominant (cause: ${dominantOrganisational.cause}${scrutinyEligible ? "" : "; goodwill included, unresolved_public_scrutiny not set"})`;
+  } else {
+    variant = "scrutiny";
+    attributionNote = `scrutiny shortfall ${scrutinyShortfall.toFixed(1)} dominant (unresolved_public_scrutiny set)`;
+  }
+
   return {
     family: "PYRRHIC_VICTORY",
     variant,
-    diagnostic: `Gate 3 (Delivery): PYRRHIC / ${variant} — ${compositeSummary} < threshold ${cfg.triumphantThreshold}; relationships above WARM_RELATIONSHIP_THRESHOLD; picked lower of budget% ${budgetPct.toFixed(0)} vs goodwill ${goodwill}.`,
+    organisationalDominantCause,
+    diagnostic: `Gate 3 (Delivery): PYRRHIC / ${variant} — ${compositeSummary} < threshold ${cfg.triumphantThreshold}; relationships above WARM_RELATIONSHIP_THRESHOLD; ${attributionNote}.`,
   };
 }
 
@@ -215,6 +297,19 @@ export function endingConditionFlags(state: GameState): Record<string, boolean> 
     ending_PYRRHIC_financial: isPyrrhic && result.endingVariant === "financial",
     ending_PYRRHIC_political: isPyrrhic && result.endingVariant === "political",
     ending_PYRRHIC_scrutiny: isPyrrhic && result.endingVariant === "scrutiny",
+    ending_PYRRHIC_organisational: isPyrrhic && result.endingVariant === "organisational",
+    // One narrator beat within the organisational block is picked by
+    // dominant cause — see OrganisationalDominantCause's doc comment.
+    // Each already implies ending_PYRRHIC_organisational, so dialogue can
+    // condition on just one of these four flags for that line.
+    ending_PYRRHIC_organisational_boardConfidence:
+      isPyrrhic && result.endingVariant === "organisational" && result.organisationalDominantCause === "boardConfidence",
+    ending_PYRRHIC_organisational_teamMorale:
+      isPyrrhic && result.endingVariant === "organisational" && result.organisationalDominantCause === "teamMorale",
+    ending_PYRRHIC_organisational_honesty:
+      isPyrrhic && result.endingVariant === "organisational" && result.organisationalDominantCause === "honesty",
+    ending_PYRRHIC_organisational_stakeholderGoodwill:
+      isPyrrhic && result.endingVariant === "organisational" && result.organisationalDominantCause === "stakeholderGoodwill",
     ending_PYRRHIC_recoverable_quality_failure: isPyrrhic && result.endingVariant === "recoverable_quality_failure",
     ending_CONTRACT_LOST: result.endingFamily === "CONTRACT_LOST",
     ending_BATCH_REJECTED: result.endingFamily === "BATCH_REJECTED",
@@ -250,6 +345,7 @@ export function evaluateEnding(state: GameState): EndingResult {
       batchResult: quality.batchResult,
       endingFamily: "CONTRACT_LOST",
       endingVariant: null,
+      organisationalDominantCause: null,
       diagnostics,
     };
   }
@@ -266,6 +362,7 @@ export function evaluateEnding(state: GameState): EndingResult {
       batchResult: quality.batchResult,
       endingFamily: quality.family,
       endingVariant: quality.family === "PYRRHIC_VICTORY" ? "recoverable_quality_failure" : null,
+      organisationalDominantCause: null,
       diagnostics,
     };
   }
@@ -278,6 +375,7 @@ export function evaluateEnding(state: GameState): EndingResult {
     batchResult: "released",
     endingFamily: delivery.family,
     endingVariant: delivery.family === "PYRRHIC_VICTORY" ? delivery.variant : null,
+    organisationalDominantCause: delivery.family === "PYRRHIC_VICTORY" ? delivery.organisationalDominantCause : null,
     diagnostics,
   };
 }

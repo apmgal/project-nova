@@ -148,7 +148,10 @@ much scope was accepted". The only red trigger is `big01Response ===
 "phase_b_quietly"` — scope that grew without ever going through a real
 re-plan. A big, formally re-planned scope (`"full_replan"`) can reach
 green; it only drops to amber if descoping is *also* under strain (2+ of
-the CBS cut-task/MoSCoW-"Won't" items). Earlier drafts of this formula
+the MoSCoW-"Won't" items — see the "CBS classification rework" entry
+further down for why this dropped from "CBS cut-task/MoSCoW-'Won't'
+items" to MoSCoW alone: Act 3's CBS no longer performs any actual
+descoping, so it correctly has nothing left to contribute here). Earlier drafts of this formula
 scored "how much scope was accepted" instead, which penalized BIG-01's
 "full re-plan" response — the most transparent, best-governed of its
 three options — the same as its most-hidden one. Corrected before
@@ -1574,3 +1577,304 @@ mood-shading constant. Reverified: default (uninvested, 50/50)
 relationships now resolve Triumphant when everything else is strong; a
 genuinely Cold relationship (15) still correctly triggers the political
 variant.
+
+---
+
+## CBS classification rework — Act 3's forced descope replaced with explicit Protect/Potential-lever judgement
+
+**Status:** Implemented (`TOOL_ACT3_SCENE02_CBS`, `CBSReview.tsx`,
+`lib/nova/state.ts`). Logged because the mechanic it replaces (an
+unexplained forced £7.5M threshold) and the reasoning for the
+replacement are both worth preserving, and because this entry is where
+the resulting backlog item — the actual bridge to Act 4 — needs to be
+recorded precisely rather than assumed.
+
+**What was wrong with the old mechanic:** the CBS totalled £8.0M against
+a hardcoded `descopeThreshold` of £7.5M, forcing the player to cut
+exactly one task before continuing. That threshold had no narrative
+rationale anywhere in the game's dialogue (searched exhaustively), it
+duplicated/conflicted with the £12.0M-approved / £8.0M-baseline / £4.0M-
+contingency financial model established elsewhere, and it taught a
+mechanically arbitrary lesson — "the tool says you're over budget" —
+rather than a real PM one. It also produced literally-unreachable
+choices: three of the nine work packages cost too little to single-
+handedly bring the total at or below the threshold, so the tool's own
+example ("cutting `wbs_operator_training` should weaken team readiness
+later") described a state the engine could never actually reach.
+
+**What it does now:** the CBS is a fixed, non-negotiable £8.0M cost
+baseline — nothing is ever cut, the total never moves. Daniel narrates
+the real numbers (£8.0M baseline, £4.0M contingency, £12.0M approved,
+all derived from `STARTING_BUDGET`/`totalIfAllIncluded`, never a second
+hardcoded figure) and asks the player to classify each of seven eligible
+packages (`classifiableTaskIds` — Foundations and Filling Equipment
+deliberately excluded, see below) as **Protected** or a **Potential
+lever**, via two explicit buttons per package. All seven must be
+classified before Submit enables — completion is deliberately NOT
+optional and NOT true-by-default, since an untouched CBS being
+indistinguishable from one where the player explicitly protected
+everything would defeat the point of asking. Classification is stored
+in `GameState.decisions` under `cbsClassification_<taskId>` (not
+`flags`, not `toolProgress`) — a categorical Act 3 *judgement*, kept
+deliberately separate from any later Act 4 *event* about what actually
+got reduced.
+
+**Why forced descoping was dropped rather than fixed:** Act 4's EV-10
+("Finance Freezes Part of the Contingency Budget") already teaches
+"forced scope cut under real financial pressure" — and does it better,
+since it fires off actual budget depletion (`budgetRemaining < 15%`)
+rather than an arbitrary tool constraint, and already has softening/
+mitigation infrastructure (`contingency_risk_logged`,
+`asked_contingency_mitigation`) the Act 3 CBS never had. Forcing the
+same lesson twice, with the worse-motivated version first, was worse
+design than asking Act 3 to do only the job its own `pmConcept` already
+claims: "Cost Breakdown Structure" — establish and defend a baseline,
+not cut it.
+
+**Two packages were deliberately left out of `classifiableTaskIds`:**
+Foundations and Filling Equipment. Reducing either doesn't threaten
+first-batch readiness the way HVAC/cleanroom/isolator/IQ-OQ/training/VMF
+do — losing foundation over-spec or filling-line redundancy is a
+future-capability/benefits question ("launches fine, falls short of
+Business Case throughput assumptions"), not a launch-readiness one, and
+the benefits-realisation system doesn't exist yet to receive that
+consequence. Rather than invent a placeholder readiness consequence for
+either (or expose a lever button with nothing behind it — never surface
+a "pending" mechanic to the player), both stay as ordinary, non-
+interactive cost lines until the benefits system exists. `costsByTask`
+still includes both, so the £8.0M baseline figure is unaffected.
+
+**`countDescopedItems` correction (Monthly Status Report Scope RAG):**
+this function used to add CBS's single cut task to its "requirements
+descoped under pressure" count. Since CBS no longer performs any actual
+descoping, that component was removed rather than left silently
+returning zero forever — see the correction note on the "Monthly Status
+Report — actual-state RAG formulas" entry above. The function now counts
+MoSCoW "Won't" placements only.
+
+**Backlog — the Act 4 bridge does not exist yet, precisely stated:**
+`cbsClassification_<taskId>` currently has no downstream reader
+anywhere. EV-10 was investigated specifically to check whether its
+existing choice architecture could consume it: `CHOICE_EV-10` is a flat,
+static 3-option list in `choices.json`, and its "Descope a 'Should'
+requirement" option is about Act 2's MoSCoW Should/Could/Won't
+prioritization — a different mechanic, a different decision, and must
+NOT be retrofitted to secretly mean "reduce a CBS package." There is no
+per-item dynamic choice mechanism on EV-10 today. The future fix is not
+"add a dialogue callback" — it needs an actual **new, small dynamic
+CBS-lever choice mechanism**, modeled on the one precedent already in
+the codebase for exactly this shape of problem:
+`computeReadinessInterventionOptions` (Act 5), which builds its option
+list purely from whatever gaps are actually present in that playthrough
+rather than a fixed static list. EV-10 (or whichever event ends up
+carrying this) needs the equivalent: a generated option per package the
+player flagged `potentialLever` in Act 3, letting the player pick which
+one actually gets reduced now. That actual reduction needs **its own
+separate state** — provisionally `actuallyReduced_<taskId>` (naming TBD
+at implementation time, but semantically distinct from
+`cbsClassification_<taskId>` the same way Act 3 intent and Act 4 action
+are distinct) — which is what the five previously-scoped downstream
+consequence hooks (EV-02 for HVAC/cleanroom, EV-05 + Act 5 readiness for
+isolator, Act 5 readiness + Audit Trail for IQ/OQ and VMF, Act 5
+readiness for training and utilities) should actually read, once built.
+None of those hooks should ever read `cbsClassification_*` directly —
+classifying something as a lever and it actually being cut are different
+facts, and conflating them would recreate the exact semantic mistake
+this whole rework exists to fix.
+
+---
+
+## Budget reconciliation — Gate 3 financial subscore + HUD + Act 6
+
+**Status:** Implemented (`computeBudgetReconciliation` in
+`lib/nova/state.ts`, `evaluateDeliveryComposite` in `lib/nova/endings.ts`,
+`HUD.tsx`, `DIALOGUE_ACT6_SCENE03`). Direct follow-on from the CBS
+classification rework above — this is the reason that rework had to
+happen first: Act 3's CBS is what fixes `referenceBaselineCost`, and
+nothing here could be named or scored honestly until that number meant
+one specific, stable thing.
+
+**The problem:** Gate 3 (`evaluateDeliveryComposite`, the Triumphant vs.
+Pyrrhic decision) scored a `budgetRemainingPct` subscore as
+`budgetRemaining / STARTING_BUDGET * 100` — percent of the full £12.0M
+approved figure remaining. That understates exposure: a player who has
+spent exactly the £4.0M contingency (the actual amount of slack the
+project ever had) still shows `budgetRemaining` at £8.0M, i.e. "66% of
+budget remaining" — reads as comfortably healthy when the true position
+is "0% of contingency left." The same flawed percentage also drove the
+HUD's Budget chip.
+
+**The fix — one new pure function, no schema changes:**
+`computeBudgetReconciliation(state)` in `lib/nova/state.ts` returns
+`{approvedBudget, referenceBaselineCost, originalContingency,
+additionalSpend, forecastCostAgainstBaseline, headroom}`, all derived
+fresh from `projectMetrics.budgetRemaining` and
+`TOOL_ACT3_SCENE02_CBS`'s own fixed `totalIfAllIncluded` — no new
+`GameState` field stores any of it, same pattern as
+`reportMismatchFlags`/`effectiveDialogueFlags`. `referenceBaselineCost`
+is read from the CBS tool's data rather than hardcoded a second time, so
+there's exactly one place the £8.0M figure lives. `headroom` is
+algebraically `budgetRemaining − referenceBaselineCost` — same
+information as the old `budgetRemainingPct`, but measured against the
+£4.0M contingency that's actually at risk rather than the full £12.0M
+approved figure.
+
+**Gate 3:** `budgetRemainingPct` replaced with `financialSubscore =
+headroom / originalContingency * 100` (clamped 0–100 for scoring, same
+treatment every other subscore already got). `benefitsRealisationScore`
+was removed from the composite entirely, not just re-weighted — see the
+`weightsNote` in `data/endings.json` for why (folding an unfinished
+benefits system into the ending's delivery composite was scoring
+something the game doesn't actually measure yet). Its former 0.15 weight
+was redistributed evenly across the remaining five dimensions (+0.03
+each) — a provisional, simple choice, recalibrate after playtesting like
+every other number in that file. The Pyrrhic financial/scrutiny variant
+comparison (`budgetPct <= goodwill`) was updated to
+`financialSubscore <= goodwill` for consistency.
+
+**HUD:** the Budget chip now shows `headroom / originalContingency * 100`
+(unclamped, so a genuine overspend past contingency reads visibly
+negative rather than flattening at 0% — same treatment Delivery Pace's
+own +/- delta already gets). Also fixed a duplicated-constant bug found
+in passing: `HUD.tsx` had its own hardcoded `STARTING_BUDGET =
+12_000_000` rather than importing the one already exported from
+`state.ts` — a second source of truth for the same number, now removed.
+The full breakdown (baseline/additional spend/forecast/approved/
+headroom, all formatted currency) is available on demand — tap the
+Budget chip to toggle it — rather than shown permanently, per the
+"available on demand rather than permanent" framing this was scoped
+under; it doesn't compete with the existing sequential tutorial popover
+(guarded to never show both at once).
+
+**Act 6:** a new, unconditional line in `DIALOGUE_ACT6_SCENE03`
+("Final cost: {forecastCostFormatted} against the
+{approvedBudgetFormatted} approved — {costPerformanceLabel}"),
+positioned immediately after — but deliberately NOT merged into or
+offered as evidence for — the existing "£12M Investment Justified — not
+yet demonstrable" ROI line. Cost performance (did the project land
+inside its approved budget) and investment justification (did the spend
+actually deliver value) are different questions; the ROI line stays
+exactly as honestly unresolved as it already was. Template values come
+from a new `budgetReconciliationTemplateValues(state)` in `state.ts`,
+wired into `GameRoot.tsx`'s existing `templateValues` object the same
+way `{currentWeek}` already is.
+
+**Verification:** `tsc --noEmit`/`eslint .` both clean.
+`next build` itself fails in this sandbox on Google Fonts network
+access — unrelated to this change, same failure predates it.
+
+## Benefits system rework — retire the score, split the Register into its own artefact
+
+**Status:** built and verified.
+
+**Investigation, before any design:** traced every touch of
+`benefitsRealisationScore` (started at 0, exactly two negative-only
+effects across the whole game — `CHOICE_BIG-01`'s "phase Product B
+quietly" option and `CHOICE_EV-NP2`'s "delay Product B" option — no
+upward path anywhere), the Act 3 Benefits Register tool
+(`TOOL_ACT3_SCENE06_BENEFITS`, `proof_chain_builder` type: Measure/
+Evidence/Owner/When tension moments for three benefits, purely
+pedagogical, `wrongPlacementBehavior.penalty: "none"`, zero scoring
+impact), the Act 6 readout (its three checkmarks were computed entirely
+from Gate 1/Gate 2 results, never from the Register or the score), and
+the dead `second_product_benefits_undefined` flag (rendered in HUD,
+documented as a TODO in the tool's own `note` field, never actually
+set). Also found the tool's `note` field had flagged two never-applied
+follow-up patches — set the flag on BIG-01 completion, and patch Act 6's
+world-memory reel to show the Register's real status — both resolved by
+this pass.
+
+**Decision 1 — retire the score entirely, no replacement metric.**
+`benefitsRealisationScore` had no upward path, so it could only ever
+drag things down, never reward good benefits management — keeping it
+(even re-weighted) would still be scoring something honest play can't
+improve. Removed from `ProjectMetrics` (types.ts), the default
+`projectMetrics` in `game_state.json`, both choices' effects (replaced
+by the flag below), the Gate 3 composite (see the budget-reconciliation
+entry above — done in the same pass), the HUD's Benefits chip and its
+`METRIC_HELP` entry and doc comment, `DevPlaytestNav.tsx`'s debug line,
+and every stale `"Benefits Realisation Score"` reference in
+`events.json`/`scenes.json` design-doc metadata. No numeric or status
+chip replaces it on the HUD — the Register artefact + Act 6 review
+(below) carry that job instead, more honestly than a live percentage
+ever did.
+
+**Decision 2 — Register completion defines assessment criteria, never
+causes outcomes.** Completing the Act 3 tool still doesn't touch any
+score (unchanged: `wrongPlacementBehavior.penalty: "none"`). What it now
+does is flip the Benefits Register artefact from "incomplete" to
+"complete" — a document-status change, not a game-state effect.
+
+**Decision 3 — split the Benefits Register out of the PID into its own
+artefact.** The PID's `incomplete`/`complete` captions used to describe
+Ellis's unfinished "Benefits Plan" going to sign-off — the exact same
+in-fiction document the Act 3 Benefits Register tool teaches. Two
+different systems (project purpose/scope/stakeholders vs. benefits
+measurement) were sharing one artefact identity. Resolved by:
+- `lib/nova/artefacts.ts`: PID's captions reworded to drop all
+  Benefits Plan/Tracker language, re-anchored to the cost baseline going
+  to sign-off instead (`"Updated once the cost baseline went to sign-off
+  in Act 3"`); its own `benefitsRegister` entry added, images
+  `benefits_register_{incomplete,complete}.png`.
+- `GameRoot.tsx`'s `enterScene`: reveals `benefitsRegister` as
+  "incomplete" on entering `ACT1_SCENE05` ("The Missing Appendices" —
+  the scene where the player finds Ellis's draft, in-fiction named
+  `Benefits_Plan_DRAFT_v3` in that scene's own dialogue). This scene is
+  pure narration with no investigation-panel structure to hang a
+  `revealsArtefactId` off of (unlike `q_drive_pid` in
+  `risk_investigation.json`), so the reveal is wired as an inline check
+  in `enterScene` instead — the one place a scene transition is
+  guaranteed to run exactly once on entry.
+- `GameRoot.tsx`'s `handleSubmitTool`: the PID's completion trigger
+  moved from `TOOL_ACT3_SCENE06_BENEFITS` (Benefits Register tool) to
+  `TOOL_ACT3_SCENE02_CBS` (cost baseline sign-off) — matching its new
+  captions. A second, new trigger completes `benefitsRegister` on
+  `TOOL_ACT3_SCENE06_BENEFITS` submission, same as the PID used to.
+
+**Decision 4 — Act 6's Benefits Review rebuilt to reuse the Register's
+own Measure/Evidence structure, with honest per-benefit statuses.**
+`DIALOGUE_ACT6_SCENE03`'s three benefit lines rewritten:
+- NHS Contract Secured: unchanged mechanism (`contract_secured`/
+  `contract_lost` from `endingConditionFlags`, Gate 1's own result),
+  reworded to explicitly say "realised"/"not realised."
+- More Patients Treated: **softened from a clean ✓/✗.** A released
+  batch (`batch_released`) only proves manufacturing capability, not
+  that a patient has actually been treated — so this now reads "⚠
+  ENABLED — measurement continues post-launch," naming the real
+  measure (monthly production output) nobody in the room has seen yet.
+  Only `batch_rejected` (no batch, no capability, nothing to measure)
+  reads a clean "✗ NOT YET ENABLED."
+- £12M Investment Justified: still always renders unconditionally
+  (the game's timeline never reaches the 12-month measurement point,
+  same as before) — but now pulls `{roiMeasure}`/`{roiEvidence}`/
+  `{roiWhen}` from a new `benefitsRegisterTemplateValues(state)` in
+  `state.ts`, a pure read of `TOOL_ACT3_SCENE06_BENEFITS`'s own
+  `correctMeasure`/`correctEvidence`/`correctWhen` fields for the ROI
+  benefit — so this line can never drift out of sync with what the Act
+  3 tool actually asked the player to prove.
+- New optional line, gated on the real (non-synthetic)
+  `second_product_benefits_undefined` flag: only set when
+  `CHOICE_BIG-01`'s "phase Product B quietly" option is chosen — the
+  only one of its three options that genuinely leaves Product B's
+  benefits undefined, matching the game's own existing
+  `computeScopeDimension` judgment (verified by reading all three
+  options' actual effects before setting the flag).
+
+**Verification:** `tsc --noEmit`/`eslint .` clean. Scripted checks:
+`benefitsRegisterTemplateValues` values match the tool's own
+`correctMeasure`/`correctEvidence`/`correctWhen` exactly; artefact
+reveal → CBS-submit → Benefits-submit sequence produces
+`{benefitsRegister: "complete", pid: "complete"}` as expected;
+`second_product_benefits_undefined` sets/reads correctly; strong and
+weak archetype `GameState`s both produce mutually-exclusive
+`contract_secured`/`contract_lost` and `batch_released`/`batch_rejected`
+pairs via `endingConditionFlags`.
+
+**Artefact art:** no image-generation tool was available this session.
+`scripts/gen_benefits_register.py` (Python/PIL) approximates the
+existing PID art's style — torn-paper card on black for incomplete,
+clean straight edges for complete, same AstraZeneca wordmark colours,
+black serif headers — but this is a scripted approximation, not a
+hand-tuned illustration pass like the PID's (which saw several manual
+v2→v3→v4 iterations per its own doc comment). Lower fidelity by design;
+revisit with a proper illustration pass if this artefact earns one.

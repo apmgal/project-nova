@@ -558,7 +558,7 @@
     "contentSummary": "Player builds the Benefits Register with Daniel.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Benefits Realisation Score"
+      "Benefits Register (artefact — defines how success will be assessed, not scored)"
     ],
     "dialogueId": "DIALOGUE_ACT3_SCENE06",
     "choicesId": null,
@@ -670,8 +670,8 @@
       "Budget Remaining",
       "Schedule Health",
       "Risk Exposure",
-      "Benefits Realisation Score",
-      "Board Confidence \u2014 all shift simultaneously"
+      "Board Confidence \u2014 all shift simultaneously",
+      "second_product_benefits_undefined flag (phase_b_quietly option only)"
     ],
     "dialogueId": "DIALOGUE_BIG-01",
     "choicesId": "CHOICE_BIG-01",
@@ -929,7 +929,6 @@
     "contentSummary": "Team gathers; batch released or rejected across one or both product lines depending on Regulatory Readiness/Risk Exposure.",
     "worldMemoryBeat": null,
     "variablesTouched": [
-      "Benefits Realisation Score",
       "Team Morale"
     ],
     "dialogueId": "DIALOGUE_ACT6_SCENE02",

@@ -67,7 +67,6 @@ export default function DevPlaytestNav({ gameState, history }: DevPlaytestNavPro
           <div>Schedule: {m.scheduleHealth}</div>
           <div>Risk: {m.riskExposure}</div>
           <div>Reg. Readiness: {m.regulatoryReadiness}</div>
-          <div>Benefits: {m.benefitsRealisationScore}</div>
           <div>Board Conf.: {m.boardConfidence}</div>
           <div>Goodwill: {m.stakeholderGoodwill}</div>
           <div>Morale: {m.teamMorale}</div>

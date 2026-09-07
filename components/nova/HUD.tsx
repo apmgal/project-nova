@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import type { GameState, ToolScreenBlock } from "@/lib/nova/types";
-import { computeWeeksRemaining, computeCurrentObjective, metricBand } from "@/lib/nova/state";
+import {
+  computeWeeksRemaining,
+  computeCurrentObjective,
+  metricBand,
+  computeBudgetReconciliation,
+} from "@/lib/nova/state";
 
 interface HUDProps {
   gameState: GameState;
@@ -10,10 +15,12 @@ interface HUDProps {
   onDismissTutorial: () => void;
 }
 
-/** Baseline budgetRemaining from game_state.json's starting template —
- * used only to turn an absolute currency figure into a percentage for
- * banding; not re-derived from data since it's a fixed starting value. */
-const STARTING_BUDGET = 12_000_000;
+const currencyFormatter = new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "GBP",
+  maximumFractionDigits: 1,
+  notation: "compact",
+});
 
 const BAND_DOT: Record<string, string> = {
   green: "bg-emerald-500",
@@ -30,7 +37,7 @@ const METRIC_HELP: { label: string; description: string }[] = [
   {
     label: "Budget",
     description:
-      "How much of your £12M starting budget is left. Spent through your MoSCoW choices, any Cost Breakdown cut, and who you hired.",
+      "How much of the £4.0M contingency you set aside in Act 3 is still unspent — not a raw percentage of the full £12M, since spending exactly the contingency should read as fully exposed, not '66% remaining'. Tap the chip for the full breakdown.",
   },
   {
     label: "Delivery Pace",
@@ -44,12 +51,7 @@ const METRIC_HELP: { label: string; description: string }[] = [
   {
     label: "Quality",
     description:
-      "How ready you are for regulatory inspection. Builds through validation work, documentation, and QA hires.",
-  },
-  {
-    label: "Benefits",
-    description:
-      "Whether the project's actual outcomes have been realised yet. Stays at 0 until go-live, because you can't realise a benefit before the facility exists. The dot colour is a quick read across all five: green means healthy, amber means watch it, red means it needs attention.",
+      "How ready you are for regulatory inspection. Builds through validation work, documentation, and QA hires. The dot colour is a quick read across all four: green means healthy, amber means watch it, red means it needs attention.",
   },
 ];
 
@@ -154,14 +156,13 @@ function TutorialPopover({
  * its own beyond the tutorial-seen flag. weeksRemaining is derived fresh
  * every render from scheduleHealth and is never clamped: a badly-behind
  * schedule can show "Week 27 / 24" and the story keeps moving regardless
- * — this is informational, never a gate. Quality reuses regulatoryReadiness
- * and Benefits reuses benefitsRealisationScore, the closest existing
- * metrics to what the design calls for.
+ * — this is informational, never a gate. Quality reuses regulatoryReadiness,
+ * the closest existing metric to what the design calls for.
  *
  * A "?" toggle (re)starts a sequential coach-mark tour: one chip
  * highlighted at a time (the rest dimmed), a callout underneath naming it
  * and explaining what it measures, "Got it" advancing Budget -> Delivery
- * Pace -> Risk -> Quality -> Benefits, "Skip tutorial" ending it immediately.
+ * Pace -> Risk -> Quality, "Skip tutorial" ending it immediately.
  * It auto-starts the first time the HUD ever mounts (gated by
  * flags.hud_tutorial_seen, set via onDismissTutorial once the tour ends
  * or is skipped for the first time) and can be replayed from the start
@@ -171,13 +172,23 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
   const [tutorialStep, setTutorialStep] = useState<number | null>(
     gameState.flags.hud_tutorial_seen ? null : 0
   );
+  const [budgetDetailOpen, setBudgetDetailOpen] = useState(false);
 
   const metrics = gameState.projectMetrics;
   const weeksRemaining = computeWeeksRemaining(metrics.scheduleHealth);
   const currentWeek = Math.max(0, Math.min(24, weeksRemaining));
   const isOverdue = weeksRemaining > 24 || weeksRemaining < 0;
 
-  const budgetPct = (metrics.budgetRemaining / STARTING_BUDGET) * 100;
+  // Reconciled against the £4.0M contingency Act 3 establishes, not a raw
+  // fraction of the full £12M approved figure — see computeBudgetReconciliation's
+  // own doc comment in state.ts for why that distinction matters (spending
+  // exactly the contingency should read as fully exposed, not "66% left").
+  // Deliberately unclamped here (unlike Gate 3's own use of this same
+  // function) so a genuine overspend past the contingency visibly reads as
+  // negative rather than flattening at 0%, same treatment Delivery Pace's
+  // own +/- delta already gets below.
+  const reconciliation = computeBudgetReconciliation(gameState);
+  const contingencyPct = (reconciliation.headroom / reconciliation.originalContingency) * 100;
   const pace = deliveryPaceDisplay(metrics.scheduleHealth);
   const objective = ganttToolScreen
     ? computeCurrentObjective(
@@ -232,20 +243,69 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
           </span>
         </div>
         <div className="relative">
-          <Chip
-            label="Budget"
-            value={`${Math.round(budgetPct)}%`}
-            band={metricBand(budgetPct, true)}
-            state={chipState(0)}
-          />
+          <button
+            type="button"
+            onClick={() => setBudgetDetailOpen((v) => !v)}
+            className="rounded-full text-left"
+            aria-expanded={budgetDetailOpen}
+          >
+            <Chip
+              label="Budget"
+              value={`${Math.round(contingencyPct)}%`}
+              band={metricBand(contingencyPct, true)}
+              state={chipState(0)}
+            />
+          </button>
           {renderPopoverIfActive(0)}
+          {budgetDetailOpen && tutorialStep === null && (
+            <div className="absolute left-0 top-full z-30 mt-2 w-60 rounded-lg border border-zinc-700 bg-zinc-950/95 p-3 text-[11px] text-zinc-300 backdrop-blur-sm">
+              <div className="mb-1.5 text-[10px] uppercase tracking-wide text-zinc-500">
+                Contingency headroom
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Cost baseline</span>
+                <span>{currencyFormatter.format(reconciliation.referenceBaselineCost)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Additional spend</span>
+                <span>{currencyFormatter.format(reconciliation.additionalSpend)}</span>
+              </div>
+              <div className="flex justify-between border-t border-zinc-800 pt-1 mt-1">
+                <span className="text-zinc-500">Forecast cost</span>
+                <span>{currencyFormatter.format(reconciliation.forecastCostAgainstBaseline)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Approved budget</span>
+                <span>{currencyFormatter.format(reconciliation.approvedBudget)}</span>
+              </div>
+              <div className="mt-1.5 flex justify-between border-t border-zinc-800 pt-1.5 font-semibold">
+                <span className="text-zinc-400">Headroom left</span>
+                <span className={reconciliation.headroom < 0 ? "text-red-400" : "text-emerald-400"}>
+                  {currencyFormatter.format(reconciliation.headroom)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
         <div className="relative">
           <Chip
             label="Delivery Pace"
             value={pace.value}
             valueClassName={pace.className}
-            band={metricBand(metrics.scheduleHealth, true)}
+            // Red line matches Gate 1's real contract-losing floor
+            // (gateThresholds.contractGate.scheduleHealthFloor in
+            // data/endings.json) instead of metricBand's generic default of
+            // 30 — a player at scheduleHealth 35 was previously shown a
+            // reassuring amber/yellow dot despite already being in
+            // Contract Lost territory. Green line left at the generic
+            // default (60) rather than invented from scratch, giving a
+            // 20-point amber warning band (40-59) above the real floor.
+            // Deliberately does not account for the grace-decision floor
+            // override (30, only when big01Response === "phase_b_quietly")
+            // — that would need decisions threaded into the HUD just for
+            // this, and defaulting to the stricter floor only ever errs
+            // toward over-warning, never toward hiding real danger.
+            band={metricBand(metrics.scheduleHealth, true, 60, 40)}
             state={chipState(1)}
           />
           {renderPopoverIfActive(1)}
@@ -263,19 +323,16 @@ export default function HUD({ gameState, ganttToolScreen, onDismissTutorial }: H
           <Chip
             label="Quality"
             value={`${metrics.regulatoryReadiness}`}
-            band={metricBand(metrics.regulatoryReadiness, true)}
+            // Matches Gate 2's real floors (gateThresholds.qualityGate in
+            // data/endings.json): green only at/above the clean-release
+            // floor (70), red below the recoverable floor (50) — the old
+            // default (green >=60) let a player at regulatoryReadiness 65
+            // read as "healthy" while still 5 points short of a clean
+            // release.
+            band={metricBand(metrics.regulatoryReadiness, true, 70, 50)}
             state={chipState(3)}
           />
           {renderPopoverIfActive(3)}
-        </div>
-        <div className="relative">
-          <Chip
-            label="Benefits"
-            value={`${metrics.benefitsRealisationScore}`}
-            band={metricBand(metrics.benefitsRealisationScore, true)}
-            state={chipState(4)}
-          />
-          {renderPopoverIfActive(4)}
         </div>
         <div className="group relative flex-shrink-0">
           <button

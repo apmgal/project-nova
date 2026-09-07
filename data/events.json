@@ -10,8 +10,8 @@
       "Budget Remaining",
       "Schedule Health",
       "Risk Exposure",
-      "Benefits Realisation Score",
-      "Board Confidence \u2014 the only event in the game to move five variables in one beat"
+      "Board Confidence \u2014 the only event in the game to move four variables in one beat",
+      "second_product_benefits_undefined flag \u2014 set only if the player picks 'phase Product B quietly'"
     ],
     "participants": [
       "marcus"
@@ -399,7 +399,7 @@
     "impact": [
       "Budget Remaining",
       "Mike E. Trust",
-      "Benefits Realisation Score"
+      "Stakeholder Goodwill / Schedule Health (depending on option chosen)"
     ],
     "participants": [
       "daniel"

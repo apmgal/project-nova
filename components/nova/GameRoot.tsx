@@ -32,9 +32,9 @@ import {
   isToolComplete,
   placePriorityCard,
   isPriorityToolComplete,
-  isCbsComplete,
-  getDescopedTaskId,
-  descopeTask,
+  isCbsClassificationComplete,
+  computeCbsClassifications,
+  setCbsClassification,
   toggleHire,
   isHiringComplete,
   validateMilestonePlacement,
@@ -65,6 +65,9 @@ import {
   effectiveDialogueFlags,
   reportMismatchTemplateValues,
   applyReadinessIntervention,
+  isReadinessInterventionSequenceComplete,
+  budgetReconciliationTemplateValues,
+  benefitsRegisterTemplateValues,
 } from "@/lib/nova/state";
 import { endingConditionFlags } from "@/lib/nova/endings";
 import { DEV_MODE, useDevPlaytestHistory } from "@/lib/nova/devHistory";
@@ -78,6 +81,7 @@ import type {
   Scene,
   StatusReportRecord,
   ToolScreenBlock,
+  CbsClassification,
 } from "@/lib/nova/types";
 import TitleScreen from "./TitleScreen";
 import DialogueTranscript from "./DialogueTranscript";
@@ -205,7 +209,7 @@ function computeToolComplete(state: GameState, toolScreen: ToolScreenBlock | nul
     case "power_interest_grid":
       return isPriorityToolComplete(state, toolId, toolScreen.cards?.length ?? 0);
     case "cost_review_with_descope":
-      return isCbsComplete(state, toolScreen);
+      return isCbsClassificationComplete(state, toolScreen);
     case "pick_n_of_m_swipeable":
       return isHiringComplete(state, toolId, toolScreen.maxHires ?? toolScreen.candidates?.length ?? 0);
     case "gantt_placement": {
@@ -354,6 +358,15 @@ export default function GameRoot() {
     const scene = getScene(sceneId);
     next = { ...next, currentScene: sceneId, currentBackground, currentAmbient };
     next = applySceneFlagsSet(next, scene?.flagsSet);
+    // ACT1_SCENE05 ("The Missing Appendices") is where the player finds
+    // Ellis's unfinished Benefits_Plan_DRAFT_v3 — a pure narrative beat with
+    // no investigation-panel structure to hang a revealsArtefactId off of
+    // (unlike q_drive_pid in risk_investigation.json), so the reveal is
+    // wired here instead, the one place a scene transition is guaranteed to
+    // run exactly once on entry.
+    if (sceneId === "ACT1_SCENE05") {
+      next = setArtefactStatus(next, "benefitsRegister", "incomplete");
+    }
     return next;
   }
 
@@ -792,10 +805,21 @@ export default function GameRoot() {
   function handleSubmitTool() {
     if (!gameState || !scene || !toolScreen || !toolComplete) return;
     let next = submitTool(gameState, toolScreen);
-    // Finishing the Benefits Tracker is what actually completes the PID's
-    // Benefits Plan in-fiction, so the drawer copy upgrades here too.
-    if (toolScreen.toolId === "TOOL_ACT3_SCENE06_BENEFITS") {
+    // The PID covers purpose/scope/stakeholders only (see lib/nova/
+    // artefacts.ts). Its Objectives+Scope claims are actually finished by
+    // four Act 3 activities in sequence — WBS (scope) -> CBS (cost) ->
+    // Team (delivery resources) -> Milestones (schedule) — and since
+    // scenes run strictly linearly, Milestones completing is proof the
+    // other three already are too. No multi-condition check needed: this
+    // is just the single point the last required definition input lands.
+    if (toolScreen.toolId === "TOOL_ACT3_SCENE04_MILESTONES") {
       next = setArtefactStatus(next, "pid", "complete");
+    }
+    // Finishing the Benefits Register tool is what completes the Register
+    // artefact in-fiction — Ellis's unfinished draft (revealed in
+    // ACT1_SCENE05, see enterScene) becomes "Benefits Register — Approved."
+    if (toolScreen.toolId === "TOOL_ACT3_SCENE06_BENEFITS") {
+      next = setArtefactStatus(next, "benefitsRegister", "complete");
     }
     setGameState(next);
     saveGame(next);
@@ -858,6 +882,18 @@ export default function GameRoot() {
   function handlePickReadiness(interventionId: string | null) {
     if (!gameState || !scene || !toolScreen) return;
     let next = applyReadinessIntervention(gameState, interventionId);
+
+    // Sequential, not a one-shot pick: only advance once both "two days"
+    // slots are resolved (or nothing genuine remains to spend the second
+    // one on) — see isReadinessInterventionSequenceComplete's doc comment.
+    // Otherwise just persist the update so ReadinessChecklist re-renders
+    // with the board reflecting this pick before offering the next slot.
+    if (!isReadinessInterventionSequenceComplete(next)) {
+      setGameState(next);
+      saveGame(next);
+      return;
+    }
+
     next = submitTool(next, toolScreen);
     setGameState(next);
     saveGame(next);
@@ -897,9 +933,9 @@ export default function GameRoot() {
     saveGame(next);
   }
 
-  function handleDescopeTask(taskId: string) {
+  function handleClassifyCbsTask(taskId: string, classification: CbsClassification) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
-    const next = descopeTask(gameState, toolScreen, taskId);
+    const next = setCbsClassification(gameState, toolScreen, taskId, classification);
     setGameState(next);
     saveGame(next);
   }
@@ -963,6 +999,8 @@ export default function GameRoot() {
     currentWeek: String(computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)),
     ...supplierTemplateValues(gameState),
     ...reportMismatchTemplateValues(gameState),
+    ...budgetReconciliationTemplateValues(gameState),
+    ...benefitsRegisterTemplateValues(gameState),
   };
   const displayLines = combinedLines.map((line) => ({
     ...line,
@@ -1051,8 +1089,8 @@ export default function GameRoot() {
             ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
               <CBSReview
                 toolScreen={toolScreen}
-                cutTaskId={getDescopedTaskId(gameState, toolScreen.toolId)}
-                onDescope={handleDescopeTask}
+                classifications={computeCbsClassifications(gameState, toolScreen)}
+                onClassify={handleClassifyCbsTask}
                 pmConcept={scene.pmConcept}
                 onReset={handleResetTool}
                 canSubmit={toolComplete}

@@ -1,7 +1,11 @@
 "use client";
 
 import type { GameState, ToolScreenBlock } from "@/lib/nova/types";
-import { computeReadinessBoard, computeReadinessInterventionOptions } from "@/lib/nova/state";
+import {
+  computeReadinessBoard,
+  computeReadinessInterventionOptions,
+  readinessInterventionSlotsUsed,
+} from "@/lib/nova/state";
 
 interface ReadinessChecklistProps {
   toolScreen: ToolScreenBlock;
@@ -17,18 +21,22 @@ const BAR_CLASS =
 /**
  * "readiness_checklist" (ACT5_SCENE01) — a read-only review of the two
  * product lines' physical/quality readiness, entirely derived from earlier
- * decisions (see computeReadinessBoard in state.ts), followed by ONE
- * constrained pick: which of the currently-outstanding gaps to spend two
- * days closing, or push forward on the compressed schedule instead (see
- * computeReadinessInterventionOptions/applyReadinessIntervention). This is
- * deliberately NOT another placement/pass-fail exercise — nothing here is
- * "fixed" by the player, only reviewed and, for one item, triaged. Same
+ * decisions (see computeReadinessBoard in state.ts), followed by up to TWO
+ * sequential picks — "two days of recovery capacity" taken literally, one
+ * day at a time. Each render shows whichever gaps are still genuinely open
+ * (see computeReadinessInterventionOptions/applyReadinessIntervention) —
+ * closing one re-renders the board before the second day is offered, and a
+ * category never comes back around a second time. This is deliberately NOT
+ * another placement/pass-fail exercise — nothing here is "fixed" by the
+ * player, only reviewed and, for up to two items, triaged. Same
  * navy/lavender "real document" chrome as StatusReportBuilder/
  * RaidUpdateCard, since this is conceptually the same family of artefact.
  */
 export default function ReadinessChecklist({ toolScreen, gameState, onPick }: ReadinessChecklistProps) {
   const board = computeReadinessBoard(gameState);
   const options = computeReadinessInterventionOptions(gameState);
+  const slotsUsed = readinessInterventionSlotsUsed(gameState);
+  const daysRemaining = 2 - slotsUsed;
 
   function renderColumn(title: string, items: ReturnType<typeof computeReadinessBoard>["productA"]) {
     return (
@@ -87,15 +95,26 @@ export default function ReadinessChecklist({ toolScreen, gameState, onPick }: Re
         </div>
 
         <div className="mt-4">
-          <div className={BAR_CLASS}>Two days of recovery capacity</div>
+          <div className={BAR_CLASS}>
+            {options.length === 0
+              ? "Recovery capacity"
+              : daysRemaining === 2
+                ? "Two days of recovery capacity remaining"
+                : "One day of recovery capacity remaining"}
+          </div>
           <div className="flex flex-col gap-1.5" style={{ background: "#ddd8e6", padding: "8px" }}>
             {options.length === 0 ? (
               <p className="text-[10.5px]" style={{ color: "#333" }}>
                 Nothing outstanding to spend it on. The board&apos;s clean.
               </p>
+            ) : daysRemaining === 2 ? (
+              <p className="text-[10.5px]" style={{ color: "#333" }}>
+                You have two days before the next gate. Spend today closing one gap below, or move on and leave
+                it — you&apos;ll decide what to do with the second day after.
+              </p>
             ) : (
               <p className="text-[10.5px]" style={{ color: "#333" }}>
-                You have two days before the next gate. Where do you put them? You can&apos;t close everything.
+                One day left before the next gate. This is your last chance to close anything on this board.
               </p>
             )}
             <div className="flex flex-col gap-1">
@@ -104,10 +123,13 @@ export default function ReadinessChecklist({ toolScreen, gameState, onPick }: Re
                   key={option.id}
                   type="button"
                   onClick={() => onPick(option.id)}
-                  className="rounded border px-2.5 py-1.5 text-left text-[10.5px] hover:border-[#1f3864]"
+                  className="rounded border px-2.5 py-1.5 text-left hover:border-[#1f3864]"
                   style={{ borderColor: LINE, background: "#fff", color: "#333" }}
                 >
-                  {option.label}
+                  <div className="text-[10.5px] font-semibold">{option.label}</div>
+                  <div className="mt-0.5 text-[9.5px] leading-snug" style={{ color: "#666" }}>
+                    {option.description}
+                  </div>
                 </button>
               ))}
               <button
@@ -118,7 +140,7 @@ export default function ReadinessChecklist({ toolScreen, gameState, onPick }: Re
               >
                 {options.length === 0
                   ? "Proceed — the schedule doesn't need it."
-                  : "Proceed on the compressed schedule instead."}
+                  : "Move on and leave this gap unresolved."}
               </button>
             </div>
           </div>

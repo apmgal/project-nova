@@ -674,12 +674,17 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "He pulls up the WBS on a second monitor, converting each work package into a line item without looking away from the screen."
+        "text": "He pulls up the WBS on a second monitor, converting each work package into a line item without looking away from the screen. The total settles: eight million."
+      },
+      {
+        "speaker": "daniel",
+        "emotion": "neutral",
+        "text": "Eight million. Against twelve approved. That's four million of contingency sitting between you and whatever this project throws at you."
       },
       {
         "speaker": "daniel",
         "emotion": "concerned",
-        "text": "Some of this I can defend to the Board blind. Some of it I'm going to need you to explain to me first, so I don't get blindsided explaining it to them."
+        "text": "The baseline works. I can defend it to the Board as it stands. But once delivery starts, pressure will come — it always does — and I don't want to be finding out where you've got flexibility at the same moment I need it."
       },
       {
         "speaker": "narrator",
@@ -692,22 +697,28 @@
         "text": "I've had two rounds of headcount cuts on my own team this year. I'd rather the third round wasn't caused by a project I signed off badly."
       },
       {
-        "speaker": "narrator",
-        "emotion": null,
-        "text": "He says it flatly, like a fact rather than a complaint, and goes back to the spreadsheet."
+        "speaker": "daniel",
+        "emotion": "neutral",
+        "text": "So walk me through it. For each of these — what am I protecting, and what's a potential lever if something has to move later?"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "[Player builds the Cost Breakdown Structure from the WBS.]"
+        "text": "He says it flatly, like a fact rather than a complaint, and turns the second monitor toward you."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "[Player classifies each package as Protected or a Potential lever.]"
       },
       {
         "speaker": "daniel",
         "emotion": "neutral",
-        "text": "...Alright. This I can work with."
+        "text": "...Alright. Now if it comes to it later, at least I know where to look first."
       }
     ],
-    "needsWriting": false
+    "needsWriting": false,
+    "engineNote": "Player classification happens between the two [Player...] marker beats — see the tool marker line and TOOL_ACT3_SCENE02_CBS. Daniel's closing line is deliberately generic (doesn't name a specific package) since which packages got flagged as levers varies per playthrough; EV-10 in Act 4 is where a specific earlier classification gets called back by name, once its own choice architecture is extended to read cbsClassification_<taskId> decisions (see DESIGN_NOTES.md — not built yet)."
   },
   "DIALOGUE_ACT3_SCENE03": {
     "dialogueId": "DIALOGUE_ACT3_SCENE03",
@@ -1613,6 +1624,42 @@
       {
         "speaker": "marcus",
         "emotion": "neutral",
+        "text": "Contract's secured. I'll be honest, I fielded more questions about this one in the last three weeks than I did about the whole rest of the programme.",
+        "condition": "ending_PYRRHIC_organisational"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The control room is quieter than you'd expect for a project that just succeeded.",
+        "condition": "ending_PYRRHIC_organisational"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The facility launched. The Board signed off, but the questions didn't stop there — some doubt about your judgement never quite went away.",
+        "condition": "ending_PYRRHIC_organisational_boardConfidence"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The facility launched. The team got there, but they're running on fumes — this win took more out of them than it should have.",
+        "condition": "ending_PYRRHIC_organisational_teamMorale"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The facility launched. The numbers held up under Whitfield's inspection, barely — and ‘barely’ has a way of following you into the next project.",
+        "condition": "ending_PYRRHIC_organisational_honesty"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The facility launched. But too much goodwill had been spent getting it there — delivery succeeded, even if some of the people you needed along the way were less convinced by how you got there.",
+        "condition": "ending_PYRRHIC_organisational_stakeholderGoodwill"
+      },
+      {
+        "speaker": "marcus",
+        "emotion": "neutral",
         "text": "We lost it. Competitor got there first.",
         "condition": "ending_CONTRACT_LOST"
       },
@@ -1727,36 +1774,47 @@
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "And the Benefits Register you built with Daniel, back before any of this started:"
+        "text": "And the Benefits Register \u2014 Ellis's draft, finished with Daniel back in Act 3:"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "\u2713 NHS Contract Secured",
+        "text": "\u2713 NHS Contract Secured \u2014 realised.",
         "condition": "contract_secured"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "\u2717 NHS Contract Secured",
+        "text": "\u2717 NHS Contract Secured \u2014 not realised.",
         "condition": "contract_lost"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "\u2713 More Patients Treated \u2014 batch released.",
+        "text": "\u26a0 More Patients Treated \u2014 ENABLED, measurement continues post-launch. A released batch proves the line can manufacture at volume; it doesn't yet prove a single patient has been treated. That's a monthly production-output number nobody in this room has seen yet.",
         "condition": "batch_released"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "\u2717 More Patients Treated \u2014 batch rejected.",
+        "text": "\u2717 More Patients Treated \u2014 NOT YET ENABLED. No batch means no output to measure. This benefit doesn't start until one does.",
         "condition": "batch_rejected"
       },
       {
         "speaker": "narrator",
         "emotion": null,
-        "text": "\u26a0 \u00a312M Investment Justified \u2014 not yet demonstrable. ROI isn't measured for another twelve months. Nobody in this room gets to know that answer today."
+        "text": "\u26a0 \u00a312M Investment Justified \u2014 not yet measurable. Per the Register: {roiMeasure}, evidenced by {roiEvidence}, due {roiWhen}. Nobody in this room gets to know that answer today."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "The Register never did say anything about Product B. That gap is still sitting there, open, whatever happens today.",
+        "condition": "second_product_benefits_undefined"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Final cost: {forecastCostFormatted} against the {approvedBudgetFormatted} approved \u2014 {costPerformanceLabel}. What that spend actually bought is the question above; this is only whether you kept to what you were given."
       },
       {
         "speaker": "narrator",
@@ -1789,7 +1847,7 @@
       }
     ],
     "needsWriting": false,
-    "engineNote": "Retagged for the v2 gate-based ending architecture (lib/nova/endings.ts's evaluateEnding, see DESIGN_NOTES.md's 'Four-family ending architecture' entry) \u2014 supersedes this note's old END-1..7/single-composite description. The 7 condition flags below (ending_TRIUMPHANT_LAUNCH, ending_PYRRHIC_financial, ending_PYRRHIC_political, ending_PYRRHIC_scrutiny, ending_PYRRHIC_recoverable_quality_failure, ending_CONTRACT_LOST, ending_BATCH_REJECTED) are mutually exclusive and come from endingConditionFlags(state) in lib/nova/endings.ts, not stored on gameState.flags. Dialogue TEXT is unchanged from the old END-ids this pass (retagging only) \u2014 one known mismatch worth a future content pass: the ending_PYRRHIC_scrutiny block's text (\"overtakes the project's own timeline entirely... answering questions instead\") was written for the old END-7's binary override and reads more severe than its new trigger (a stakeholder-goodwill dip that did NOT cross the Contract Gate's severeGoodwillFloor \u2014 a severe-enough dip now routes to ending_CONTRACT_LOST instead, with ACT6_SCENE01's new NHS Procurement notice, and reuses ending_CONTRACT_LOST's existing text rather than this block). The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1\u20136 are all in gameState.flags. BENEFITS REGISTER READOUT: contract_secured/contract_lost are also from endingConditionFlags \u2014 read directly off the Contract Gate result now, not derived from which ending band fired. batch_released/batch_rejected likewise reuse the flags ACT6_SCENE02 already renders against. The ROI line always renders unconditionally \u2014 by design, the game's timeframe never reaches the 12-month measurement point, so this benefit is honestly left unresolved rather than forced to a tidy answer."
+    "engineNote": "Retagged for the v2 gate-based ending architecture (lib/nova/endings.ts's evaluateEnding, see DESIGN_NOTES.md's 'Four-family ending architecture' entry) \u2014 supersedes this note's old END-1..7/single-composite description. The 7 condition flags below (ending_TRIUMPHANT_LAUNCH, ending_PYRRHIC_financial, ending_PYRRHIC_political, ending_PYRRHIC_scrutiny, ending_PYRRHIC_recoverable_quality_failure, ending_CONTRACT_LOST, ending_BATCH_REJECTED) are mutually exclusive and come from endingConditionFlags(state) in lib/nova/endings.ts, not stored on gameState.flags. Dialogue TEXT is unchanged from the old END-ids this pass (retagging only) \u2014 one known mismatch worth a future content pass: the ending_PYRRHIC_scrutiny block's text (\"overtakes the project's own timeline entirely... answering questions instead\") was written for the old END-7's binary override and reads more severe than its new trigger (a stakeholder-goodwill dip that did NOT cross the Contract Gate's severeGoodwillFloor \u2014 a severe-enough dip now routes to ending_CONTRACT_LOST instead, with ACT6_SCENE01's new NHS Procurement notice, and reuses ending_CONTRACT_LOST's existing text rather than this block). The world memory reel and closing line always render, after whichever single ending block played. all_ellis_fragments_found = true only if fragments 1\u20136 are all in gameState.flags. BENEFITS REGISTER READOUT (reworked alongside the benefitsRealisationScore retirement \u2014 see 'Benefits system rework' in DESIGN_NOTES.md): this now reads status off the Benefits Register artefact's own Measure/Evidence structure (lib/nova/artefacts.ts's benefitsRegister entry, completed in Act 3 via TOOL_ACT3_SCENE06_BENEFITS) rather than a numeric score that only ever moved downward. contract_secured/contract_lost are from endingConditionFlags \u2014 read directly off the Contract Gate result, not derived from which ending band fired. batch_released/batch_rejected likewise reuse the flags ACT6_SCENE02 already renders against, but the More Patients Treated line is now deliberately NOT a clean \u2713/\u2717: a released batch proves manufacturing capability, not that any patient was actually treated (that's a post-launch, monthly-production-output measurement the game's timeline never reaches) \u2014 so batch_released reads \u26a0 ENABLED / measurement continues, and only batch_rejected (no batch, no capability, nothing to measure) reads \u2717 NOT YET ENABLED. The ROI line always renders unconditionally, and now pulls {roiMeasure}/{roiEvidence}/{roiWhen} from benefitsRegisterTemplateValues(state) in lib/nova/state.ts \u2014 a read of TOOL_ACT3_SCENE06_BENEFITS's own correctMeasure/correctEvidence/correctWhen fields for the ROI benefit, so this line can never drift out of sync with what the Act 3 tool actually asked the player to prove. The optional Product B line is gated on second_product_benefits_undefined, a real gameState.flags entry (not a synthetic endingConditionFlags one) set only when CHOICE_BIG-01's 'phase_b_quietly' option is chosen \u2014 see that choice's own engineNote for why only that option, not full_replan or renegotiate, genuinely leaves Product B's benefits undefined. COST-PERFORMANCE LINE (added alongside the CBS classification rework/budget reconciliation pass, always renders unconditionally right after the benefits block): {forecastCostFormatted}/{approvedBudgetFormatted}/{costPerformanceLabel} come from budgetReconciliationTemplateValues(state) in lib/nova/state.ts, fed via GameRoot's templateValues the same way {currentWeek} already is. Deliberately its own line, not folded into or offered as evidence for the ROI line above it \u2014 cost performance (stayed inside the approved \u00a312M) and investment justification (was the spend actually worth it) are different questions; conflating them was the exact mistake this pass was designed to avoid. See the 'Budget reconciliation \u2014 Gate 3 financial subscore + HUD + Act 6' entry in DESIGN_NOTES.md."
   },
   "DIALOGUE_BIG-01": {
     "dialogueId": "DIALOGUE_BIG-01",
@@ -2517,9 +2575,19 @@
         "emotion": null,
         "text": "24-week deployment window opens.",
         "style": "badge"
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Delivery Pace tracks your position against that window. Let it collapse and the NHS contract is lost outright, regardless of anything else you get right."
+      },
+      {
+        "speaker": "narrator",
+        "emotion": null,
+        "text": "Quality tracks inspection-readiness. A clean release needs it comfortably high; let it fall too far and even a rejected batch stops being recoverable."
       }
     ],
     "needsWriting": false,
-    "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' \u2014 scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen."
+    "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' \u2014 scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen. The two closing sublines (added per the Act 5 attainability audit \u2014 see DESIGN_NOTES.md) are this game's one deliberately explicit, HUD-tutorial-adjacent moment: they establish that Delivery Pace/Quality have hard floors worth protecting, without stating the actual numbers (40 / 70 \u2014 those live in the HUD's own colour bands, not in prose) so they age gracefully if the thresholds are ever recalibrated. Risk is deliberately NOT covered here \u2014 already legible from its own HUD band, and made sufficiently explicit later in the game on its own terms. Later scene-level choice copy (e.g. Act 5's readiness interventions) stays narrative-only on top of this \u2014 players are expected to combine a choice's plain-English framing with what they already know from here and the HUD, not be shown raw +/- deltas a second time."
   }
 }

@@ -58,9 +58,27 @@ export const ARTEFACT_REGISTRY: Record<string, ArtefactDefinition> = {
     },
     caption: {
       incomplete:
-        "Found in the shared drive. Ellis never finished the Benefits Plan — most of this is still template text.",
+        "Found in the shared drive. Ellis got through objectives and scope before he stopped — the Steering Group row is still \"[Names TBC].\"",
       complete:
-        "Updated after the Benefits Tracker went to sign-off. Objectives, scope, and stakeholders are locked in.",
+        "Updated after the delivery plan — scope, cost and schedule — was baselined in Act 3. Objectives, scope, and stakeholders are locked in.",
+    },
+  },
+  benefitsRegister: {
+    title: "Benefits Register",
+    subtitle: "Project NOVA",
+    images: {
+      // Same placeholder-art approach as the PID's own incomplete/complete
+      // pair (see note above) — generated via a script rather than hand-
+      // tuned over several passes, so it's lower-fidelity than the PID art.
+      // Revisit with a proper illustration pass if this artefact earns one.
+      incomplete: "/assets/documents/benefits_register_incomplete.png",
+      complete: "/assets/documents/benefits_register_complete.png",
+    },
+    caption: {
+      incomplete:
+        "Buried three folders deep in Ellis's files: “Benefits_Plan_DRAFT_v3.” Three benefits are named — NHS Contract Secured, More Patients Treated, £12M Investment Justified — but none of them say how anyone would measure, evidence, or own proving it. It stops mid-sentence.",
+      complete:
+        "Rebuilt with Daniel during Act 3 sign-off. Each benefit now has a defined Measure, Evidence source, and Owner — this is what determines how success gets assessed at close, not whether it happens.",
     },
   },
 };

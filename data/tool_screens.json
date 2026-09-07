@@ -408,7 +408,7 @@
     "toolId": "TOOL_ACT3_SCENE02_CBS",
     "sourceScene": "ACT3_SCENE02",
     "type": "cost_review_with_descope",
-    "instructions": "Review the auto-summed cost of every task from the WBS. If the total exceeds the threshold, you must cut one task.",
+    "instructions": "This is the accepted £8.0M cost baseline — nothing here gets cut. For each package below, tell Daniel whether it's protected or a potential lever if pressure hits the £4.0M contingency later.",
     "costsByTask": {
       "wbs_foundations": 1800000,
       "wbs_cleanroom_panels": 1200000,
@@ -421,9 +421,16 @@
       "wbs_validation_master_file": 200000
     },
     "totalIfAllIncluded": 8000000,
-    "descopeThreshold": 7500000,
-    "descopeRule": "If the sum of all included tasks (from WBS) exceeds descopeThreshold, the player must select exactly one task to cut before continuing. Cutting a task sets a flag: descoped_<taskId> = true, and removes its cost from the total. The cut task becomes a real, trackable gap (e.g. cutting wbs_operator_training should weaken team readiness later, same pattern as the risk-investigation skipped-dimension consequences).",
-    "completionCondition": "Total is at or below descopeThreshold (via descope if needed)",
+    "classifiableTaskIds": [
+      "wbs_cleanroom_panels",
+      "wbs_hvac",
+      "wbs_power_water",
+      "wbs_isolator",
+      "wbs_iqoq",
+      "wbs_operator_training",
+      "wbs_validation_master_file"
+    ],
+    "completionCondition": "Every task in classifiableTaskIds has an explicit Protect/Potential-lever classification (wbs_foundations and wbs_filling_equipment are deliberately excluded — no downstream consequence exists for either yet, see DESIGN_NOTES.md).",
     "onComplete": {
       "nextScene": "ACT3_SCENE03"
     }

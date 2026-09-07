@@ -256,7 +256,8 @@
         "text": "Build slack into the validation timeline now.",
         "effects": {
           "scheduleHealth": -5,
-          "riskExposure": -5
+          "riskExposure": -5,
+          "regulatoryReadiness": 5
         },
         "flags": {
           "validation_risk_logged": true
@@ -414,17 +415,19 @@
       {
         "text": "We protect Product A fully and phase Product B in quietly.",
         "effects": {
-          "riskExposure": 10,
-          "benefitsRealisationScore": -5
+          "riskExposure": 10
         },
         "decisions": {
           "big01Response": "phase_b_quietly"
+        },
+        "flags": {
+          "second_product_benefits_undefined": true
         },
         "nextScene": "ACT4_SCENE04"
       }
     ],
     "needsWriting": false,
-    "engineNote": "big01Response ('renegotiate'/'full_replan'/'phase_b_quietly') is read by computeScopeDimension in lib/nova/state.ts to derive the Monthly Status Report's Scope RAG — see STATUS_REPORT_THRESHOLDS' section comment for the formula."
+    "engineNote": "big01Response ('renegotiate'/'full_replan'/'phase_b_quietly') is read by computeScopeDimension in lib/nova/state.ts to derive the Monthly Status Report's Scope RAG — see STATUS_REPORT_THRESHOLDS' section comment for the formula. 'phase_b_quietly' is also the only one of the three options that sets second_product_benefits_undefined — verified against all three options' actual text before wiring: 'full_replan' explicitly re-plans both lines together (Product B's benefits get redefined as part of that), 'renegotiate' only touches the timeline and doesn't resolve scope either way, only 'phase_b_quietly' absorbs Product B without ever formally redefining what it's meant to deliver — matching computeScopeDimension's own existing SCOPE_UNCONTROLLED_GROWTH judgment about this exact option. Read by the HUD badge and by DIALOGUE_ACT6_SCENE03's Benefits Review."
   },
   "CHOICE_ACT4_SCENE01": {
     "choiceId": "CHOICE_ACT4_SCENE01",
@@ -885,6 +888,9 @@
           "boardConfidence": 5,
           "stakeholderGoodwill": -10
         },
+        "flags": {
+          "unresolved_public_scrutiny": true
+        },
         "nextScene": null
       }
     ],
@@ -950,8 +956,7 @@
       {
         "text": "Fully validate Product A on time, delay Product B.",
         "effects": {
-          "scheduleHealth": -5,
-          "benefitsRealisationScore": -10
+          "scheduleHealth": -5
         },
         "decisions": {
           "validationResourcing": "protect_a"

@@ -1,7 +1,8 @@
 "use client";
 
-import type { ToolScreenBlock } from "@/lib/nova/types";
+import type { ToolScreenBlock, CbsClassification } from "@/lib/nova/types";
 import { getToolScreen } from "@/lib/nova/data";
+import { STARTING_BUDGET } from "@/lib/nova/state";
 import { WBS_ZONE_STYLE, FALLBACK_WBS_ZONE_STYLE } from "./wbsZoneStyle";
 import { useConceptHint, ConceptHintButton, ConceptHintPanel } from "./ConceptHint";
 import { ResetToolButton } from "./ResetTool";
@@ -9,8 +10,8 @@ import { SubmitToolButton } from "./SubmitTool";
 
 interface CBSReviewProps {
   toolScreen: ToolScreenBlock;
-  cutTaskId: string | undefined;
-  onDescope: (taskId: string) => void;
+  classifications: Record<string, CbsClassification | undefined>;
+  onClassify: (taskId: string, classification: CbsClassification) => void;
   pmConcept?: string;
   onReset: () => void;
   canSubmit: boolean;
@@ -30,22 +31,25 @@ function formatMillions(value: number): string {
 /**
  * "cost_review_with_descope" (CBS) — reuses the WBS's warehouse tree shape
  * and zone color/icon coding (WBS_ZONE_STYLE) but as a cost review: the
- * root node shows the live running total as a simple headline number plus
- * a budget gauge and an over/within-budget badge (no "threshold" wording,
- * per design direction), each zone box shows only its name (no subtotal),
- * and every task leaf shows its own cost. Tapping a task cuts it — a
- * live, changeable pick (tap a different task to switch, or the same one
- * again to restore) rather than a one-way commitment, mirroring Team
- * Selection's reversible-until-you-move-on interaction. The zone->task
- * grouping is borrowed directly from TOOL_ACT3_SCENE01_WBS's
- * cards[].correctBucket rather than duplicated in this tool's own data,
- * since CBS reviews the exact same task set the player already sorted in
- * the WBS scene.
+ * root node shows the fixed £8.0M cost baseline plus the £4.0M contingency
+ * it leaves within the £12.0M approved budget — both derived from
+ * STARTING_BUDGET and totalIfAllIncluded, never hardcoded — and every
+ * task leaf shows its own cost. Nothing here is ever cut: the total never
+ * moves. Instead, each classifiable task gets an explicit Protect /
+ * Potential lever judgement — a contingency-planning read, not a scope
+ * decision — via two per-task buttons rather than a single tap, so
+ * "explicitly protected" stays distinguishable from "not yet considered"
+ * (see isCbsClassificationComplete's doc comment in state.ts for why that
+ * distinction matters). Foundations and Filling Equipment still show as
+ * cost lines but render with no buttons at all — classifiableTaskIds
+ * excludes them because no downstream consequence exists for either yet,
+ * and an interactive-looking control with nothing behind it would be
+ * worse than no control.
  */
 export default function CBSReview({
   toolScreen,
-  cutTaskId,
-  onDescope,
+  classifications,
+  onClassify,
   pmConcept,
   onReset,
   canSubmit,
@@ -53,6 +57,7 @@ export default function CBSReview({
 }: CBSReviewProps) {
   const hint = useConceptHint(pmConcept);
   const costs = toolScreen.costsByTask ?? {};
+  const classifiableIds = new Set(toolScreen.classifiableTaskIds ?? []);
   const wbs = getToolScreen("TOOL_ACT3_SCENE01_WBS");
   const wbsCards = wbs?.cards ?? [];
   const zones = wbs?.buckets ?? [];
@@ -60,13 +65,11 @@ export default function CBSReview({
   const taskLabel = (taskId: string) => wbsCards.find((c) => c.id === taskId)?.text ?? taskId;
   const taskZone = (taskId: string) => wbsCards.find((c) => c.id === taskId)?.correctBucket;
 
-  const total = Object.entries(costs).reduce(
-    (sum, [taskId, cost]) => (taskId === cutTaskId ? sum : sum + cost),
-    0
-  );
-  const budget = toolScreen.descopeThreshold ?? Infinity;
-  const overBudget = total > budget;
-  const barPercent = Number.isFinite(budget) ? Math.min(100, Math.round((total / budget) * 100)) : 0;
+  const baseline = toolScreen.totalIfAllIncluded ?? Object.values(costs).reduce((a, b) => a + b, 0);
+  const approved = STARTING_BUDGET;
+  const contingency = approved - baseline;
+
+  const classifiedCount = [...classifiableIds].filter((id) => classifications[id]).length;
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
@@ -84,27 +87,18 @@ export default function CBSReview({
       <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
 
       <div className="flex flex-col items-center">
-        <div className="w-64 max-w-full text-center">
-          <div className="text-xs text-zinc-500">Total facility cost</div>
-          <div className="mt-0.5 text-2xl font-semibold text-zinc-100">{formatMillions(total)}</div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-800">
-            <div
-              className={`h-full transition-all ${overBudget ? "bg-red-500" : "bg-emerald-500"}`}
-              style={{ width: `${barPercent}%` }}
-            />
+        <div className="grid w-full max-w-md grid-cols-3 gap-2 text-center">
+          <div>
+            <div className="text-[11px] text-zinc-500">Cost baseline</div>
+            <div className="mt-0.5 text-lg font-semibold text-zinc-100">{formatMillions(baseline)}</div>
           </div>
-          <div className="mt-1 flex justify-between text-[11px] text-zinc-500">
-            <span>£0</span>
-            <span>Budget {currencyFormatter.format(budget)}</span>
+          <div>
+            <div className="text-[11px] text-zinc-500">Contingency</div>
+            <div className="mt-0.5 text-lg font-semibold text-emerald-300">{formatMillions(contingency)}</div>
           </div>
-          <div
-            className={`mt-2 inline-block rounded-full px-3 py-1 text-xs ${
-              overBudget ? "bg-red-950/50 text-red-300" : "bg-emerald-950/50 text-emerald-300"
-            }`}
-          >
-            {overBudget
-              ? `Over budget by ${currencyFormatter.format(total - budget)}`
-              : "Within budget"}
+          <div>
+            <div className="text-[11px] text-zinc-500">Approved budget</div>
+            <div className="mt-0.5 text-lg font-semibold text-zinc-100">{formatMillions(approved)}</div>
           </div>
         </div>
         <div className="mt-3 h-4 w-px bg-zinc-700" />
@@ -118,7 +112,7 @@ export default function CBSReview({
           if (zoneTaskIds.length === 0) return null;
 
           return (
-            <div key={zone} className="flex w-[150px] flex-none flex-col items-center gap-1.5">
+            <div key={zone} className="flex w-[170px] flex-none flex-col items-center gap-1.5">
               <div className="h-4 w-px bg-zinc-700" />
               <div
                 className={`flex w-full flex-col items-center gap-1 rounded-md border-2 px-2 py-2 text-center ${style.ring} ${style.fill}`}
@@ -128,25 +122,44 @@ export default function CBSReview({
                   {zone}
                 </span>
               </div>
-              <div className="flex w-full flex-col gap-1">
+              <div className="flex w-full flex-col gap-1.5">
                 {zoneTaskIds.map((taskId) => {
-                  const isCut = taskId === cutTaskId;
+                  const isClassifiable = classifiableIds.has(taskId);
+                  const classification = classifications[taskId];
                   return (
-                    <button
+                    <div
                       key={taskId}
-                      onClick={() => onDescope(taskId)}
-                      className={`rounded-md border px-2 py-1.5 text-left text-[11px] transition-colors ${
-                        isCut
-                          ? "border-red-700/60 bg-red-950/30 text-red-300"
-                          : "border-zinc-700 bg-zinc-800/80 text-zinc-300 hover:border-zinc-500"
-                      }`}
+                      className="rounded-md border border-zinc-700 bg-zinc-800/80 px-2 py-1.5 text-left text-[11px] text-zinc-300"
                     >
-                      <div className={isCut ? "line-through" : ""}>{taskLabel(taskId)}</div>
-                      <div className="mt-0.5 text-zinc-500">
-                        {isCut ? "Cut — was " : ""}
-                        {currencyFormatter.format(costs[taskId])}
-                      </div>
-                    </button>
+                      <div>{taskLabel(taskId)}</div>
+                      <div className="mt-0.5 text-zinc-500">{currencyFormatter.format(costs[taskId])}</div>
+                      {isClassifiable && (
+                        <div className="mt-1.5 flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => onClassify(taskId, "protected")}
+                            className={`flex-1 rounded border px-1.5 py-1 text-[10px] font-medium transition-colors ${
+                              classification === "protected"
+                                ? "border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                                : "border-zinc-700 bg-zinc-900/60 text-zinc-400 hover:border-zinc-500"
+                            }`}
+                          >
+                            Protect
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onClassify(taskId, "potentialLever")}
+                            className={`flex-1 rounded border px-1.5 py-1 text-[10px] font-medium transition-colors ${
+                              classification === "potentialLever"
+                                ? "border-amber-700/60 bg-amber-950/40 text-amber-300"
+                                : "border-zinc-700 bg-zinc-900/60 text-zinc-400 hover:border-zinc-500"
+                            }`}
+                          >
+                            Potential lever
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -155,9 +168,9 @@ export default function CBSReview({
         })}
       </div>
 
-      {overBudget && (
-        <p className="text-xs text-red-300">
-          Over budget — tap one task above to cut it before continuing.
+      {classifiableIds.size > 0 && classifiedCount < classifiableIds.size && (
+        <p className="text-xs text-zinc-400">
+          Classify every package above — {classifiedCount}/{classifiableIds.size} done — before continuing.
         </p>
       )}
 
