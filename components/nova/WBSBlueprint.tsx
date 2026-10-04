@@ -17,6 +17,12 @@ interface WBSBlueprintProps {
   onReset: () => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  /** Project Artefacts gallery snapshot mode — same contract as
+   * ToolScreen/PriorityBoard's own `readOnly`: hides instructions/hint/
+   * reset/submit and disables tap/drag placement (pointer-events-none);
+   * the "Unsorted work packages" section is also hidden since `available`
+   * for this entry already implies every card is placed. */
+  readOnly?: boolean;
 }
 
 /**
@@ -37,6 +43,7 @@ export default function WBSBlueprint({
   onReset,
   canSubmit,
   onSubmit,
+  readOnly = false,
 }: WBSBlueprintProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shakeZone, setShakeZone] = useState<{ zone: string; attempt: number } | null>(null);
@@ -90,8 +97,10 @@ export default function WBSBlueprint({
   const draggedCard = drag.draggingId ? cards.find((c) => c.id === drag.draggingId) : null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {(toolScreen.instructions || pmConcept) && (
+    <div
+      className={`flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4 ${readOnly ? "pointer-events-none" : ""}`}
+    >
+      {!readOnly && (toolScreen.instructions || pmConcept) && (
         <div className="flex items-start justify-between gap-3">
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
@@ -102,7 +111,7 @@ export default function WBSBlueprint({
           </div>
         </div>
       )}
-      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      {!readOnly && <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />}
 
       <div className="flex flex-col items-center">
         <div className="w-48 max-w-full rounded-md border border-zinc-600 bg-zinc-800/80 px-4 py-2 text-center">
@@ -169,6 +178,7 @@ export default function WBSBlueprint({
         })}
       </div>
 
+      {!readOnly && (
       <div>
         <div className="mb-2 flex items-baseline justify-between text-[11px] uppercase tracking-wide text-zinc-500">
           <span>Unsorted work packages</span>
@@ -203,8 +213,9 @@ export default function WBSBlueprint({
           )}
         </div>
       </div>
+      )}
 
-      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      {!readOnly && <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />}
 
       {draggedCard && (
         <DragGhost pointer={drag.pointer}>

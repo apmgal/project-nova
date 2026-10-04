@@ -21,6 +21,15 @@ interface GanttBoardProps {
   onReset: () => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  /** Project Artefacts gallery snapshot mode. `available` for this entry
+   * already implies the critical path was placed AND correctly confirmed
+   * (that's what toolSubmitted requires), so readOnly skips the "tap to
+   * guess, then Check" phase entirely and just always shows the finished
+   * timeline with the critical-path arrows drawn — recomputed fresh from
+   * `placements` via computeCriticalPath, same as the live board, never a
+   * second persisted copy of "was it correct". Hides instructions/hint/
+   * reset/Check/Confirm/Submit and disables tap/drag. */
+  readOnly?: boolean;
 }
 
 const WEEK_PX = 20;
@@ -63,12 +72,13 @@ export default function GanttBoard({
   onReset,
   canSubmit,
   onSubmit,
+  readOnly = false,
 }: GanttBoardProps) {
   const milestones = toolScreen.milestones ?? [];
   const weeks = toolScreen.timelineWeeks ?? 24;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(readOnly);
   const hint = useConceptHint(pmConcept);
 
   // Gantt keeps its own local UI state (selection/error/the phase-2
@@ -192,8 +202,10 @@ export default function GanttBoard({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {(toolScreen.instructions || pmConcept) && (
+    <div
+      className={`flex flex-col gap-3 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4 ${readOnly ? "pointer-events-none" : ""}`}
+    >
+      {!readOnly && (toolScreen.instructions || pmConcept) && (
         <div className="flex items-start justify-between gap-3">
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
@@ -204,13 +216,13 @@ export default function GanttBoard({
           </div>
         </div>
       )}
-      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
-      {error && (
+      {!readOnly && <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />}
+      {!readOnly && error && (
         <div className="rounded-md border border-red-700/50 bg-red-950/40 px-3 py-2 text-xs text-red-300">
           {error}
         </div>
       )}
-      {allPlaced && (
+      {!readOnly && allPlaced && (
         <p className="text-xs text-zinc-400">
           Tap the milestones you think form the critical path — the chain with zero slack that
           decides the finish date — then check your answer.
@@ -352,7 +364,7 @@ export default function GanttBoard({
         </div>
       </div>
 
-      {allPlaced && (
+      {!readOnly && allPlaced && (
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleCheckClicked}
@@ -375,16 +387,18 @@ export default function GanttBoard({
             {orderedPath.map((id) => milestones.find((m) => m.id === id)?.text).join(" → ")}. A
             delay in any one of these delays the finish date — everything else has slack.
           </p>
-          <button
-            onClick={onConfirmCriticalPath}
-            className="w-fit rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-          >
-            Confirm critical path
-          </button>
+          {!readOnly && (
+            <button
+              onClick={onConfirmCriticalPath}
+              className="w-fit rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+            >
+              Confirm critical path
+            </button>
+          )}
         </div>
       )}
 
-      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      {!readOnly && <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />}
 
       {draggedMilestone && (
         <DragGhost pointer={drag.pointer}>

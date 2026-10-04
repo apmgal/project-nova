@@ -16,6 +16,7 @@ import type {
 } from "./types";
 import { getCharacter, getDefaultGameState, getEvent, getToolScreen, EVENT_FRAME_SUFFIX } from "./data";
 import type { KenBurnsConfig } from "./narrative/kenBurns";
+import { matchFieldGuideEntries } from "./fieldGuide";
 
 const SAVE_KEY = "projectNova.saveGame.v1";
 
@@ -157,6 +158,25 @@ export function markCharactersMet(state: GameState, characterIds: string[]): Gam
   const newIds = characterIds.filter((id) => !state.charactersMet.includes(id));
   if (newIds.length === 0) return state;
   return { ...state, charactersMet: [...state.charactersMet, ...newIds] };
+}
+
+/** Unions FIELD_GUIDE entry ids matching `pmConcept` into
+ * state.fieldGuideSeen — called from GameRoot's enterScene on the exact
+ * same guard and with the same OUTGOING-scene timing as markCharactersMet
+ * right above (a module counts as "seen" once the player has actually
+ * left the scene that taught it, not the instant it loads). Takes the
+ * scene's raw `pmConcept` string rather than a pre-resolved id list so
+ * GameRoot doesn't need to import matchFieldGuideEntries itself — mirrors
+ * markCharactersMet's own shape (plural ids in, no-op if nothing's new)
+ * even though pmConcept is a single string, since matchFieldGuideEntries
+ * can resolve to more than one entry for a handful of concepts (see
+ * FieldGuideEntry's own doc comment). */
+export function markFieldGuideSeen(state: GameState, pmConcept: string | undefined | null): GameState {
+  const newIds = matchFieldGuideEntries(pmConcept)
+    .map((entry) => entry.id)
+    .filter((id) => !state.fieldGuideSeen.includes(id));
+  if (newIds.length === 0) return state;
+  return { ...state, fieldGuideSeen: [...state.fieldGuideSeen, ...newIds] };
 }
 
 // ---------------------------------------------------------------------------
@@ -1138,6 +1158,20 @@ export function computeKnownReportableRisks(state: GameState): ReportableRisk[] 
     }
   }
   return results;
+}
+
+/** Static title lookup for a risk id, independent of current GameState —
+ * unlike computeKnownReportableRisks (which only returns risks currently
+ * eligible/discovered), this always resolves a riskId that was actually
+ * selected into a past StatusReportRecord, since a risk's catalog title
+ * never changes once chosen. Used by the read-only Project Artefacts
+ * status-report snapshot to show what the player picked at submission
+ * time, even if that risk is no longer "known" under the player's current
+ * state (e.g. it later resolved and left the eligible pool). */
+export function getReportableRiskTitle(riskId: string): string | null {
+  const entry = REPORTABLE_RISK_CATALOG[riskId];
+  if (!entry) return null;
+  return entry.issueLabel ?? entry.preDiscovery?.label ?? null;
 }
 
 /** Adds or upgrades an entry in the player's artefacts drawer. Never

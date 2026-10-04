@@ -32,6 +32,14 @@ interface ToolScreenProps {
   onReset: () => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  /** True renders this as a static snapshot of a tool the player already
+   * submitted — used by ProjectArtefactsPanel to show the finished board
+   * read-only. Hides the instructions/hint/reset row and the Submit
+   * button, and disables every card's drag/click handler (pointer-events-
+   * none on the whole board) rather than threading a no-op guard through
+   * every individual handler. Defaults to false so every existing caller
+   * (the live, editable tool screen during actual gameplay) is unaffected. */
+  readOnly?: boolean;
 }
 
 interface PestleCategoryStyle {
@@ -223,6 +231,7 @@ export default function ToolScreen({
   onReset,
   canSubmit,
   onSubmit,
+  readOnly = false,
 }: ToolScreenProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [shake, setShake] = useState<{ cardId: string; attempt: number } | null>(null);
@@ -286,8 +295,12 @@ export default function ToolScreen({
   const draggedCard = drag.draggingId ? cards.find((c) => c.id === drag.draggingId) : null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {(toolScreen.instructions || pmConcept) && (
+    <div
+      className={`flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4 ${
+        readOnly ? "pointer-events-none" : ""
+      }`}
+    >
+      {!readOnly && (toolScreen.instructions || pmConcept) && (
         <div className="flex items-start justify-between gap-3">
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
@@ -298,7 +311,9 @@ export default function ToolScreen({
           </div>
         </div>
       )}
-      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      {!readOnly && (
+        <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      )}
 
       {isCollapsibleCategoryList ? (
         <div className="flex flex-col gap-1.5">
@@ -453,7 +468,7 @@ export default function ToolScreen({
         </div>
       )}
 
-      <div>
+      <div className={readOnly && poolCards.length === 0 ? "hidden" : undefined}>
         <div className="mb-2 text-[11px] uppercase tracking-wide text-zinc-500">
           {isSwotPostitQuadrant ? "Notes to place" : "Unsorted"} ({poolCards.length})
         </div>
@@ -517,7 +532,9 @@ export default function ToolScreen({
         </div>
       </div>
 
-      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      {!readOnly && (
+        <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      )}
 
       {draggedCard && (
         <DragGhost pointer={drag.pointer}>

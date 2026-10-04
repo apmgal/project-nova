@@ -1878,3 +1878,683 @@ black serif headers — but this is a scripted approximation, not a
 hand-tuned illustration pass like the PID's (which saw several manual
 v2→v3→v4 iterations per its own doc comment). Lower fidelity by design;
 revisit with a proper illustration pass if this artefact earns one.
+
+## Field Guide: full 27-module APM reference panel
+
+Persistent reference hub covering every module in the APM syllabus
+(source: the "Project Nova APM Knowledge Hub" spreadsheet), not just
+the ~15 the game mechanically teaches. **Confirmed design decision:**
+asked the user whether this should cover only the mechanically-taught
+modules or all 27 as a full reference; answer was all 27. The other
+~8 (Organisational Structures, Sustainability, Diversity & Inclusion,
+Integrated Planning, Leadership, Team Management, Conflict Resolution,
+Ethics) have no in-game trigger and stay permanently browsable but
+never "light up" — `matchesConcepts: []`.
+
+**Data layer** (`lib/nova/fieldGuide.ts`): `FIELD_GUIDE: FieldGuideEntry[]`,
+27 entries keyed by a stable `module-<n>` id (decoupled from title text
+so a later title edit can't silently break save data). Each entry has a
+condensed, non-spoiler `summary` (same voice/rule as `glossary.ts` —
+"what it is and why it's used," never "what to do on this screen") and
+a `matchesConcepts: string[]` linking real `Scene.pmConcept` strings to
+the module. `matchFieldGuideEntries(pmConcept)` returns every entry a
+given concept unlocks (almost always 0 or 1, but a couple of concepts
+deliberately point at more than one module given real syllabus overlap
+— e.g. both PESTLE and SWOT unlock Module 6).
+
+**State layer:** new `GameState.fieldGuideSeen: string[]` field (mirrors
+`charactersMet`). `markFieldGuideSeen(state, pmConcept)` in `state.ts`
+unions in every matching module id — called from `GameRoot.tsx`'s
+`enterScene`, on the **outgoing** scene, the same timing `markCharactersMet`
+already uses and for the same reason (a concept counts as encountered
+once the player has actually left the scene that taught it, not the
+instant it loads).
+
+**Panel** (`components/nova/FieldGuidePanel.tsx`): mirrors
+`CharacterPanel.tsx`'s shell exactly (edge-tab toggle → `fixed inset-0`
+overlay → slide-in `w-80` drawer), stacked just below CharacterPanel's
+own tab on the same left edge. Unlike CharacterPanel/CharacterBoard's
+"met" badge, which never hides content, "encountered" here only
+changes visual treatment (parchment card vs muted zinc) and badge text
+("Encountered" vs "Reference") — every entry's summary is always
+readable, since it's all non-spoiler reference material and the whole
+point was a browsable hub, not a reveal mechanic.
+
+**"Lights up":** the edge tab pulses amber with a count badge whenever
+`fieldGuideSeen` holds an id the player hasn't opened the panel to view
+yet (`viewedIds`, seeded once from `fieldGuideSeen` at mount so a
+reloaded save doesn't treat already-unlocked modules as new). Opening
+the panel expands and auto-scrolls to the newest such entry, then (after
+a ~1.2s beat so the highlight is actually visible) marks it viewed.
+
+**Verification:** `tsc --noEmit`/`eslint` clean on all touched files.
+Scripted check confirmed `markFieldGuideSeen`: unions in `module-6` on
+"PESTLE analysis", no duplicate on the overlapping "SWOT analysis", adds
+`module-7` on "MoSCoW prioritisation", and is a no-op for an unmapped
+concept string or `undefined` — matching `matchFieldGuideEntries`'s
+designed behavior. Confirmed 27 total entries, 8 with empty
+`matchesConcepts` (permanently reference-only, never light up).
+
+## Field Guide renamed to APM Knowledge Library + search bar added
+
+Two follow-ups after reviewing mockups of six visual directions
+(bookshelf-of-spines, category tabs, passport-stamp unlock, shelf-map
+progress dots, per-module icons, search bar): player-facing copy
+renamed "Field Guide" → "APM Knowledge Library" everywhere in
+`FieldGuidePanel.tsx` (header, both aria-labels); internal identifiers
+(`FIELD_GUIDE`, `fieldGuideSeen`, `FieldGuidePanel.tsx` itself,
+`markFieldGuideSeen`) were deliberately left alone since they're
+implementation names, not copy, and renaming them risks churn for no
+player-visible benefit.
+
+Added a search bar ("Option 6" from the mockups) directly under the
+header: a plain text input filters the 27-entry list by substring match
+against title or summary, case-insensitive, live as the player types.
+Confirmed design decision — this narrows the existing list rather than
+replacing it with a separate results view, so an empty query always
+shows the full un-filtered roster exactly as before search existed; a
+query with zero matches shows a one-line "No modules match" message
+instead of an empty drawer. Clearing the ✕ button or closing the panel
+resets the query, so reopening always starts from the full list.
+
+**Verification:** `tsc --noEmit`/`eslint` clean.
+
+## APM Knowledge Library content rewritten to source language, lengthened, with bold keywords
+
+Replaced every FIELD_GUIDE `summary` with the source spreadsheet's own
+two-paragraph module text, kept close to verbatim (confirmed design
+decision — "keep the same language as the Excel" rather than a
+condensed rewrite), instead of the shorter paraphrased version written
+earlier this session. Re-extracted the original 27 module texts
+straight from the uploaded "Project Nova APM Knowledge Hub" xlsx via
+openpyxl to source this, rather than relying on the earlier condensed
+versions already in the file.
+
+Each module's key named concepts/tools (its own title term plus the
+named models the spreadsheet calls out — e.g. Module 16's Goleman,
+Maslow, Herzberg, McGregor) are wrapped in a `**bold**` marker — not
+real markdown, just a simple convention `FieldGuidePanel.tsx`'s new
+`renderBoldedText()` helper parses into `<strong>` tags, splitting on
+`\n\n` into separate `<p>` tags so the now-two-paragraph entries read
+as two paragraphs rather than one dense block. Bold terms were chosen
+per module (one list of target phrases, generated with a script, not
+hand-tagged per entry) and verified to all exist verbatim in the
+source text before insertion — no silent misses.
+
+**Verification:** `tsc --noEmit`/`eslint` clean on both touched files.
+Scripted check confirmed: all 27 entries present, every entry's `**`
+markers balanced (no truncated bold span), every summary comfortably
+over 400 characters (vs. the ~250-350 character condensed originals),
+`matchFieldGuideEntries` still resolves "PESTLE analysis"→module-6 and
+"MoSCoW prioritisation"→module-7 unaffected by the content swap, and
+the panel's search filter still finds a term ("BATNA") that only
+appears in a module's body text, not its title — confirming the
+longer text doesn't break substring search.
+
+## Side-panel open/close transitions + elevation shadow
+
+Both left-edge slide-in panels (`CharacterPanel.tsx`, `FieldGuidePanel.tsx`
+— ArtefactsDrawer's Investigation Board is a different, dropdown-shaped
+pattern and wasn't touched) previously used `{open && (...)}` to mount
+the overlay, which meant there was nothing to animate: the drawer just
+popped into existence with no "before" state to transition from. Both
+are now always mounted, with `open` toggling Tailwind transition
+classes instead of the JSX conditional itself — the only way a CSS
+transition can actually run on state change.
+
+Two separate transitions, each on its own element: the outer overlay
+fades its opacity (0 → 100, 200ms) and carries a dim backdrop over the
+rest of the scene, so the panel reads as something that opened on top
+of the game rather than a flat overlay with no depth cue; the inner
+drawer slides in on `translate-x` (`-translate-x-full` →
+`translate-x-0`, 300ms ease-out) independently of that fade. Closed
+state also carries `pointer-events-none` so the invisible-but-mounted
+overlay never intercepts clicks on the game underneath.
+
+**First pass used values too subtle against this game's own
+near-black palette** (`bg-black/40` backdrop, `shadow-xl`, dark
+`border-zinc-700` edge) — against SceneBackground's own dark,
+soft-focus art a black shadow and a 40%-black backdrop barely read at
+all, so a static screenshot looked almost unchanged. Strengthened to:
+backdrop `bg-black/65` plus `backdrop-blur-[2px]` (now visibly blurs
+the scene behind, not just dims it — consistent with the blur+dim
+pattern PauseOverlay/HUD/DialogueBox already use elsewhere in this
+codebase); drawer shadow deepened and widened to
+`shadow-[20px_0_60px_-6px_rgba(0,0,0,0.95)]`; drawer background
+flattened from `bg-zinc-950/98` to fully opaque `bg-zinc-950` so it
+doesn't pick up a tint from the now-blurred scene showing through;
+edge border brightened from `border-zinc-700` to `border-zinc-500/60`
+so there's an actual visible line separating drawer from scene instead
+of dark-on-dark. Note: the background blur visible in screenshots is
+NOT this change — `SceneBackground.tsx` already always applies a
+`blur(4px)` soft-focus to the game's own art; the backdrop-blur added
+here stacks an *additional* blur only while a panel is open.
+
+**Verification:** `tsc --noEmit`/`eslint` clean on both files;
+`prettier --write` run afterward to reflow the restructured JSX (output
+diffed only in wrapping/indentation, no logic change).
+
+## Edge-tab buttons: bigger, colored, hover tooltip
+
+Both stacked edge tabs (team panel, APM Knowledge Library) were 24px
+(`h-6 w-6`) with an identical muted grey icon — hard to tell apart and
+easy to miss. Enlarged to 40px (`h-10 w-10`, icon 18px up from 11px)
+and each given its own default accent color so they read as distinct
+destinations at a glance rather than two identical grey dots: the team
+panel is sky-blue (`border-sky-700/60 text-sky-300`), the knowledge
+library is violet (`border-violet-700/60 text-violet-300`) — violet
+only when there's nothing new to show; its existing amber
+pulse/badge-on-unlock behavior is untouched and still overrides the
+violet when `newIds.length > 0`.
+
+Added a hover tooltip to both: a `group`/`group-hover:opacity-100`
+span, plain CSS (no portal, no JS positioning), anchored
+`absolute left-full ml-3` so it always has room to the right since
+both tabs sit on the left edge — shows "Meet the Team" /
+"APM Knowledge Library" on hover so a new player can tell what a tab
+opens before clicking it.
+
+FieldGuidePanel's tab shifted from `top-[calc(50%+34px)]` to
+`top-[calc(50%+42px)]` to keep the same ~22px visual gap below
+CharacterPanel's tab now that both are 40px tall instead of 24px (the
+math: CharacterPanel centers via `-translate-y-1/2` at exactly 50%, so
+its bottom edge sits at `50% + 20px`; FieldGuidePanel's tab has no
+transform and is positioned by its top edge, so `50% + 20 + 22 = 50% +
+42`).
+
+**Verification:** `tsc --noEmit`/`eslint`/`prettier --write` all clean
+on both files, no formatting diff from prettier.
+
+## Pause moved to left edge (top) + mute button added
+
+The pause button had lived on the right edge since the "Build pause
+button" entry earlier in this file; moved it to the left edge instead,
+directly above CharacterPanel/FieldGuidePanel's own tabs as one
+continuous column — pause, mute, team panel, knowledge library, top
+to bottom — so every edge-tab control lives on one side rather than
+splitting pause onto the right for no functional reason. Same
+`h-10 w-10` circular-tab shape, hover-tooltip pattern and shadow as
+the panel tabs below it, each with its own accent: pause amber, mute
+cyan (switching to rose + `VolumeX` icon while muted, vs. `Volume2`
+unmuted).
+
+First pass anchored both to fixed pixel offsets from the very top of
+the screen (`top-4`/`top-16`), which collided with the header and the
+DEV/PLAYTEST banner instead of reading as part of the same edge-tab
+column. Repositioned to sit directly above CharacterPanel's tab
+instead, using the same 22px-gap/62px-pitch math FieldGuidePanel's own
+tab already uses below CharacterPanel: CharacterPanel centers on
+exactly 50% via `-translate-y-1/2`, so its top edge sits at
+`50% - 20px`; mute's top edge is one 40px-button-plus-22px-gap pitch
+above that (`top-[calc(50%-82px)]`), and pause is one more pitch above
+mute (`top-[calc(50%-144px)]`).
+
+Mute is a new, independent control — not previously in the codebase.
+Added a `muted` boolean state in GameRoot (session-only, not
+GameState/game_state.json: a device/session sound preference, not
+save data) and rode it into every background-audio `SceneAudio`
+instance's own `volume` prop at 0 when muted: the two gameplay-loop
+instances (ambient, footsteps) in GameRoot directly, plus
+NarrativeScene's own music instance via a new `muted?: boolean` prop
+threaded from GameRoot's Reception Intro call site. Deliberately uses
+`volume`, not `paused` — SceneAudio already treats those as two
+independent axes (`paused` does a real `.pause()` so a track resumes
+from where it left off; `volume` ramps smoothly, see SceneAudio's own
+doc comment) and muting sound shouldn't freeze playback position the
+way pausing the game does. TitleScreen's own pre-game music track is
+unaffected — it mounts before any in-game HUD exists, same scope
+boundary the pause button already had.
+
+**Verification:** `tsc --noEmit`/`eslint`/`prettier --write` clean on
+`GameRoot.tsx` and `NarrativeScene.tsx`.
+
+---
+
+## Project Artefacts panel + Investigation Board converted to edge-tab icon
+
+**Status:** Shipped.
+
+Two related asks: (1) convert the Investigation Board's old bottom-left
+pill button into the same edge-tab style as the other persistent panels,
+and (2) add a new "Project Artefacts" panel showing the player's own
+completed interactive-tool outputs (PESTLE, SWOT, MoSCoW, Stakeholder
+Grid), explicitly as a **read-only snapshot of what they filled in** —
+not a completed/not-completed checklist — per direct confirmation.
+
+**Shared left-edge icon column, final order (center-to-center 62px
+pitch, matching the existing pause/mute/team/library spacing):**
+pause (`top-[calc(50%-144px)]`, amber) → mute (`top-[calc(50%-82px)]`,
+amber) → Team (`top-1/2`, sky) → APM Knowledge Library
+(`top-[calc(50%+42px)]`, violet) → **Project Artefacts**
+(`top-[calc(50%+104px)]`, teal — new) → **Investigation Board**
+(`top-[calc(50%+166px)]`, rose — new).
+
+**Investigation Board (`ArtefactsDrawer.tsx`):** restyled from a
+bottom-left pill button + inline popup list onto the exact same
+h-10 w-10 circular edge-tab + full-height slide-in drawer shell
+`FieldGuidePanel`/`CharacterPanel` already use, so all four left-edge
+panels now share one visual language. Rose was picked as the one
+remaining accent color not already claimed by team/library/pause-mute/
+project-artefacts. The full-size artefact image viewer (PID, Benefits
+Register) is untouched — only the toggle and list shell changed, not
+`lib/nova/artefacts.ts` or the registry.
+
+**Project Artefacts (new):**
+- `lib/nova/projectArtefacts.ts` — `getCompletedProjectArtefacts(gameState)`
+  walks every tool screen (`getAllToolScreens()`, added to `data.ts`),
+  keeps only the four visualStyles this gallery knows how to render
+  read-only (`pestle_category_list`, `swot_postit_quadrant`,
+  `moscow_quadrant`, `power_interest_quadrant`), and further filters to
+  `toolSubmitted[toolId] === true` — reaching a tool but never tapping
+  Submit does not qualify, since there's no "finished" state to show.
+  Each visualStyle maps to a display title (`ToolScreenBlock` has no
+  `title` field) and to which generic renderer it needs
+  (`sort` → `ToolScreen`, `priority` → `PriorityBoard`).
+- `ToolScreen.tsx` and `PriorityBoard.tsx` both gained a `readOnly?:
+  boolean` prop (default `false`, so every live gameplay call site is
+  unaffected): hides the instructions/hint/reset row and the Submit
+  button, hides the Unsorted/Unassigned pool section once it's empty,
+  and disables all interaction via `pointer-events-none` on the root
+  wrapper rather than threading a no-op guard through every individual
+  drag/click handler.
+- `ProjectArtefactsPanel.tsx` — new edge tab + drawer (teal accent,
+  mirroring `FieldGuidePanel`'s shell) listing every qualifying
+  completed tool; tapping one opens a full-screen overlay rendering
+  that exact tool's stored `toolProgress`/`toolPlacements` through
+  `ToolScreen`/`PriorityBoard` in `readOnly` mode — a true snapshot of
+  what the player placed, not a regenerated summary. Hidden entirely
+  (returns `null`) until at least one qualifying tool is submitted,
+  matching `ArtefactsDrawer`'s own "nothing to show yet" rule.
+- Mounted in `GameRoot.tsx` alongside the other persistent panels.
+
+**Known scope limit (stated, not yet addressed):** WBS, CBS, the
+Milestone Gantt, Team Selection, Comms, the Benefits proof-chain
+builder, RAID updates, and the Monthly Status Report all use bespoke
+components rather than the generic `ToolScreen`/`PriorityBoard`
+renderers, so none of them appear in this gallery yet. Extending it to
+cover them would mean a bespoke read-only render path per component
+rather than one shared `readOnly` prop.
+
+**Verification:** `tsc --noEmit` and `eslint` clean on every touched
+file. `next build` fails in this sandbox only on a pre-existing,
+unrelated issue — `next/font`'s Google Fonts CSS fetch is blocked by
+the sandbox's network allowlist (`app/layout.tsx`, untouched by this
+change); not a regression from this work. Ran a scripted sanity check
+of `getCompletedProjectArtefacts` against constructed `GameState`
+fixtures: nothing submitted → empty list; an unknown/fake toolId
+submitted → empty list; a real qualifying tool (PESTLE) reached but
+`toolSubmitted` still `false` → excluded; the same tool once submitted
+→ included with the right title; all four qualifying tools submitted
+at once → all four returned. All five cases matched expectations.
+
+---
+
+## Project Artefacts rebuilt as a phase-grouped gallery; Investigation Board fully merged in
+
+**Status:** Shipped. Supersedes the flat-list version from the entry above.
+
+Follow-up request: organise the Project Artefacts gallery by APM
+lifecycle phase instead of one flat list — Phase 1 Initiation (PID,
+PESTLE, SWOT, MoSCoW), Phase 2 Planning (Stakeholder Analysis, Benefits
+Register), Phase 3 Execution (the 3 Monthly Status Reports), Phase 4
+Monitoring & Control (the Audit Trail), Phase 5 Closure (a new "Project
+Reflection" feedback piece). Three scope questions were confirmed
+directly: (1) merge the Investigation Board's found-documents into this
+one panel rather than keeping it separate, (2) SWOT joins Initiation and
+the Benefits Register joins Planning (neither was named in the original
+breakdown), (3) Project Reflection is a structured scorecard — one rating
++ one line of commentary per APM competency — not free narrative or a
+bare checklist.
+
+**Phase labels are a new, separate naming layer.** "Initiation/Planning/
+Execution/Monitoring & Control/Closure" is the APM-process-group framing
+the player asked for — distinct from the game's own Act 1-6 structure,
+which the phases map to loosely, not 1:1 (MoSCoW is built in Act 2 but
+sits under Phase 1 here, per direct instruction).
+
+**`lib/nova/projectArtefacts.ts` rewritten** around `getProjectArtefactsByPhase(gameState)`,
+returning all 5 `PROJECT_PHASES` with every known entry inside each —
+including ones the player hasn't reached yet, each carrying its own
+`available: boolean` rather than being filtered out. `ProjectArtefactsPanel`
+shows the full 5-phase skeleton with locked entries greyed out and a lock
+icon, the same "full reference, lit up as encountered" non-spoiler rule
+`FieldGuidePanel` already uses — these are structural categories, not
+story spoilers. `hasAnyAvailableProjectArtefact(gameState)` is the one
+gate on the panel's edge tab existing at all (unchanged "nothing to show
+yet" rule).
+
+Five entry kinds, one discriminated union (`ProjectArtefactEntry`):
+- `document` — PID and Benefits Register, `available` from
+  `gameState.artefacts`. Clicking one calls back up to `onOpenDocument`
+  rather than opening anything itself.
+- `tool` — the same 4 generic-renderer tools as before (PESTLE/SWOT/
+  MoSCoW/Stakeholder Grid), `available` from `toolSubmitted`.
+- `status_report` — 3 fixed slots (`gameState.statusReports[0..2]`),
+  `available` once that index exists; a 4th report would currently be
+  invisible to this gallery (not expected to happen — Act 4 always
+  produces exactly 3).
+- `audit_trail` — one entry, `available` once
+  `toolSubmitted[TOOL_ACT5_SCENE02_AUDIT_TRAIL]` is true (found by type
+  rather than hardcoded id), carrying `computeAuditTrailEvidence(state)`'s
+  cards directly.
+- `reflection` — one entry, gated on `currentScene.startsWith("ACT6")`
+  rather than any new persisted flag, carrying the new scorecard.
+
+**Investigation Board merge.** `ArtefactsDrawer.tsx` is now viewer-only —
+its edge tab and drawer list are gone; it renders just the full-size
+incomplete/complete image + caption for whichever `viewingId` names.
+`ProjectArtefactsPanel` calls a new `onOpenDocument` prop (wired to
+GameRoot's existing `setViewingArtefactId`) for its `document` entries,
+so `DocumentDiscoveredCard`'s jump-straight-to-viewer flow keeps working
+unchanged — only the thing that used to independently toggle the viewer
+open changed, not the viewer itself. The Investigation Board's edge tab
+slot (rose, `top-[calc(50%+166px)]`) is retired outright rather than
+reassigned; the column is now 5 icons (pause/mute/team/library/project
+artefacts), unchanged positions for all of them.
+
+**New Phase 5 scorecard** (`computeProjectReflectionScorecard`, inside
+`projectArtefacts.ts` rather than `state.ts`/`endings.ts` — it needs both
+and `endings.ts` already imports from `state.ts`, so a third module avoids
+a circular import). 6 categories, each `strong`/`mixed`/`at_risk`:
+Budget & Cost Control (contingency headroom ratio, via
+`computeBudgetReconciliation`), Schedule Delivery (`scheduleHealth`
+banded), Stakeholder & Governance (`stakeholderGoodwill`+`boardConfidence`
+average, banded), Risk Management & Reporting Integrity (`riskExposure`
+banded, capped at `at_risk` by a material report mismatch via
+`findMostMaterialReportMismatch` regardless of how healthy riskExposure
+itself reads), Team & Culture (`teamMorale` banded), and Overall Outcome
+(straight from `evaluateEnding` — family name + narrativeSummary reused
+verbatim from `data/endings.json`, with a small new `PYRRHIC_VARIANT_LABELS`
+map since variants there have no short display name of their own).
+
+**Read-only renderers** (`components/nova/ProjectArtefactSnapshots.tsx`,
+new file): `StatusReportSnapshot` (static RAG pills + resolved risk/
+accomplishment/activity text, navy/lavender styling matching
+`StatusReportBuilder`'s in-fiction look), `AuditTrailSnapshot` (evidence
+cards grouped by category, matching `AuditTrailBuilder`'s look), and
+`ReflectionScorecardView` (new card-per-category layout, dark UI palette
+since this has no in-fiction document to mimic). `resolveStatusReportItemText`
+(in `projectArtefacts.ts`) resolves a stored `selectedAccomplishments`/
+`selectedUpcomingActivities` id back to display text by replaying
+`StatusReportBuilder`'s own id-pattern logic (`gantt_*`/`wbs_activity_*`/
+static candidate list) against the specific tool screen that produced
+that record (matched by `sourceScene === submittedAtScene`) — not stored
+redundantly, since the underlying Gantt/WBS data doesn't change after
+submission. `getReportableRiskTitle` (new export, `state.ts`) is the
+static counterpart to `computeKnownReportableRisks` for resolving a
+`riskId` that's no longer "currently known" but was selected into a past
+report.
+
+**Known limitation, called out in the Audit Trail snapshot's own copy:**
+`AuditTrailBuilder`'s folder filing (`filed: Record<string, string>`) is
+local component state, never persisted to `GameState` — so the snapshot
+can only show which evidence existed at close, not how the player
+organised it into folders. Flagged in-panel ("not how it was organised
+into folders, which wasn't saved") rather than silently reproducing a
+folder layout that was never actually saved.
+
+**Verification:** `tsc --noEmit` and `eslint` clean on every touched/new
+file (`lib/nova/projectArtefacts.ts`, `lib/nova/state.ts`,
+`components/nova/ProjectArtefactsPanel.tsx`, `ArtefactsDrawer.tsx`,
+`ProjectArtefactSnapshots.tsx`, `GameRoot.tsx`). Scripted checks against
+constructed `GameState` fixtures: a brand-new game shows the panel as
+fully hidden; finding the PID alone lights up exactly one Initiation
+entry; submitting all 4 tools + finding both documents correctly fills
+Initiation (4/4) and Planning (2/2) while Execution/Monitoring/Closure
+stay locked; 2-of-3 status reports submitted shows reports 1-2 available
+and 3 locked; the audit-trail tool's `toolSubmitted` flag correctly
+unlocks Phase 4; `currentScene` before vs. at `ACT6_*` correctly gates
+Phase 5, and a default-metrics fixture at `ACT6_SCENE01` produced a
+sensible scorecard (five `strong` categories, one `mixed` Overall Outcome
+matching the Pyrrhic/political ending that fixture's metrics resolve to).
+A separate check confirmed `resolveStatusReportItemText` correctly
+resolves both a static accomplishment-candidate id and a dynamic
+`wbs_activity_*`/`gantt_*` id back to their real text, and falls back to
+the raw id for anything unresolvable rather than throwing. `next build`'s
+pre-existing, unrelated Google Fonts sandbox-network failure (noted in
+the previous entry) persists.
+
+---
+
+## Project Artefacts "new item" notification
+
+**Status:** Shipped.
+
+Follow-up request: make sure the player notices whenever something new
+becomes available in the Project Artefacts gallery, not just that it's
+sitting there unlocked.
+
+Reused `FieldGuidePanel`'s exact "lights up" mechanism rather than
+inventing a second one — no new persisted `GameState` field needed.
+Every entry's own `available` flag (already sourced from genuinely
+persisted signals — `toolSubmitted`/`artefacts`/`statusReports`/
+`currentScene`) doubles as the "encountered" signal; a local,
+session-only `viewedIds` Set (in `ProjectArtefactsPanel.tsx`) is seeded
+from whichever entries are already available right when the component
+mounts, so nothing is retroactively flagged new after a page reload —
+only entries that newly flip to `available` *while the panel stays
+mounted* (a tool gets submitted, a report gets filed, Act 6 begins) show
+as new.
+
+Three layers of notice, same visual language as `FieldGuidePanel`:
+- The edge tab itself switches to the pulsing amber ring + a small
+  numbered badge (count of new entries) whenever `newIds.length > 0`,
+  replacing its normal static teal.
+- Each phase's collapsed header shows a small amber dot next to its name
+  if any entry inside it is new, so the player doesn't have to expand
+  every phase hunting for what changed.
+- Inside an expanded phase, the new entry itself gets an amber ring
+  around its row and an amber "NEW" badge in place of the normal teal
+  "Available" tag.
+
+Opening the panel auto-expands the phase containing the newest new entry
+and scrolls to it (`entryRefs`, same pattern as `FieldGuidePanel`'s own
+`entryRefs`/`scrollIntoView`), then — after a 1200ms beat so the player
+actually sees the highlight — marks every currently-new entry viewed,
+clearing the badge. "Newest" has no real timestamp to go on (entries are
+derived from flags, not an append-only log), so it's approximated as the
+last new entry in the fixed phase/entry iteration order; since phases
+unlock roughly in story order already, this tracks true recency closely
+enough without needing to invent one. Directly opening an entry (tapping
+into its snapshot, or a document's viewer) marks that one entry viewed
+immediately, independent of the batch timer — no reason to make the
+player wait out the beat once they've actually looked at the thing.
+
+**Verification:** `tsc --noEmit` and `eslint` clean on
+`ProjectArtefactsPanel.tsx`. Scripted check simulating the actual
+session lifecycle: seeded `viewedIds` from an initial state (PID found)
+→ confirmed zero new ids at that point (no reload spam); simulated PESTLE
+being submitted later in the same session without touching `viewedIds` →
+confirmed exactly `[PESTLE's toolId]` reported as new; simulated opening
+the panel (viewedIds reset to the new full available set) → confirmed
+zero new ids afterward. All three steps matched expectations.
+
+---
+
+## End-of-game Project Reflection: APM module breakdown + pivotal decision analysis
+
+**Status:** Shipped.
+
+Follow-up request: once the player sees their ending, show a breakdown
+of how they scored across the (APM) modules and an analysis of their
+decisions, as part of their Project Reflection. Scope was narrowed over
+several rounds of direct back-and-forth before building anything:
+
+1. "Modules" could have meant either the 6 reflection categories already
+   built, or a from-scratch scoring system for all 27 APM syllabus
+   modules. Walked through the honest mechanics first: there is no
+   per-module performance signal anywhere in `GameState` — only the 6
+   whole-project metrics already driving the scorecard, and
+   `fieldGuideSeen`'s "encountered" flag. Any per-module "score" could
+   only ever be its parent category's rating, inherited, not computed
+   independently.
+2. Confirmed to inherit-and-show all 27 at first; then, once the
+   mechanics above were walked through again concretely (the 8 modules
+   with zero in-game tie — Organisational Structures, Sustainability,
+   Diversity & Inclusion, Integrated Planning, Leadership, Team
+   Management, Conflict Resolution, Ethics — would be scored purely
+   cosmetically), narrowed to the **19 modules with a real in-game tie**
+   (at least one `matchesConcepts` entry in `fieldGuide.ts`) and dropped
+   the other 8 entirely rather than showing them unscored.
+3. Placement confirmed as a new full-screen moment immediately after the
+   ending, not just a more-visible panel entry.
+4. Decision analysis confirmed as a curated list of pivotal decisions
+   (not a full chronological log).
+
+**`lib/nova/projectArtefacts.ts` extensions:**
+- `MODULE_CATEGORY: Record<string, string>` — the 19 qualifying module
+  ids mapped to one of the 6 scorecard category ids (`budget`/
+  `schedule`/`stakeholders`/`risk`/`team`/`outcome`), grounded in each
+  module's actual `matchesConcepts` rather than guessed from title alone
+  (e.g. Reviews/Assurance/Change Control → `risk`, since those are
+  exactly what the Audit Trail's own evidence categories already cover).
+- `ModuleScoreEntry`/`PivotalDecision` types added; `ReflectionScorecard`
+  extended with `moduleBreakdown: ModuleScoreEntry[]` and
+  `pivotalDecisions: PivotalDecision[]`.
+- `computeProjectReflectionScorecard` now builds `categories` as a local
+  variable first (previously inlined straight into the return), so
+  `moduleBreakdown` can look up each category's already-computed rating
+  by id via a `Map` before the final object is assembled.
+- `computePivotalDecisions(state)` — 7 entries. 5 of them
+  (`supplier_decision`/`isolator`/`filling_line`/`big01`/
+  `validation_resourcing`) reuse `computeAuditTrailEvidence`'s own cards
+  verbatim by id, rather than re-deriving the same flags/decisions a
+  second time with new copy — one source of truth for "what actually
+  happened." The other 2 (`early_risk_investigation`, counting how many
+  of the 3 Act 2 risk-logged flags are set; `reporting_honesty`, from
+  `findMostMaterialReportMismatch`) have no Audit Trail card of their own
+  and are computed fresh.
+
+**`ReflectionScorecardView`** (`ProjectArtefactSnapshots.tsx`) extended
+with two new sections below the existing category cards: the module
+breakdown (grouped under each category's own card, with a small
+"Encountered" tag on modules the player actually hit — informational
+only, never a gate on whether a module shows or what it's scored) and
+the Key Decisions list. Extended in place rather than forked, so the
+Project Artefacts panel's Phase 5 Closure entry and the new end-game
+screen render identically — never two diverging versions of "the
+reflection."
+
+**New end-game screen (`ProjectReflectionEnding.tsx`):** `ACT6_SCENE03`
+(the real ending scene) has always had an empty `nextScenes`, so
+finishing it previously fell into the same generic "End of built
+content" screen a genuinely broken scene reference hits —
+`EndInfo.reason` only ever carried `"unbuilt-branch"`. Added a second
+reason, `"story-complete"`, distinguished in `goToRealScene` by checking
+which scene is being *left* (`baseState.currentScene === "ACT6_SCENE03"`)
+at the exact point `nextSceneId` resolves to nothing — the one
+intentional dead end in the whole scene graph, as opposed to every other
+case which really is an unbuilt branch. `GameRoot.tsx`'s `endInfo` render
+branches on that reason: `ProjectReflectionEnding` for the real ending,
+unchanged `EndOfContent` otherwise. `ProjectReflectionEnding` doesn't
+call the scorecard builder directly — it pulls the Closure phase's
+`reflection` entry out of `getProjectArtefactsByPhase(gameState)`, the
+exact same call the panel itself makes, so there's only one code path
+producing this content, not two that could quietly diverge.
+
+**Verification:** `tsc --noEmit` and `eslint` clean on every touched
+file. Scripted checks: a bare-metrics fixture produced exactly 19
+modules, sorted by module number, spanning all 6 categories, and all 7
+decisions resolved to "no decision on record" / "none investigated" /
+"every report held up" as expected; a fixture with every relevant
+flag/decision set (filling line approved, isolator expedited, all 3 Act
+2 risks logged, BIG-01 renegotiated, validation resourcing protect_a,
+supplier steritech, 3 fieldGuideSeen entries) produced the exact authored
+Audit Trail copy for the 5 reused decisions, correct counts for the 2
+computed ones, and correctly flagged exactly the 3 seeded modules as
+encountered; a fixture at `ACT5_SCENE03` (before Act 6) correctly showed
+the reflection entry as unavailable. `next build`'s pre-existing,
+unrelated Google Fonts sandbox-network failure persists.
+
+---
+
+## Project Artefacts: Planning phase expansion (CBS, WBS, Comms, Milestone Timeline) + Execution RAID entries
+
+Direct instruction: "Can we have the cost breakdown structure etc... to
+into planning too?" Investigation surfaced four more Act 3 tools with no
+gallery entry at all (CBS, WBS, the Comms matching tool, the Milestone
+Timeline/Gantt) and one, RAID Update, that already persisted its data
+but had no read-only view anywhere. Walked the user through scope/cost
+per tool before building (confirmed via `AskUserQuestion`): CBS + WBS +
+Comms join Planning alongside the existing Stakeholder Grid and Benefits
+Register; the Benefits proof-chain builder is deliberately left out
+(the existing Benefits Register document already covers that ground —
+adding both would read as two entries for one thing); Team Selection is
+left out (its swipe-one-at-a-time UI has no sensible static-snapshot
+form without a full rebuild). The user's own follow-up added two more:
+the Milestone Timeline into Planning ("a plan on a page") and RAID
+Update into Execution (their phase 3), alongside the 3 Monthly Status
+Reports.
+
+**Comms (`TOOL_ACT3_SCENE05_COMMS`) needed zero component work** — it's
+a plain `sort_into_buckets` screen with no `visualStyle` override, so it
+already renders through `ToolScreen.tsx`'s default grid, which already
+supports `readOnly`. It just wasn't picked up by
+`getProjectArtefactsByPhase`'s tool loop, which only matched entries by
+`visualStyle` — added a new `TOOL_ID_OVERRIDES` map (toolId → {title,
+phase}) checked alongside the existing `TOOL_VISUAL_STYLE_*` maps, for
+tools identifiable only by toolId.
+
+**CBS, WBS, and the Milestone Timeline each needed a real `readOnly`
+mode on their own bespoke component** (`CBSReview.tsx`,
+`WBSBlueprint.tsx`, `GanttBoard.tsx`) — the same `readOnly` contract
+ToolScreen/PriorityBoard already established (hide
+instructions/hint/reset/submit, `pointer-events-none` on the root), but
+each needed its own structurally different treatment, same caveat noted
+when that pattern was first built:
+- **CBS:** the Protect/Potential-lever buttons become static labels
+  reading back whatever's already in `GameState.decisions` (via
+  `computeCbsClassifications`), rather than live controls.
+- **WBS:** the "Unsorted work packages" pool section is hidden entirely
+  in readOnly mode (it's always empty anyway — `available` already
+  requires every card placed).
+- **Milestone Timeline:** `available` (toolSubmitted) already requires
+  every milestone placed *and* the critical path correctly confirmed —
+  there's no separate "was it correct" flag to read, so readOnly just
+  defaults the local `checked` state to `true` and recomputes the
+  critical path fresh from `placements` via `computeCriticalPath`,
+  exactly like the live board's own confirmed state. The Check/Confirm
+  buttons are hidden; the arrows and the named critical-path line always
+  show.
+
+**RAID Update turned out cheaper than first scoped.** The live
+`RaidUpdateCard.tsx` component is a one-shot local-state form with no
+snapshot of its own, but `GameRoot.tsx`'s `handleSubmitRaidUpdate`
+*already* persists every answer on submit — owner/response into
+`GameState.decisions` (`${raidKey}_owner` / `${raidKey}_response`),
+escalate into a flag (`${raidKey}_escalated`) — so no new storage was
+needed, only a new static read-only renderer. Added
+`RaidUpdateSnapshot` to `ProjectArtefactSnapshots.tsx`: the same
+navy/lavender "real document" chrome as the live card, but every field
+a filled-in badge instead of a button.
+
+**`lib/nova/projectArtefacts.ts`:** added four new entry kinds (`cbs`,
+`wbs`, `gantt`, `raid`) to the `ProjectArtefactEntry` union, each
+carrying whatever extra data its renderer needs beyond the toolScreen
+itself (CBS: classifications; WBS: placedCardIds; Gantt: placements;
+RAID: owner/response/escalated resolved via `raidKey ?? toolId`). The
+tool-assembly loop in `getProjectArtefactsByPhase` now branches on
+`toolScreen.type`/`visualStyle`/`toolId` to route each tool to the right
+kind, falling through to the pre-existing `visualStyle`-keyed "tool"
+branch for PESTLE/SWOT/MoSCoW/Stakeholder Grid, unchanged.
+
+**`ProjectArtefactsPanel.tsx`:** render switch extended with branches
+for all four new kinds, passing `readOnly` plus no-op stub handlers
+(`NOOP`, `NOOP_STRING`, and a new `NOOP_PLACE_NULLABLE` — GanttBoard's
+`onPlace` returns `string | null`, unlike PriorityBoard's void-returning
+one the existing `NOOP_PLACE` stub was built for). The Gantt branch
+reads `criticalPathGuesses` from `gameState.toolSelections` directly
+(not carried on the entry) — passing anything other than the real
+persisted guesses would make `isCriticalPathGuessCorrect` read false and
+hide the arrows even though the entry is only ever available once
+they're correct.
+
+Planning now shows 6 entries (Stakeholder Grid, Benefits Register, Cost
+Breakdown Review, Work Breakdown Structure, Communications Plan,
+Milestone Timeline); Execution shows the 3 Monthly Status Reports plus
+one RAID Log Update entry (currently exactly one RAID tool screen exists
+in the data, `TOOL_EV-06-RAID_CARD`).
+
+**Verification:** `tsc --noEmit` and `eslint` clean on every touched
+file. `next build` hits the same pre-existing, unrelated Google Fonts
+sandbox-network failure noted above — not from this change.

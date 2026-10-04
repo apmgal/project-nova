@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>APM Knowledge Library — design options</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0c0c0d;
+    color: #e4e4e7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    padding: 40px 24px 80px;
+  }
+  .intro {
+    max-width: 760px;
+    margin: 0 auto 48px;
+  }
+  .intro h1 {
+    font-size: 22px;
+    margin: 0 0 6px;
+    color: #f4f4f5;
+  }
+  .intro p {
+    font-size: 13px;
+    color: #a1a1aa;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 28px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .option {
+    background: #151517;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .option-label {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #27272a;
+  }
+  .option-label .tag {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #71717a;
+    font-weight: 600;
+  }
+  .option-label h2 {
+    font-size: 15px;
+    margin: 4px 0 4px;
+    color: #f4f4f5;
+  }
+  .option-label p {
+    font-size: 11.5px;
+    color: #8b8b92;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .demo {
+    background: #09090b;
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .panel-shell {
+    width: 100%;
+    max-width: 320px;
+    background: rgba(9,9,11,0.98);
+    border: 1px solid #3f3f46;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    height: 460px;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid #27272a;
+  }
+  .panel-header span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e4e4e7;
+  }
+  .panel-header .x {
+    color: #71717a;
+    font-size: 13px;
+  }
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  /* Shared card tokens from the actual game */
+  .card {
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin-bottom: 7px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .card.unlocked { background: #f7f0e0; border: 1px solid #ddcda3; color: #241a1e; }
+  .card.locked { background: rgba(39,39,42,0.5); border: 1px solid #27272a; color: #71717a; }
+  .card-title { font-size: 12.5px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .badge { font-size: 8.5px; font-weight: 700; border-radius: 999px; padding: 1.5px 6px; text-transform: uppercase; white-space: nowrap; }
+  .badge.encountered { background: #eaf3de; color: #3b6d11; }
+  .badge.ref { background: transparent; color: #52525b; font-weight: 600; text-transform: uppercase; }
+  .card-summary { font-size: 10.5px; margin-top: 5px; line-height: 1.5; color: #4a3c40; }
+
+  /* OPTION 1: shelf / spines */
+  .shelf-row { display: flex; gap: 3px; margin-bottom: 8px; }
+  .spine {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 10px 3px;
+    border-radius: 3px 3px 0 0;
+    white-space: nowrap;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .spine.unlocked { background: #caa24a; color: #2b1f0a; }
+  .spine.locked { background: #27272a; color: #52525b; }
+  .shelf-base { height: 6px; background: #3f3f46; border-radius: 0 0 3px 3px; margin-top: -1px; }
+  .shelf-group-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; margin: 10px 0 5px; }
+  .open-book {
+    background: #f7f0e0; border: 1px solid #ddcda3; border-radius: 6px; padding: 10px; margin-top: 10px; color: #241a1e;
+  }
+
+  /* OPTION 2: category tabs */
+  .tabs { display: flex; gap: 2px; padding: 6px 10px 0; flex-wrap: wrap; }
+  .tab { font-size: 9.5px; padding: 4px 8px; border-radius: 4px 4px 0 0; background: #1f1f22; color: #a1a1aa; cursor: pointer; }
+  .tab.active { background: #f7f0e0; color: #241a1e; font-weight: 700; }
+
+  /* OPTION 3: passport stamp unlock */
+  .stamp-wrap { position: relative; }
+  .stamp {
+    position: absolute;
+    top: -6px; right: 6px;
+    border: 2px solid #b4432f;
+    color: #b4432f;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 5px;
+    border-radius: 3px;
+    transform: rotate(-11deg);
+    background: rgba(180,67,47,0.08);
+  }
+
+  /* OPTION 4: shelf-map progress dots */
+  .progress-wrap { padding: 10px 12px 2px; }
+  .progress-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-bottom: 8px; }
+  .dot { width: 100%; aspect-ratio: 1; border-radius: 2px; display:flex; align-items:center; justify-content:center; font-size: 7px; font-weight: 700; }
+  .dot.on { background: #caa24a; color: #2b1f0a; }
+  .dot.off { background: #27272a; color: #52525b; }
+  .progress-caption { font-size: 10px; color: #a1a1aa; margin-bottom: 6px; }
+
+  /* OPTION 5: per-module icon */
+  .icon-circle {
+    width: 22px; height: 22px; border-radius: 50%; display:flex; align-items:center; justify-content:center;
+    font-size: 11px; flex-shrink: 0; margin-right: 8px;
+  }
+  .icon-circle.unlocked { background: #caa24a; color: #2b1f0a; }
+  .icon-circle.locked { background: #27272a; color: #52525b; }
+  .icon-row { display: flex; align-items: center; }
+
+  /* OPTION 6: search bar */
+  .search-box {
+    margin: 10px 10px 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #1f1f22;
+    border: 1px solid #3f3f46;
+    font-size: 11px;
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>APM Knowledge Library — visual direction options</h1>
+  <p>Six ways to make the renamed panel more interesting to browse. Each box is a self-contained mockup of just the panel's drawer, using the game's existing palette (parchment cards, zinc chrome). Not wired to real data — just shapes and layout to react to.</p>
+</div>
+
+<div class="options">
+
+  <!-- OPTION 1: Shelf / spines -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 1</span>
+      <h2>Bookshelf of spines</h2>
+      <p>Modules render as book spines grouped by category. Tap a spine to "pull it out" and flip open to the summary below. Leans hardest into the "library" rename.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="panel-body">
+          <div class="shelf-group-label">Business Case &amp; Governance</div>
+          <div class="shelf-row">
+            <div class="spine unlocked">M4 Governance</div>
+            <div class="spine unlocked">M5 Business Case</div>
+            <div class="spine unlocked">M6 PESTLE/SWOT</div>
+            <div class="spine locked">M8 Solutions</div>
+          </div>
+          <div class="shelf-base"></div>
+
+          <div class="shelf-group-label">Planning &amp; Control</div>
+          <div class="shelf-row">
+            <div class="spine unlocked">M7 MoSCoW</div>
+            <div class="spine unlocked">M12 WBS</div>
+            <div class="spine locked">M13 Resource</div>
+            <div class="spine unlocked">M14 CBS</div>
+          </div>
+          <div class="shelf-base"></div>
+
+          <div class="open-book">
+            <div class="card-title">6. Tools &amp; Techniques of a Business Case <span class="badge encountered">Encountered</span></div>
+            <div class="card-summary">PESTLE scans the external environment; SWOT turns the lens inward. Run together early, they surface what a business case needs to account for before money is committed.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 2: Category tabs -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 2</span>
+      <h2>Category tabs</h2>
+      <p>27 entries split into APM's own groupings (Governance, Planning, People, Risk &amp; Change...) as tabs, so the list under each tab stays short instead of one long scroll.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="tabs">
+          <div class="tab active">Governance</div>
+          <div class="tab">Planning</div>
+          <div class="tab">People</div>
+          <div class="tab">Risk</div>
+          <div class="tab">Delivery</div>
+        </div>
+        <div class="panel-body">
+          <div class="card unlocked">
+            <div class="card-title">4. Aspects of Project Governance <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card unlocked">
+            <div class="card-title">5. The Importance of the Business Case <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card unlocked">
+            <div class="card-title">6. Tools &amp; Techniques of a Business Case <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card locked">
+            <div class="card-title">27. Ethics <span class="badge ref">Reference</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 3: Passport stamp unlock -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 3</span>
+      <h2>Passport-stamp unlock</h2>
+      <p>Instead of a plain amber ring, a newly-unlocked entry gets a tilted ink-stamp mark — a more thematic "library due date" moment than a generic highlight.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="panel-body">
+          <div class="card locked">
+            <div class="card-title">4. Aspects of Project Governance <span class="badge ref">Reference</span></div>
+          </div>
+          <div class="stamp-wrap">
+            <div class="card unlocked">
+              <div class="card-title">7. Requirements Management <span class="badge encountered">Encountered</span></div>
+              <div class="card-summary">MoSCoW (Must/Should/Could/Won't) forces a prioritisation conversation once requirements compete for the same time and budget.</div>
+            </div>
+            <div class="stamp">New Entry</div>
+          </div>
+          <div class="card locked">
+            <div class="card-title">8. Solutions Development <span class="badge ref">Reference</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 4: Shelf-map progress -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 4</span>
+      <h2>Shelf-map progress header</h2>
+      <p>A small 27-dot grid pinned at the top of the drawer shows encountered vs. reference-only modules at a glance, before scrolling the full list.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="progress-wrap">
+          <div class="progress-caption">9 of 27 modules encountered</div>
+          <div class="progress-grid">
+            <div class="dot on">1</div><div class="dot off">2</div><div class="dot off">3</div>
+            <div class="dot on">4</div><div class="dot on">5</div><div class="dot on">6</div>
+            <div class="dot on">7</div><div class="dot off">8</div><div class="dot off">9</div>
+            <div class="dot off">10</div><div class="dot off">11</div><div class="dot on">12</div>
+            <div class="dot off">13</div><div class="dot on">14</div><div class="dot off">15</div>
+            <div class="dot off">16</div><div class="dot off">17</div><div class="dot off">18</div>
+            <div class="dot off">19</div><div class="dot off">20</div><div class="dot off">21</div>
+            <div class="dot off">22</div><div class="dot on">23</div><div class="dot off">24</div>
+            <div class="dot off">25</div><div class="dot on">26</div><div class="dot off">27</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="card unlocked">
+            <div class="card-title">6. Tools &amp; Techniques of a Business Case <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card locked">
+            <div class="card-title">9. Sustainability <span class="badge ref">Reference</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 5: Per-module icon -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 5</span>
+      <h2>Per-module glyph</h2>
+      <p>A small icon per entry (compass for PESTLE, tree for WBS, scale for risk) makes the list scannable by shape, not just title text.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="panel-body">
+          <div class="card unlocked icon-row">
+            <div class="icon-circle unlocked">🧭</div>
+            <div class="card-title" style="flex:1">6. PESTLE &amp; SWOT <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card unlocked icon-row">
+            <div class="icon-circle unlocked">✅</div>
+            <div class="card-title" style="flex:1">7. Requirements (MoSCoW) <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card unlocked icon-row">
+            <div class="icon-circle unlocked">🌳</div>
+            <div class="card-title" style="flex:1">12. Schedule (WBS) <span class="badge encountered">Encountered</span></div>
+          </div>
+          <div class="card locked icon-row">
+            <div class="icon-circle locked">⚖️</div>
+            <div class="card-title" style="flex:1">27. Ethics <span class="badge ref">Reference</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 6: Search bar -->
+  <div class="option">
+    <div class="option-label">
+      <span class="tag">Option 6</span>
+      <h2>Search / jump bar</h2>
+      <p>A filter-as-you-type field at the top, so looking something up mid-playthrough doesn't mean scrolling past 20 other entries first.</p>
+    </div>
+    <div class="demo">
+      <div class="panel-shell">
+        <div class="panel-header"><span>APM Knowledge Library</span><span class="x">✕</span></div>
+        <div class="search-box">🔍 <span>moscow...</span></div>
+        <div class="panel-body">
+          <div class="card unlocked">
+            <div class="card-title">7. Requirements Management <span class="badge encountered">Encountered</span></div>
+            <div class="card-summary">MoSCoW (Must have, Should have, Could have, Won't have) forces a prioritisation conversation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

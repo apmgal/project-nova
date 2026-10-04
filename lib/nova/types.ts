@@ -34,6 +34,15 @@ export interface GameState {
    * cinematic, which isn't itself a Scene so never runs through
    * markCharactersMet). */
   charactersMet: string[];
+  /** FIELD_GUIDE entry ids (lib/nova/fieldGuide.ts) the player has
+   * actually encountered so far — same shape and same fold-in timing as
+   * charactersMet (unioned on scene EXIT via markFieldGuideSeen in
+   * state.ts, not scene entry), drives FieldGuidePanel.tsx's unlocked/
+   * locked state and its "just unlocked" light-up. Seeded empty: nothing
+   * in the Reception Intro cinematic (which, like charactersMet's own
+   * seed, runs outside the normal Scene/pmConcept machinery) teaches a
+   * module. */
+  fieldGuideSeen: string[];
   choiceHistory: ChoiceHistoryEntry[];
   /** Key into assets.json's `backgrounds` map for whatever backdrop is
    * currently in effect, carried forward across lines/scenes until a line

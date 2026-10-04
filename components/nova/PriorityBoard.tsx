@@ -18,6 +18,14 @@ interface PriorityBoardProps {
   onReset: () => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  /** True renders this as a static snapshot of a tool the player already
+   * submitted — used by ProjectArtefactsPanel to show the finished board
+   * read-only. Hides the instructions/hint/reset row and the Submit
+   * button, and disables every card's drag/click handler (pointer-events-
+   * none on the whole board) rather than threading a no-op guard through
+   * every individual handler. Defaults to false so every existing caller
+   * (the live, editable tool screen during actual gameplay) is unaffected. */
+  readOnly?: boolean;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -198,6 +206,7 @@ export default function PriorityBoard({
   onReset,
   canSubmit,
   onSubmit,
+  readOnly = false,
 }: PriorityBoardProps) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const hint = useConceptHint(pmConcept);
@@ -243,8 +252,12 @@ export default function PriorityBoard({
   }, 0);
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {(toolScreen.instructions || pmConcept) && (
+    <div
+      className={`flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4 ${
+        readOnly ? "pointer-events-none" : ""
+      }`}
+    >
+      {!readOnly && (toolScreen.instructions || pmConcept) && (
         <div className="flex items-start justify-between gap-3">
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
@@ -255,7 +268,9 @@ export default function PriorityBoard({
           </div>
         </div>
       )}
-      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      {!readOnly && (
+        <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      )}
 
       {isMoscowQuadrant ? (
         <div className="grid grid-cols-2 gap-x-14 gap-y-14">
@@ -499,7 +514,7 @@ export default function PriorityBoard({
         </div>
       )}
 
-      <div>
+      <div className={readOnly && unplacedCards.length === 0 ? "hidden" : undefined}>
         <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-zinc-500">
           <span>Unassigned ({unplacedCards.length})</span>
           {hasCosts && (
@@ -576,7 +591,9 @@ export default function PriorityBoard({
         </div>
       </div>
 
-      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      {!readOnly && (
+        <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      )}
 
       {draggedCard && (
         <DragGhost pointer={drag.pointer}>

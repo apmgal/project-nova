@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Pause } from "lucide-react";
+import { Pause, Volume2, VolumeX } from "lucide-react";
 import {
   getScene,
   getDialogue,
@@ -23,6 +23,7 @@ import {
   applyFlags,
   applySceneFlagsSet,
   markCharactersMet,
+  markFieldGuideSeen,
   isLineVisible,
   splitAroundToolMarker,
   isToolMarkerLine,
@@ -100,6 +101,8 @@ import ReadinessChecklist from "./ReadinessChecklist";
 import AuditTrailBuilder from "./AuditTrailBuilder";
 import InspectionEvidenceExhibit from "./InspectionEvidenceExhibit";
 import CharacterPanel from "./CharacterPanel";
+import FieldGuidePanel from "./FieldGuidePanel";
+import ProjectArtefactsPanel from "./ProjectArtefactsPanel";
 import HUD from "./HUD";
 import RiskInvestigationPanel from "./RiskInvestigationPanel";
 import EmailInboxPanel from "./EmailInboxPanel";
@@ -110,6 +113,7 @@ import DebugDrawer from "./DebugDrawer";
 import ArtefactsDrawer from "./ArtefactsDrawer";
 import PauseOverlay from "./PauseOverlay";
 import EndOfContent from "./EndOfContent";
+import ProjectReflectionEnding from "./ProjectReflectionEnding";
 import NarrativeScene from "./narrative/NarrativeScene";
 import SceneBackground from "./narrative/SceneBackground";
 import PanoramaBackground from "./narrative/PanoramaBackground";
@@ -139,11 +143,22 @@ const CRITICAL_PATH_CONFIRMED_MARKER = "critical_path_confirmed";
 
 function isHudActiveForScene(scene: Scene): boolean {
   if (HUD_ALWAYS_ON_ACTS.has(scene.act)) return true;
-  return scene.act === "Act 3" && (scene.sceneId === HUD_START_SCENE_ID || scene.sceneId === "ACT3_SCENE07");
+  return (
+    scene.act === "Act 3" &&
+    (scene.sceneId === HUD_START_SCENE_ID || scene.sceneId === "ACT3_SCENE07")
+  );
 }
 
 interface EndInfo {
-  reason: "unbuilt-branch";
+  /** "story-complete": the player finished ACT6_SCENE03, the genuine,
+   * intentional end of the story (its own `nextScenes` is deliberately
+   * empty) — shows ProjectReflectionEnding. "unbuilt-branch": every other
+   * case of nowhere-to-go (a dialogue choice or scene pointing at
+   * something outside this build's currently-loaded scene set) — shows
+   * the generic EndOfContent cutoff screen. Both arrive via the exact
+   * same "nextSceneId resolved to nothing usable" code path in
+   * goToRealScene; this field is what tells them apart downstream. */
+  reason: "unbuilt-branch" | "story-complete";
   targetScene: string;
 }
 
@@ -154,7 +169,7 @@ function useIsClient(): boolean {
   return useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 }
 
@@ -178,16 +193,20 @@ function useIsClient(): boolean {
  */
 function computeSceneLines(
   scene: Scene,
-  flags: GameState["flags"]
-): { preLines: DialogueLine[]; postLines: DialogueLine[]; markerText: string | null } {
+  flags: GameState["flags"],
+): {
+  preLines: DialogueLine[];
+  postLines: DialogueLine[];
+  markerText: string | null;
+} {
   const rawLines = (getDialogue(scene.dialogueId)?.lines ?? []).filter((line) =>
-    isLineVisible(line.condition, flags)
+    isLineVisible(line.condition, flags),
   );
 
   if (scene.postToolDialogueId) {
-    const postLines = (getDialogue(scene.postToolDialogueId)?.lines ?? []).filter((line) =>
-      isLineVisible(line.condition, flags)
-    );
+    const postLines = (
+      getDialogue(scene.postToolDialogueId)?.lines ?? []
+    ).filter((line) => isLineVisible(line.condition, flags));
     return { preLines: rawLines, postLines, markerText: null };
   }
 
@@ -201,17 +220,28 @@ function computeSceneLines(
  * everything else (rendering, placement handlers) branches independently.
  * A standalone function (not a closure inside the component) so
  * TypeScript's narrowing of its params works reliably. */
-function computeToolComplete(state: GameState, toolScreen: ToolScreenBlock | null): boolean {
+function computeToolComplete(
+  state: GameState,
+  toolScreen: ToolScreenBlock | null,
+): boolean {
   if (!toolScreen) return true;
   const toolId = toolScreen.toolId;
   switch (toolScreen.type) {
     case "priority_assignment":
     case "power_interest_grid":
-      return isPriorityToolComplete(state, toolId, toolScreen.cards?.length ?? 0);
+      return isPriorityToolComplete(
+        state,
+        toolId,
+        toolScreen.cards?.length ?? 0,
+      );
     case "cost_review_with_descope":
       return isCbsClassificationComplete(state, toolScreen);
     case "pick_n_of_m_swipeable":
-      return isHiringComplete(state, toolId, toolScreen.maxHires ?? toolScreen.candidates?.length ?? 0);
+      return isHiringComplete(
+        state,
+        toolId,
+        toolScreen.maxHires ?? toolScreen.candidates?.length ?? 0,
+      );
     case "gantt_placement": {
       // Placement uses the same "every key placed" shape as
       // priority_assignment. But that alone isn't "complete" here — the
@@ -221,13 +251,16 @@ function computeToolComplete(state: GameState, toolScreen: ToolScreenBlock | nul
       // live guess (which could momentarily be true mid-tap).
       const milestoneCount = toolScreen.milestones?.length ?? 0;
       if (!isPriorityToolComplete(state, toolId, milestoneCount)) return false;
-      return (state.toolProgress[toolId] ?? []).includes(CRITICAL_PATH_CONFIRMED_MARKER);
+      return (state.toolProgress[toolId] ?? []).includes(
+        CRITICAL_PATH_CONFIRMED_MARKER,
+      );
     }
     case "proof_chain_builder":
       return isToolComplete(
         state,
         toolId,
-        (toolScreen.benefits?.length ?? 0) * (toolScreen.fieldsPlayerBuilds?.length ?? 2)
+        (toolScreen.benefits?.length ?? 0) *
+          (toolScreen.fieldsPlayerBuilds?.length ?? 2),
       );
     case "sort_into_buckets":
     default:
@@ -247,7 +280,10 @@ function resolveInitialLineIndex(state: GameState, sceneId: string): number {
   const scene = getScene(sceneId);
   if (!scene) return 0;
   if (scene.displayStyle === "announcement") {
-    const { preLines, postLines } = computeSceneLines(scene, dialogueFlagsFor(state));
+    const { preLines, postLines } = computeSceneLines(
+      scene,
+      dialogueFlagsFor(state),
+    );
     return preLines.length + postLines.length;
   }
   if (scene.toolId && hasReachedToolScreen(state, scene.toolId)) {
@@ -279,18 +315,24 @@ export default function GameRoot() {
   // workshop that raises three concerns in turn) know which ones have
   // already been answered and shouldn't block dialogue again. Reset
   // whenever the scene changes.
-  const [resolvedChoiceIds, setResolvedChoiceIds] = useState<Set<string>>(new Set());
+  const [resolvedChoiceIds, setResolvedChoiceIds] = useState<Set<string>>(
+    new Set(),
+  );
   // Which choices' risk-investigation interstitial (if they have one) the
   // player has already stepped through this scene — separate from
   // resolvedChoiceIds because the investigation and the choice itself are
   // two distinct steps in front of the same breakIndex. Reset alongside it.
-  const [resolvedInvestigationIds, setResolvedInvestigationIds] = useState<Set<string>>(new Set());
+  const [resolvedInvestigationIds, setResolvedInvestigationIds] = useState<
+    Set<string>
+  >(new Set());
   // Which artefact's full-size viewer ArtefactsDrawer is showing. Lifted up
   // here (rather than local to the drawer) so SharePointBrowserPanel's
   // DocumentDiscoveredCard can jump straight to the viewer when the player
   // picks "Open" on a newly-found artefact, not just when they open the
   // drawer list themselves.
-  const [viewingArtefactId, setViewingArtefactId] = useState<string | null>(null);
+  const [viewingArtefactId, setViewingArtefactId] = useState<string | null>(
+    null,
+  );
   // Reception Intro Scene: a one-off cinematic prologue that plays before
   // the first real scene on every fresh "New Game" (never on Continue,
   // which always resumes wherever the player left off). Kept as its own
@@ -304,6 +346,12 @@ export default function GameRoot() {
   // change, so this doesn't need to do anything beyond reassure the
   // player it's safe to stop for a moment.
   const [paused, setPaused] = useState(false);
+  // Mute: the other independent axis SceneAudio exposes — rides its
+  // `volume` prop down to 0 (a ramp, not a hard cut) rather than
+  // `paused`'s real .pause(), so muting never freezes playback position.
+  // Session-only (not part of GameState/game_state.json): a device/
+  // session sound preference, not save data.
+  const [muted, setMuted] = useState(false);
 
   // Temporary DEV_MODE-only playtesting nav — see lib/nova/devHistory.ts
   // for the full rationale. Calling the hook unconditionally (rather than
@@ -350,13 +398,31 @@ export default function GameRoot() {
     let next: GameState = state;
     if (state.currentScene !== sceneId) {
       const prevScene = getScene(state.currentScene);
-      const prevLines = prevScene ? getDialogue(prevScene.dialogueId)?.lines ?? [] : [];
-      currentBackground = foldBackground(currentBackground, prevLines, state.flags, prevLines.length - 1);
-      currentAmbient = foldAmbient(currentAmbient, prevLines, state.flags, prevLines.length - 1);
+      const prevLines = prevScene
+        ? (getDialogue(prevScene.dialogueId)?.lines ?? [])
+        : [];
+      currentBackground = foldBackground(
+        currentBackground,
+        prevLines,
+        state.flags,
+        prevLines.length - 1,
+      );
+      currentAmbient = foldAmbient(
+        currentAmbient,
+        prevLines,
+        state.flags,
+        prevLines.length - 1,
+      );
       next = markCharactersMet(next, prevScene?.charactersInvolved ?? []);
+      next = markFieldGuideSeen(next, prevScene?.pmConcept);
     }
     const scene = getScene(sceneId);
-    next = { ...next, currentScene: sceneId, currentBackground, currentAmbient };
+    next = {
+      ...next,
+      currentScene: sceneId,
+      currentBackground,
+      currentAmbient,
+    };
     next = applySceneFlagsSet(next, scene?.flagsSet);
     // ACT1_SCENE05 ("The Missing Appendices") is where the player finds
     // Ellis's unfinished Benefits_Plan_DRAFT_v3 — a pure narrative beat with
@@ -469,12 +535,18 @@ export default function GameRoot() {
     // place that needs to know about eventsResolved at all.
     const justFinished = queue[state.eventQueueIndex];
     const withResolved: GameState = justFinished
-      ? { ...state, eventsResolved: [...new Set([...state.eventsResolved, justFinished])] }
+      ? {
+          ...state,
+          eventsResolved: [...new Set([...state.eventsResolved, justFinished])],
+        }
       : state;
 
     const nextIndex = withResolved.eventQueueIndex + 1;
     if (nextIndex < queue.length) {
-      const withIndex: GameState = { ...withResolved, eventQueueIndex: nextIndex };
+      const withIndex: GameState = {
+        ...withResolved,
+        eventQueueIndex: nextIndex,
+      };
       goToRealScene(withIndex, resolveEventQueueEntryScene(queue[nextIndex]));
       return;
     }
@@ -498,8 +570,12 @@ export default function GameRoot() {
       // scene that doesn't exist in this build.
       saveGame(baseState);
       setGameState(baseState);
+      // The one intentional dead end in the whole scene graph — every
+      // other nextScenes-empty/unresolvable case really is an unbuilt
+      // branch. Checked by which scene we're LEAVING (baseState.currentScene
+      // is still ACT6_SCENE03 here; enterScene is never reached on this path).
       setEndInfo({
-        reason: "unbuilt-branch",
+        reason: baseState.currentScene === "ACT6_SCENE03" ? "story-complete" : "unbuilt-branch",
         targetScene: nextSceneId ?? "(none)",
       });
       return;
@@ -516,13 +592,19 @@ export default function GameRoot() {
   }
 
   if (!isClient) {
-    return <div className="flex flex-1 items-center justify-center bg-zinc-950" />;
+    return (
+      <div className="flex flex-1 items-center justify-center bg-zinc-950" />
+    );
   }
 
   if (!gameState) {
     if (showReceptionIntro) {
       return (
-        <NarrativeScene script={RECEPTION_INTRO_SCENE} onComplete={handleReceptionIntroComplete} />
+        <NarrativeScene
+          script={RECEPTION_INTRO_SCENE}
+          onComplete={handleReceptionIntroComplete}
+          muted={muted}
+        />
       );
     }
     return (
@@ -537,13 +619,19 @@ export default function GameRoot() {
   if (endInfo) {
     return (
       <>
-        {DEV_MODE && <DevPlaytestNav gameState={gameState} history={devHistory} />}
-        <EndOfContent
-          gameState={gameState}
-          reason={endInfo.reason}
-          targetScene={endInfo.targetScene}
-          onRestart={handleRestart}
-        />
+        {DEV_MODE && (
+          <DevPlaytestNav gameState={gameState} history={devHistory} />
+        )}
+        {endInfo.reason === "story-complete" ? (
+          <ProjectReflectionEnding gameState={gameState} onRestart={handleRestart} />
+        ) : (
+          <EndOfContent
+            gameState={gameState}
+            reason={endInfo.reason}
+            targetScene={endInfo.targetScene}
+            onRestart={handleRestart}
+          />
+        )}
       </>
     );
   }
@@ -566,13 +654,17 @@ export default function GameRoot() {
   // final action. lineIndex is a single running index over the pre-tool +
   // post-tool lines combined; the tool screen is an interstitial that
   // blocks advancing past the boundary between them until it's complete.
-  const { preLines, postLines, markerText } = computeSceneLines(scene, dialogueFlagsFor(gameState));
+  const { preLines, postLines, markerText } = computeSceneLines(
+    scene,
+    dialogueFlagsFor(gameState),
+  );
   const combinedLines = [...preLines, ...postLines];
   const toolBreakIndex = preLines.length;
 
   const toolScreen = scene.toolId ? getToolScreen(scene.toolId) : null;
   const toolType = toolScreen?.type;
-  const toolIsPriority = toolType === "priority_assignment" || toolType === "power_interest_grid";
+  const toolIsPriority =
+    toolType === "priority_assignment" || toolType === "power_interest_grid";
   // toolComplete: whether the activity's own requirements are met (every
   // card placed, hires locked in, etc.) — used only to enable the Submit
   // button. toolSubmitted: whether the player has actually tapped it.
@@ -580,11 +672,14 @@ export default function GameRoot() {
   // auto-advance the scene instantly; now the tool screen stays up (with
   // Submit visibly enabled) until the player chooses to move on.
   const toolComplete = computeToolComplete(gameState, toolScreen);
-  const toolSubmitted = Boolean(toolScreen && gameState.toolSubmitted[toolScreen.toolId]);
+  const toolSubmitted = Boolean(
+    toolScreen && gameState.toolSubmitted[toolScreen.toolId],
+  );
 
   // Blocked at the tool interstitial: pre-tool dialogue is done, but the
   // player hasn't submitted the tool yet.
-  const atToolBreak = Boolean(scene.toolId) && !toolSubmitted && lineIndex >= toolBreakIndex;
+  const atToolBreak =
+    Boolean(scene.toolId) && !toolSubmitted && lineIndex >= toolBreakIndex;
 
   // A scene can have more than one choice block: its own trailing
   // choicesId block, plus any insertAfterLine-anchored ones that fire
@@ -611,12 +706,16 @@ export default function GameRoot() {
       anchoredChoices.push({ block, breakIndex: toolBreakIndex });
       continue;
     }
-    const anchorIndex = combinedLines.findIndex((line) => line.text === block.insertAfterLine);
+    const anchorIndex = combinedLines.findIndex(
+      (line) => line.text === block.insertAfterLine,
+    );
     if (anchorIndex === -1) continue;
     anchoredChoices.push({ block, breakIndex: anchorIndex + 1 });
   }
   const defaultChoiceBlock = scene.choicesId
-    ? sceneChoices.find((block) => block.choiceId === scene.choicesId && !block.insertAfterLine)
+    ? sceneChoices.find(
+        (block) => block.choiceId === scene.choicesId && !block.insertAfterLine,
+      )
     : undefined;
   const choiceSequence: PositionedChoice[] = [...anchoredChoices];
   if (defaultChoiceBlock) {
@@ -635,7 +734,9 @@ export default function GameRoot() {
 
   const pendingChoice = !atToolBreak
     ? choiceSequence.find(
-        (choice) => !resolvedChoiceIds.has(choice.block.choiceId) && lineIndex >= choice.breakIndex
+        (choice) =>
+          !resolvedChoiceIds.has(choice.block.choiceId) &&
+          lineIndex >= choice.breakIndex,
       )
     : undefined;
   const atChoiceBreak = Boolean(pendingChoice);
@@ -649,7 +750,8 @@ export default function GameRoot() {
   // keeps flowing toward whatever comes after — another choice, more
   // lines, or eventually the scene's plain Continue action.
   const isPendingChoiceTerminal =
-    Boolean(pendingChoice) && pendingChoice?.breakIndex === combinedLines.length;
+    Boolean(pendingChoice) &&
+    pendingChoice?.breakIndex === combinedLines.length;
 
   // A pending choice can carry a riskInvestigationId — an extra step in
   // front of its own options where the player picks maxQuestions of a
@@ -661,8 +763,8 @@ export default function GameRoot() {
     : null;
   const atInvestigation = Boolean(
     pendingChoice &&
-      investigationBank &&
-      !resolvedInvestigationIds.has(pendingChoice.block.choiceId)
+    investigationBank &&
+    !resolvedInvestigationIds.has(pendingChoice.block.choiceId),
   );
 
   // An Event Library lead-in scene can carry a leadInPanelId instead of
@@ -673,13 +775,18 @@ export default function GameRoot() {
   const panelLeadInBank = getRiskInvestigation(scene.leadInPanelId);
   const atPanelLeadIn = Boolean(panelLeadInBank);
 
-  const inDialogue = !atToolBreak && !atChoiceBreak && lineIndex < combinedLines.length;
+  const inDialogue =
+    !atToolBreak && !atChoiceBreak && lineIndex < combinedLines.length;
   // Lines revealed so far in this scene's transcript: up to and including
   // the currently displayed line while in dialogue, up to (not including)
   // the blocked line while waiting on the tool/a choice, or all of them
   // once the final action (choices/continue) has been reached.
   const revealedCount =
-    atToolBreak || atChoiceBreak ? lineIndex : inDialogue ? lineIndex + 1 : combinedLines.length;
+    atToolBreak || atChoiceBreak
+      ? lineIndex
+      : inDialogue
+        ? lineIndex + 1
+        : combinedLines.length;
 
   function handleAskRiskQuestion(question: RiskInvestigationQuestion) {
     if (!gameState || gameState.flags[question.flagOnAsk]) return;
@@ -688,7 +795,7 @@ export default function GameRoot() {
       next = setArtefactStatus(
         next,
         question.revealsArtefactId,
-        question.revealsArtefactStatus ?? "incomplete"
+        question.revealsArtefactStatus ?? "incomplete",
       );
     }
     setGameState(next);
@@ -724,7 +831,8 @@ export default function GameRoot() {
       ],
     };
 
-    const isNoFailReaction = Boolean(option.reaction) && option.nextScene === null;
+    const isNoFailReaction =
+      Boolean(option.reaction) && option.nextScene === null;
     if (isNoFailReaction) {
       // Re-present the same choice list; do not advance the scene, and
       // do not mark it resolved yet.
@@ -825,7 +933,10 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
 
@@ -840,7 +951,9 @@ export default function GameRoot() {
   // dimensions. submitStatusReport appends the record (with a fresh
   // actualSnapshot) before submitTool flips the generic toolSubmitted
   // flag, mirroring handleSubmitTool's own advance-if-no-postLines logic.
-  function handleSubmitStatusReport(submission: Omit<StatusReportRecord, "actualSnapshot">) {
+  function handleSubmitStatusReport(
+    submission: Omit<StatusReportRecord, "actualSnapshot">,
+  ) {
     if (!gameState || !scene || !toolScreen) return;
     let next = submitStatusReport(gameState, submission);
     next = submitTool(next, toolScreen);
@@ -848,7 +961,10 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
 
@@ -862,7 +978,11 @@ export default function GameRoot() {
   // isActiveQueuedEventScene check (not toolScreen.onComplete) is what
   // actually routes this correctly back into the MID_WAVE_2 queue, since
   // this tool screen is itself a queued event scene ("EV-06-RAID").
-  function handleSubmitRaidUpdate(submission: { owner: string; response: string; escalate: boolean }) {
+  function handleSubmitRaidUpdate(submission: {
+    owner: string;
+    response: string;
+    escalate: boolean;
+  }) {
     if (!gameState || !scene || !toolScreen) return;
     const key = toolScreen.raidKey ?? toolScreen.toolId;
     let next = applyDecisions(gameState, {
@@ -875,7 +995,10 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
 
@@ -899,7 +1022,10 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
 
@@ -910,7 +1036,10 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
 
@@ -921,10 +1050,12 @@ export default function GameRoot() {
     saveGame(next);
 
     if (postLines.length === 0) {
-      goToScene(next, toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null);
+      goToScene(
+        next,
+        toolScreen.onComplete?.nextScene ?? scene.nextScenes?.[0] ?? null,
+      );
     }
   }
-
 
   function handlePriorityCardPlaced(cardId: string, bucket: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
@@ -933,9 +1064,17 @@ export default function GameRoot() {
     saveGame(next);
   }
 
-  function handleClassifyCbsTask(taskId: string, classification: CbsClassification) {
+  function handleClassifyCbsTask(
+    taskId: string,
+    classification: CbsClassification,
+  ) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
-    const next = setCbsClassification(gameState, toolScreen, taskId, classification);
+    const next = setCbsClassification(
+      gameState,
+      toolScreen,
+      taskId,
+      classification,
+    );
     setGameState(next);
     saveGame(next);
   }
@@ -947,10 +1086,18 @@ export default function GameRoot() {
     saveGame(next);
   }
 
-  function handleGanttPlace(milestoneId: string, startWeek: number): string | null {
+  function handleGanttPlace(
+    milestoneId: string,
+    startWeek: number,
+  ): string | null {
     if (!gameState || !scene?.toolId || !toolScreen) return null;
     const placements = gameState.toolPlacements[scene.toolId] ?? {};
-    const error = validateMilestonePlacement(toolScreen, placements, milestoneId, startWeek);
+    const error = validateMilestonePlacement(
+      toolScreen,
+      placements,
+      milestoneId,
+      startWeek,
+    );
     if (error) return error;
 
     const next = placeMilestone(gameState, toolScreen, milestoneId, startWeek);
@@ -975,7 +1122,11 @@ export default function GameRoot() {
   function handleConfirmCriticalPath() {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const toolId = scene.toolId;
-    const next = placeToolCard(gameState, toolId, CRITICAL_PATH_CONFIRMED_MARKER);
+    const next = placeToolCard(
+      gameState,
+      toolId,
+      CRITICAL_PATH_CONFIRMED_MARKER,
+    );
     setGameState(next);
     saveGame(next);
     // No auto-advance here either — confirming the critical path just
@@ -986,7 +1137,11 @@ export default function GameRoot() {
   function handleBuildBenefitField(benefitId: string, field: string) {
     if (!gameState || !scene?.toolId || !toolScreen) return;
     const toolId = scene.toolId;
-    const next = placeToolCard(gameState, toolId, benefitFieldId(benefitId, field));
+    const next = placeToolCard(
+      gameState,
+      toolId,
+      benefitFieldId(benefitId, field),
+    );
     setGameState(next);
     saveGame(next);
   }
@@ -996,7 +1151,9 @@ export default function GameRoot() {
   // matching and marker detection keep comparing against the literal
   // authored text.
   const templateValues = {
-    currentWeek: String(computeWeeksRemaining(gameState.projectMetrics.scheduleHealth)),
+    currentWeek: String(
+      computeWeeksRemaining(gameState.projectMetrics.scheduleHealth),
+    ),
     ...supplierTemplateValues(gameState),
     ...reportMismatchTemplateValues(gameState),
     ...budgetReconciliationTemplateValues(gameState),
@@ -1016,9 +1173,12 @@ export default function GameRoot() {
     gameState.currentBackground,
     displayLines,
     gameState.flags,
-    revealedCount - 1
+    revealedCount - 1,
   );
-  const resolvedBackground = resolveBackground(backgroundKey, getBackgroundFile(backgroundKey));
+  const resolvedBackground = resolveBackground(
+    backgroundKey,
+    getBackgroundFile(backgroundKey),
+  );
   // Reception <-> hallway are crops of one panoramic photo (see
   // PANORAMA_GROUPS) — checked ahead of resolvedBackground so that
   // transition renders as a single PanoramaBackground instance sliding
@@ -1031,9 +1191,22 @@ export default function GameRoot() {
   // gameState.currentAmbient (see enterScene above), since some ambience
   // (the SharePoint browsing loop) starts in one scene and is only meant
   // to cut off on a specific line several scenes later.
-  const ambientKey = foldAmbient(gameState.currentAmbient, displayLines, gameState.flags, revealedCount - 1);
-  const ambientSrc = resolveAmbientSound(ambientKey, getAmbientSoundFile(ambientKey));
-  const footstepsOn = foldFootsteps(false, displayLines, gameState.flags, revealedCount - 1);
+  const ambientKey = foldAmbient(
+    gameState.currentAmbient,
+    displayLines,
+    gameState.flags,
+    revealedCount - 1,
+  );
+  const ambientSrc = resolveAmbientSound(
+    ambientKey,
+    getAmbientSoundFile(ambientKey),
+  );
+  const footstepsOn = foldFootsteps(
+    false,
+    displayLines,
+    gameState.flags,
+    revealedCount - 1,
+  );
   // Both volumes are keyed off backgroundKey (see ambientVolumeForBackground's
   // doc comment) so they ramp louder-to-quieter across the reception ->
   // hallway -> stairs -> landing beats without needing a per-line volume
@@ -1043,193 +1216,228 @@ export default function GameRoot() {
   const footstepsVolume = footstepsVolumeForBackground(backgroundKey);
 
   const hudActive = isHudActiveForScene(scene);
-  const ganttToolScreen = hudActive ? getToolScreenByType("gantt_placement") : null;
+  const ganttToolScreen = hudActive
+    ? getToolScreenByType("gantt_placement")
+    : null;
   const isAnnouncement = scene.displayStyle === "announcement";
 
   const actionContent =
-    atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "teams_thread" ? (
-              <TeamsThreadPanel
-                bank={panelLeadInBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={handleContinueScene}
-              />
-            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "outlook_inbox" ? (
-              <EmailInboxPanel
-                bank={panelLeadInBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={handleContinueScene}
-              />
-            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "sharepoint_browser" ? (
-              <SharePointBrowserPanel
-                bank={panelLeadInBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={handleContinueScene}
-                onOpenArtefact={setViewingArtefactId}
-              />
-            ) : atPanelLeadIn && panelLeadInBank && panelLeadInBank.visualStyle === "social_feed" ? (
-              <SocialFeedPanel
-                bank={panelLeadInBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={handleContinueScene}
-              />
-            ) : atToolBreak && toolScreen && toolIsPriority ? (
-              <PriorityBoard
-                toolScreen={toolScreen}
-                placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
-                onPlace={handlePriorityCardPlaced}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
-              <CBSReview
-                toolScreen={toolScreen}
-                classifications={computeCbsClassifications(gameState, toolScreen)}
-                onClassify={handleClassifyCbsTask}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen && toolType === "pick_n_of_m_swipeable" ? (
-              <TeamSelector
-                toolScreen={toolScreen}
-                hiredIds={gameState.toolSelections[toolScreen.toolId] ?? []}
-                onToggleHire={handleToggleHire}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen && toolType === "gantt_placement" ? (
-              <GanttBoard
-                toolScreen={toolScreen}
-                placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
-                onPlace={handleGanttPlace}
-                criticalPathGuesses={gameState.toolSelections[toolScreen.toolId] ?? []}
-                onToggleCriticalPathGuess={handleToggleCriticalPathGuess}
-                onConfirmCriticalPath={handleConfirmCriticalPath}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
-              <BenefitsBuilder
-                toolScreen={toolScreen}
-                builtFieldIds={gameState.toolProgress[toolScreen.toolId] ?? []}
-                onBuildField={handleBuildBenefitField}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen && toolType === "status_report_builder" ? (
-              <StatusReportBuilder
-                toolScreen={toolScreen}
-                gameState={gameState}
-                pmConcept={scene.pmConcept}
-                onSubmitReport={handleSubmitStatusReport}
-              />
-            ) : atToolBreak && toolScreen && toolType === "raid_update_card" ? (
-              <RaidUpdateCard toolScreen={toolScreen} onSubmitUpdate={handleSubmitRaidUpdate} />
-            ) : atToolBreak && toolScreen && toolType === "readiness_checklist" ? (
-              <ReadinessChecklist toolScreen={toolScreen} gameState={gameState} onPick={handlePickReadiness} />
-            ) : atToolBreak && toolScreen && toolType === "audit_trail_builder" ? (
-              <AuditTrailBuilder toolScreen={toolScreen} gameState={gameState} onSubmit={handleSubmitAuditTrail} />
-            ) : atToolBreak && toolScreen && toolType === "inspection_evidence_exhibit" ? (
-              <InspectionEvidenceExhibit
-                toolScreen={toolScreen}
-                gameState={gameState}
-                onContinue={handleContinueEvidenceExhibit}
-              />
-            ) : atToolBreak && toolScreen && toolScreen.visualStyle === "warehouse_blueprint" ? (
-              <WBSBlueprint
-                toolScreen={toolScreen}
-                placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
-                onCorrectPlacement={handleToolCardPlaced}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atToolBreak && toolScreen ? (
-              <ToolScreen
-                toolScreen={toolScreen}
-                placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
-                onCorrectPlacement={handleToolCardPlaced}
-                pmConcept={scene.pmConcept}
-                onReset={handleResetTool}
-                canSubmit={toolComplete}
-                onSubmit={handleSubmitTool}
-              />
-            ) : atInvestigation &&
-              investigationBank &&
-              pendingChoice &&
-              investigationBank.visualStyle === "outlook_inbox" ? (
-              <EmailInboxPanel
-                bank={investigationBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
-              />
-            ) : atInvestigation &&
-              investigationBank &&
-              pendingChoice &&
-              investigationBank.visualStyle === "teams_thread" ? (
-              <TeamsThreadPanel
-                bank={investigationBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
-              />
-            ) : atInvestigation &&
-              investigationBank &&
-              pendingChoice &&
-              investigationBank.visualStyle === "sharepoint_browser" ? (
-              <SharePointBrowserPanel
-                bank={investigationBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
-                onOpenArtefact={setViewingArtefactId}
-              />
-            ) : atInvestigation && investigationBank && pendingChoice ? (
-              <RiskInvestigationPanel
-                bank={investigationBank}
-                flags={gameState.flags}
-                onAsk={handleAskRiskQuestion}
-                onContinue={() => handleContinueInvestigation(pendingChoice.block.choiceId)}
-              />
-            ) : pendingChoice ? (
-              <ChoiceButtons
-                // Same {token} substitution as displayLines above (e.g.
-                // EV-R1's "Go back to {alternateSupplier}") — option
-                // objects otherwise pass through untouched, so
-                // handleSelectChoice still sees the real effects/flags/
-                // nextScene regardless of what the button displays.
-                options={pendingChoice.block.options.map((option) => ({
-                  ...option,
-                  text: substituteTemplate(option.text, templateValues),
-                }))}
-                reactionText={reactionText}
-                onSelect={(option) => handleSelectChoice(option, pendingChoice.block.choiceId)}
-              />
-            ) : (
-              <div className="flex justify-end">
-                <button
-                  onClick={handleContinueScene}
-                  className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
-                >
-                  Continue ▸
-                </button>
-              </div>
-            );
+    atPanelLeadIn &&
+    panelLeadInBank &&
+    panelLeadInBank.visualStyle === "teams_thread" ? (
+      <TeamsThreadPanel
+        bank={panelLeadInBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={handleContinueScene}
+      />
+    ) : atPanelLeadIn &&
+      panelLeadInBank &&
+      panelLeadInBank.visualStyle === "outlook_inbox" ? (
+      <EmailInboxPanel
+        bank={panelLeadInBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={handleContinueScene}
+      />
+    ) : atPanelLeadIn &&
+      panelLeadInBank &&
+      panelLeadInBank.visualStyle === "sharepoint_browser" ? (
+      <SharePointBrowserPanel
+        bank={panelLeadInBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={handleContinueScene}
+        onOpenArtefact={setViewingArtefactId}
+      />
+    ) : atPanelLeadIn &&
+      panelLeadInBank &&
+      panelLeadInBank.visualStyle === "social_feed" ? (
+      <SocialFeedPanel
+        bank={panelLeadInBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={handleContinueScene}
+      />
+    ) : atToolBreak && toolScreen && toolIsPriority ? (
+      <PriorityBoard
+        toolScreen={toolScreen}
+        placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
+        onPlace={handlePriorityCardPlaced}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen && toolType === "cost_review_with_descope" ? (
+      <CBSReview
+        toolScreen={toolScreen}
+        classifications={computeCbsClassifications(gameState, toolScreen)}
+        onClassify={handleClassifyCbsTask}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen && toolType === "pick_n_of_m_swipeable" ? (
+      <TeamSelector
+        toolScreen={toolScreen}
+        hiredIds={gameState.toolSelections[toolScreen.toolId] ?? []}
+        onToggleHire={handleToggleHire}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen && toolType === "gantt_placement" ? (
+      <GanttBoard
+        toolScreen={toolScreen}
+        placements={gameState.toolPlacements[toolScreen.toolId] ?? {}}
+        onPlace={handleGanttPlace}
+        criticalPathGuesses={gameState.toolSelections[toolScreen.toolId] ?? []}
+        onToggleCriticalPathGuess={handleToggleCriticalPathGuess}
+        onConfirmCriticalPath={handleConfirmCriticalPath}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen && toolType === "proof_chain_builder" ? (
+      <BenefitsBuilder
+        toolScreen={toolScreen}
+        builtFieldIds={gameState.toolProgress[toolScreen.toolId] ?? []}
+        onBuildField={handleBuildBenefitField}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen && toolType === "status_report_builder" ? (
+      <StatusReportBuilder
+        toolScreen={toolScreen}
+        gameState={gameState}
+        pmConcept={scene.pmConcept}
+        onSubmitReport={handleSubmitStatusReport}
+      />
+    ) : atToolBreak && toolScreen && toolType === "raid_update_card" ? (
+      <RaidUpdateCard
+        toolScreen={toolScreen}
+        onSubmitUpdate={handleSubmitRaidUpdate}
+      />
+    ) : atToolBreak && toolScreen && toolType === "readiness_checklist" ? (
+      <ReadinessChecklist
+        toolScreen={toolScreen}
+        gameState={gameState}
+        onPick={handlePickReadiness}
+      />
+    ) : atToolBreak && toolScreen && toolType === "audit_trail_builder" ? (
+      <AuditTrailBuilder
+        toolScreen={toolScreen}
+        gameState={gameState}
+        onSubmit={handleSubmitAuditTrail}
+      />
+    ) : atToolBreak &&
+      toolScreen &&
+      toolType === "inspection_evidence_exhibit" ? (
+      <InspectionEvidenceExhibit
+        toolScreen={toolScreen}
+        gameState={gameState}
+        onContinue={handleContinueEvidenceExhibit}
+      />
+    ) : atToolBreak &&
+      toolScreen &&
+      toolScreen.visualStyle === "warehouse_blueprint" ? (
+      <WBSBlueprint
+        toolScreen={toolScreen}
+        placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
+        onCorrectPlacement={handleToolCardPlaced}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atToolBreak && toolScreen ? (
+      <ToolScreen
+        toolScreen={toolScreen}
+        placedCardIds={gameState.toolProgress[toolScreen.toolId] ?? []}
+        onCorrectPlacement={handleToolCardPlaced}
+        pmConcept={scene.pmConcept}
+        onReset={handleResetTool}
+        canSubmit={toolComplete}
+        onSubmit={handleSubmitTool}
+      />
+    ) : atInvestigation &&
+      investigationBank &&
+      pendingChoice &&
+      investigationBank.visualStyle === "outlook_inbox" ? (
+      <EmailInboxPanel
+        bank={investigationBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={() =>
+          handleContinueInvestigation(pendingChoice.block.choiceId)
+        }
+      />
+    ) : atInvestigation &&
+      investigationBank &&
+      pendingChoice &&
+      investigationBank.visualStyle === "teams_thread" ? (
+      <TeamsThreadPanel
+        bank={investigationBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={() =>
+          handleContinueInvestigation(pendingChoice.block.choiceId)
+        }
+      />
+    ) : atInvestigation &&
+      investigationBank &&
+      pendingChoice &&
+      investigationBank.visualStyle === "sharepoint_browser" ? (
+      <SharePointBrowserPanel
+        bank={investigationBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={() =>
+          handleContinueInvestigation(pendingChoice.block.choiceId)
+        }
+        onOpenArtefact={setViewingArtefactId}
+      />
+    ) : atInvestigation && investigationBank && pendingChoice ? (
+      <RiskInvestigationPanel
+        bank={investigationBank}
+        flags={gameState.flags}
+        onAsk={handleAskRiskQuestion}
+        onContinue={() =>
+          handleContinueInvestigation(pendingChoice.block.choiceId)
+        }
+      />
+    ) : pendingChoice ? (
+      <ChoiceButtons
+        // Same {token} substitution as displayLines above (e.g.
+        // EV-R1's "Go back to {alternateSupplier}") — option
+        // objects otherwise pass through untouched, so
+        // handleSelectChoice still sees the real effects/flags/
+        // nextScene regardless of what the button displays.
+        options={pendingChoice.block.options.map((option) => ({
+          ...option,
+          text: substituteTemplate(option.text, templateValues),
+        }))}
+        reactionText={reactionText}
+        onSelect={(option) =>
+          handleSelectChoice(option, pendingChoice.block.choiceId)
+        }
+      />
+    ) : (
+      <div className="flex justify-end">
+        <button
+          onClick={handleContinueScene}
+          className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
+        >
+          Continue ▸
+        </button>
+      </div>
+    );
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-zinc-950">
@@ -1246,13 +1454,21 @@ export default function GameRoot() {
           PANORAMA_GROUPS) falls through to the normal branch below,
           which mounts fresh as usual. */}
       {panorama ? (
-        <PanoramaBackground key="panorama" src={panorama.src} focusPercent={panorama.focusPercent} />
+        <PanoramaBackground
+          key="panorama"
+          src={panorama.src}
+          focusPercent={panorama.focusPercent}
+        />
       ) : (
         resolvedBackground?.src && (
           <SceneBackground
             key={resolvedBackground.src}
             src={resolvedBackground.src}
-            kenBurns={backgroundKey ? BACKGROUND_KEN_BURNS_OVERRIDES[backgroundKey] : undefined}
+            kenBurns={
+              backgroundKey
+                ? BACKGROUND_KEN_BURNS_OVERRIDES[backgroundKey]
+                : undefined
+            }
           />
         )
       )}
@@ -1270,7 +1486,7 @@ export default function GameRoot() {
         <SceneAudio
           key="ambient"
           src={ambientSrc}
-          volume={ambientVolume}
+          volume={muted ? 0 : ambientVolume}
           fadeInMs={1200}
           fadeOutMs={1500}
           paused={paused}
@@ -1280,28 +1496,70 @@ export default function GameRoot() {
         <SceneAudio
           key="footsteps"
           src={FOOTSTEPS_SFX_SRC}
-          volume={footstepsVolume}
+          volume={muted ? 0 : footstepsVolume}
           fadeInMs={300}
           fadeOutMs={700}
           paused={paused}
         />
       )}
-      {/* Floating pause button — deliberately separate from the header
-          (right-edge middle, not the top bar) so it stays in the exact
-          same spot regardless of what the header is showing (HUD stats,
-          act label, or nothing at all on announcement scenes). z-20 sits
-          above the background/audio layer and the header, below the
-          overlay itself (z-30). */}
+      {/* Floating pause + mute buttons — deliberately separate from the
+          header so they stay in the exact same spot regardless of what
+          the header is showing (HUD stats, act label, or nothing at all
+          on announcement scenes). Live on the left edge, stacked directly
+          above CharacterPanel/FieldGuidePanel's own edge tabs as one
+          continuous column — pause, mute, team, library, top to bottom —
+          rather than floating up near the header/DEV-playtest banner
+          where they first landed. Same h-10 w-10 circular-tab style, own
+          accent colors, same hover-tooltip pattern as the two tabs below.
+          z-20 sits above the background/audio layer and the header,
+          below the overlay itself (z-30).
+
+          Position math: CharacterPanel centers on exactly 50% via
+          `-translate-y-1/2`, so its top edge sits at `50% - 20px` (half
+          its own 40px height). Each button stacks with a consistent 22px
+          gap above the one below it (the same gap FieldGuidePanel's tab
+          already uses below CharacterPanel) — a 62px center-to-center
+          pitch covers one 40px button plus a 22px gap. Mute's top edge:
+          `50% - 20 - 22 - 40 = 50% - 82`. Pause's top edge, one more
+          pitch up: `50% - 82 - 22 - 40 = 50% - 144`. Mute rides
+          SceneAudio's own `volume` prop down to 0 (a ramp, not a hard
+          cut) — independent of pause, which does a real .pause()
+          instead; see the `muted` state's own comment above for why
+          this is session-only, not GameState. */}
       <button
         onClick={() => setPaused(true)}
         aria-label="Pause"
-        className="absolute right-2 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+        className="group absolute left-2 top-[calc(50%-144px)] z-20 flex h-10 w-10 items-center justify-center rounded-full border border-amber-700/60 bg-zinc-900/90 text-amber-300 shadow-md transition-colors hover:border-amber-400 hover:text-amber-200"
       >
-        <Pause size={11} className="fill-current" />
+        <Pause size={18} className="fill-current" />
+        <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-200 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+          Pause
+        </span>
+      </button>
+      <button
+        onClick={() => setMuted((m) => !m)}
+        aria-label={muted ? "Unmute sound" : "Mute sound"}
+        className={`group absolute left-2 top-[calc(50%-82px)] z-20 flex h-10 w-10 items-center justify-center rounded-full border bg-zinc-900/90 shadow-md transition-colors ${
+          muted
+            ? "border-rose-600/70 text-rose-300 hover:border-rose-400 hover:text-rose-200"
+            : "border-cyan-700/60 text-cyan-300 hover:border-cyan-400 hover:text-cyan-200"
+        }`}
+      >
+        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+        <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-200 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+          {muted ? "Unmute sound" : "Mute sound"}
+        </span>
       </button>
       <CharacterPanel charactersMet={gameState.charactersMet} />
+      <FieldGuidePanel fieldGuideSeen={gameState.fieldGuideSeen} />
+      <ProjectArtefactsPanel
+        gameState={gameState}
+        onOpenDocument={setViewingArtefactId}
+      />
       <PauseOverlay open={paused} onResume={() => setPaused(false)} />
-      {DEV_MODE && <DevPlaytestNav gameState={gameState} history={devHistory} />}
+      {DEV_MODE && (
+        <DevPlaytestNav gameState={gameState} history={devHistory} />
+      )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (
           <div />
@@ -1310,7 +1568,9 @@ export default function GameRoot() {
             <div className="text-[10px] uppercase tracking-[0.3em] text-emerald-500">
               {scene.act}
             </div>
-            <div className="text-sm font-semibold text-zinc-100">{scene.title}</div>
+            <div className="text-sm font-semibold text-zinc-100">
+              {scene.title}
+            </div>
           </div>
         )}
         <button
@@ -1343,7 +1603,10 @@ export default function GameRoot() {
            button) was silently cut off with no way to reach it. */}
         <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-end">
           {isAnnouncement ? (
-            <AnnouncementCard lines={displayLines} actionContent={actionContent} />
+            <AnnouncementCard
+              lines={displayLines}
+              actionContent={actionContent}
+            />
           ) : (
             <DialogueTranscript
               sceneAct={scene.act}

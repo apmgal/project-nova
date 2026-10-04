@@ -6,7 +6,10 @@ import CharacterPortrait from "./CharacterPortrait";
 import SpeechBubble from "./SpeechBubble";
 import SceneAudio from "./SceneAudio";
 import SceneVisualInset from "./SceneVisualInset";
-import type { NarrativeCharacter, NarrativeSceneScript } from "@/lib/nova/narrative/types";
+import type {
+  NarrativeCharacter,
+  NarrativeSceneScript,
+} from "@/lib/nova/narrative/types";
 
 /** The expression a character is showing at a given point in the script:
  * whatever the most recent line THEY spoke set explicitly, scanning back
@@ -14,7 +17,7 @@ import type { NarrativeCharacter, NarrativeSceneScript } from "@/lib/nova/narrat
 function currentExpressionFor(
   character: NarrativeCharacter,
   lines: NarrativeSceneScript["lines"],
-  uptoIndex: number
+  uptoIndex: number,
 ): string {
   for (let i = Math.min(uptoIndex, lines.length - 1); i >= 0; i--) {
     const l = lines[i];
@@ -29,6 +32,10 @@ interface NarrativeSceneProps {
    * finishes. The caller decides what plays next — this component only
    * knows how to play its own script front to back. */
   onComplete: () => void;
+  /** Rides the scene's music volume down to 0 while true — a ramp via
+   * SceneAudio's own `volume` prop, not a hard cut. Defaults to false so
+   * existing callers don't need updating. */
+  muted?: boolean;
 }
 
 const CHARACTER_ENTER_DELAY_MS = 500;
@@ -51,14 +58,19 @@ const EXIT_FADE_MS = 550;
  * center-stage for just that line; clicking past the last line fades to
  * black and then calls `onComplete`.
  */
-export default function NarrativeScene({ script, onComplete }: NarrativeSceneProps) {
+export default function NarrativeScene({
+  script,
+  onComplete,
+  muted = false,
+}: NarrativeSceneProps) {
   const [lineIndex, setLineIndex] = useState(0);
   const [exiting, setExiting] = useState(false);
 
   const line = script.lines[lineIndex] ?? null;
   const speaker =
     line && line.speaker !== "narrator"
-      ? script.characters.find((character) => character.id === line.speaker) ?? null
+      ? (script.characters.find((character) => character.id === line.speaker) ??
+        null)
       : null;
 
   // A character joins the stage the moment their first line is reached,
@@ -67,10 +79,10 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
   // introduce themselves) just by where their first line falls in
   // `script.lines`, no separate "entrance cue" data needed.
   const speakersSoFar = new Set(
-    script.lines.slice(0, lineIndex + 1).map((l) => l.speaker)
+    script.lines.slice(0, lineIndex + 1).map((l) => l.speaker),
   );
   const onStageCharacters = script.characters.filter((character) =>
-    speakersSoFar.has(character.id)
+    speakersSoFar.has(character.id),
   );
 
   function handleAdvance() {
@@ -93,8 +105,8 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
       />
 
       <SceneAudio
-        src={exiting ? null : script.music?.src ?? null}
-        volume={script.music?.volume}
+        src={exiting ? null : (script.music?.src ?? null)}
+        volume={muted ? 0 : script.music?.volume}
         fadeInMs={script.music?.fadeInMs}
         fadeOutMs={script.music?.fadeOutMs}
       />
@@ -110,7 +122,9 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
         />
       ))}
 
-      {line?.visual && <SceneVisualInset key={line.visual.src} visual={line.visual} />}
+      {line?.visual && (
+        <SceneVisualInset key={line.visual.src} visual={line.visual} />
+      )}
 
       {line && (
         <SpeechBubble
@@ -127,7 +141,10 @@ export default function NarrativeScene({ script, onComplete }: NarrativeScenePro
 
       <div
         className="pointer-events-none absolute inset-0 z-30 bg-black transition-opacity"
-        style={{ opacity: exiting ? 1 : 0, transitionDuration: `${EXIT_FADE_MS}ms` }}
+        style={{
+          opacity: exiting ? 1 : 0,
+          transitionDuration: `${EXIT_FADE_MS}ms`,
+        }}
         aria-hidden
       />
     </div>

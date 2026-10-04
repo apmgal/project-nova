@@ -16,6 +16,12 @@ interface CBSReviewProps {
   onReset: () => void;
   canSubmit: boolean;
   onSubmit: () => void;
+  /** Project Artefacts gallery snapshot mode — same contract as ToolScreen/
+   * PriorityBoard's own `readOnly`: hides instructions/hint/reset/submit
+   * and the Protect/Potential lever buttons become static labels reading
+   * back whatever classification is already in GameState.decisions,
+   * rather than live controls. */
+  readOnly?: boolean;
 }
 
 const currencyFormatter = new Intl.NumberFormat("en-GB", {
@@ -54,6 +60,7 @@ export default function CBSReview({
   onReset,
   canSubmit,
   onSubmit,
+  readOnly = false,
 }: CBSReviewProps) {
   const hint = useConceptHint(pmConcept);
   const costs = toolScreen.costsByTask ?? {};
@@ -72,8 +79,10 @@ export default function CBSReview({
   const classifiedCount = [...classifiableIds].filter((id) => classifications[id]).length;
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4">
-      {(toolScreen.instructions || pmConcept) && (
+    <div
+      className={`flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/90 p-4 ${readOnly ? "pointer-events-none" : ""}`}
+    >
+      {!readOnly && (toolScreen.instructions || pmConcept) && (
         <div className="flex items-start justify-between gap-3">
           {toolScreen.instructions && (
             <p className="text-sm text-zinc-300">{toolScreen.instructions}</p>
@@ -84,7 +93,7 @@ export default function CBSReview({
           </div>
         </div>
       )}
-      <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />
+      {!readOnly && <ConceptHintPanel entry={hint.entry} open={hint.open} onClose={hint.close} />}
 
       <div className="flex flex-col items-center">
         <div className="grid w-full max-w-md grid-cols-3 gap-2 text-center">
@@ -133,7 +142,24 @@ export default function CBSReview({
                     >
                       <div>{taskLabel(taskId)}</div>
                       <div className="mt-0.5 text-zinc-500">{currencyFormatter.format(costs[taskId])}</div>
-                      {isClassifiable && (
+                      {isClassifiable && readOnly && (
+                        <div
+                          className={`mt-1.5 rounded border px-1.5 py-1 text-center text-[10px] font-medium ${
+                            classification === "protected"
+                              ? "border-emerald-700/60 bg-emerald-950/40 text-emerald-300"
+                              : classification === "potentialLever"
+                                ? "border-amber-700/60 bg-amber-950/40 text-amber-300"
+                                : "border-zinc-700 bg-zinc-900/60 text-zinc-500"
+                          }`}
+                        >
+                          {classification === "protected"
+                            ? "Protected"
+                            : classification === "potentialLever"
+                              ? "Potential lever"
+                              : "Not classified"}
+                        </div>
+                      )}
+                      {isClassifiable && !readOnly && (
                         <div className="mt-1.5 flex gap-1">
                           <button
                             type="button"
@@ -168,13 +194,13 @@ export default function CBSReview({
         })}
       </div>
 
-      {classifiableIds.size > 0 && classifiedCount < classifiableIds.size && (
+      {!readOnly && classifiableIds.size > 0 && classifiedCount < classifiableIds.size && (
         <p className="text-xs text-zinc-400">
           Classify every package above — {classifiedCount}/{classifiableIds.size} done — before continuing.
         </p>
       )}
 
-      <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />
+      {!readOnly && <SubmitToolButton canSubmit={canSubmit} onSubmit={onSubmit} />}
     </div>
   );
 }

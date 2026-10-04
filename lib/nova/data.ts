@@ -242,6 +242,15 @@ export function getToolScreen(toolId: string | null | undefined): ToolScreenBloc
   return toolScreens[toolId] ?? null;
 }
 
+/** Every tool screen in tool_screens.json, regardless of type/visualStyle —
+ * used by lib/nova/projectArtefacts.ts to enumerate every tool the player
+ * could have completed, since (unlike getToolScreen/getToolScreenByType)
+ * that consumer doesn't know ids or types up front, just needs to filter
+ * the full set by GameState.toolSubmitted + a known visualStyle allowlist. */
+export function getAllToolScreens(): ToolScreenBlock[] {
+  return Object.values(toolScreens);
+}
+
 /** First tool screen matching a given `type` (e.g. "gantt_placement") —
  * used where a consumer needs to reach a specific tool's data (like the
  * HUD reading the Milestone Gantt for its Current Objective line) without

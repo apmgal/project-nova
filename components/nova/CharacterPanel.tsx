@@ -37,6 +37,20 @@ const CHARACTER_PANEL_IDS = [
  * Mounted unconditionally in GameRoot, same as ArtefactsDrawer/
  * DebugDrawer — always available once a save exists, never gated by
  * scene, act, or HUD visibility.
+ *
+ * Open/close is always mounted (never `{open && ...}`) so the
+ * transition classes below can actually animate on the `open` flip —
+ * a conditionally-mounted element has no "before" state to transition
+ * from/to, it just pops. The dim backdrop fades in with the overlay's
+ * own opacity transition; the drawer additionally slides in on its own
+ * transform, and its elevated shadow is what reads as "floating above
+ * the scene" rather than pasted flat on top of it.
+ *
+ * Edge tab: sky-tinted (vs. FieldGuidePanel's violet) so the two
+ * stacked tabs read as distinct destinations at a glance, not just two
+ * identical grey dots. The `group`/`group-hover` tooltip span is plain
+ * CSS, no portal or JS positioning — it's small and always has room to
+ * the right since the tab sits on the left edge.
  */
 export default function CharacterPanel({ charactersMet }: CharacterPanelProps) {
   const [open, setOpen] = useState(false);
@@ -46,33 +60,46 @@ export default function CharacterPanel({ charactersMet }: CharacterPanelProps) {
       <button
         onClick={() => setOpen(true)}
         aria-label="Open the team panel"
-        className="absolute left-2 top-1/2 z-20 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+        className="group absolute left-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-sky-700/60 bg-zinc-900/90 text-sky-300 shadow-md transition-colors hover:border-sky-400 hover:text-sky-200"
       >
-        <Users size={11} />
+        <Users size={18} />
+        <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-200 opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+          Meet the Team
+        </span>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex" onClick={() => setOpen(false)}>
-          <div
-            className="flex h-full w-80 max-w-[85vw] flex-col overflow-hidden border-r border-zinc-700 bg-zinc-950/98 shadow-xl sm:w-96"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-              <span className="text-sm font-semibold text-zinc-200">Meet the Team</span>
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="Close the team panel"
-                className="text-zinc-500 hover:text-zinc-300"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              <CharacterBoard characterIds={CHARACTER_PANEL_IDS} metIds={charactersMet} />
-            </div>
+      <div
+        className={`fixed inset-0 z-50 flex bg-black/65 backdrop-blur-[2px] transition-opacity duration-200 ease-out ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setOpen(false)}
+      >
+        <div
+          className={`flex h-full w-80 max-w-[85vw] flex-col overflow-hidden border-r border-zinc-500/60 bg-zinc-950 shadow-[20px_0_60px_-6px_rgba(0,0,0,0.95)] transition-transform duration-300 ease-out sm:w-96 ${
+            open ? "translate-x-0" : "-translate-x-full"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+            <span className="text-sm font-semibold text-zinc-200">
+              Meet the Team
+            </span>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close the team panel"
+              className="text-zinc-500 hover:text-zinc-300"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <CharacterBoard
+              characterIds={CHARACTER_PANEL_IDS}
+              metIds={charactersMet}
+            />
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }
