@@ -74,27 +74,50 @@ const BUILT_SCENE_OVERRIDES = new Set([
   // in DESIGN_NOTES.md). All four scenes staged in together, unlike Act 4's
   // wave-at-a-time rollout, since Act 5 has no event-wave complexity of its
   // own to stage incrementally.
-  "ACT5_SCENE01",
-  "ACT5_SCENE02",
-  "ACT5_SCENE03",
-  "ACT5_SCENE04",
-  // Act 6 — the ending system (see DESIGN_NOTES.md's "Four-family ending
-  // architecture" entry). Staged in once evaluateEnding + the retagged
-  // dialogue conditions were verified end-to-end via script; this is what
-  // makes Act 6 reachable by actually playing the live game, not just via
-  // the scripted playtest.
-  "ACT6_SCENE01",
-  "ACT6_SCENE02",
-  "ACT6_SCENE03",
+  // Recovery Meeting — opening dialogue only, shown after the Spline
+  // facility investigation (routing in GameRoot's warehouse-interlude
+  // onContinue). Its nextScenes (ACT5_SCENE01) now hands over to the
+  // Inspection Film (see lib/nova/inspectionFilm.ts and GameRoot's
+  // goToRealScene).
+  "ACT5_SCENE00_RECOVERY",
+  // ACT5_SCENE01–04 and ACT6_SCENE01–03 (the original Act 5–6 storyline) are
+  // no longer built: the Inspection Film replaced them as the final chapter.
+  // Their data is untouched in data/*.json and archived with restore notes
+  // in archive/legacy-act5-act6/README.md — re-adding the seven ids here is
+  // part of restoring them.
 ]);
 
 const allScenes = scenesRaw as unknown as Record<string, Scene>;
 
-export const BUILT_SCENES: Record<string, Scene> = Object.fromEntries(
-  Object.entries(allScenes).filter(
-    ([id, scene]) => BUILT_ACTS.has(scene.act) || BUILT_SCENE_OVERRIDES.has(id)
-  )
-);
+/** The scene id of the game's final chapter (re-exported by lib/nova/inspectionFilm.ts). */
+export const INSPECTION_FILM_SCENE_ID = "ACT5_INSPECTION_FILM";
+
+/** The game's final chapter — the Inspection Film (components/nova/act5/InspectionFilm.tsx, rendered by
+ * GameRoot for this scene id). Defined here rather than in scenes.json because it has no dialogue, choices
+ * or tool of its own: the film keeps its progress in GameState.decisions. */
+const INSPECTION_FILM_SCENE: Scene = {
+  sceneId: INSPECTION_FILM_SCENE_ID,
+  title: "The Inspection",
+  act: "Act 5",
+  screenType: "Cinematic",
+  location: null,
+  charactersInvolved: [],
+  pmConcept: "Regulatory inspection and project closure",
+  contentSummary:
+    "The morning of the commissioning inspection, Whitfield's inspection, three weeks of no news, the Final Determination, the outcome's epilogue and the Decision Analysis.",
+  dialogueId: null,
+  choicesId: null,
+  nextScenes: [],
+};
+
+export const BUILT_SCENES: Record<string, Scene> = {
+  ...Object.fromEntries(
+    Object.entries(allScenes).filter(
+      ([id, scene]) => BUILT_ACTS.has(scene.act) || BUILT_SCENE_OVERRIDES.has(id)
+    )
+  ),
+  [INSPECTION_FILM_SCENE_ID]: INSPECTION_FILM_SCENE,
+};
 
 export const BUILT_SCENE_IDS = new Set(Object.keys(BUILT_SCENES));
 

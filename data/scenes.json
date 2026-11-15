@@ -1201,5 +1201,32 @@
     "needsWriting": false,
     "note": "Non-canonical bridge scene. This is where the Week X/24 HUD countdown activates for the first time \u2014 a visual translation layer over scheduleHealth (weeksRemaining = round(scheduleHealth/100*24)), not a new stored variable.",
     "displayStyle": "announcement"
+  },
+  "ACT5_SCENE00_RECOVERY": {
+    "sceneId": "ACT5_SCENE00_RECOVERY",
+    "title": "Recovery Meeting",
+    "act": "Act 5",
+    "screenRange": null,
+    "screenType": "Scripted Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "vaughn",
+      "camille",
+      "priya"
+    ],
+    "pmConcept": "Recovery planning under schedule pressure",
+    "contentSummary": "After the site investigation, Vaughn, Camille and Priya lay out the recovery problem: wrong component, verification and records still owed, thirty days left. Ends at a placeholder for the recovery strategy decision.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT5_SCENE00_RECOVERY",
+    "choicesId": null,
+    "toolId": null,
+    "trigger": {
+      "previousScene": "ACT4_SCENE06"
+    },
+    "nextScenes": [
+      "ACT5_SCENE01"
+    ],
+    "needsWriting": false
   }
 }

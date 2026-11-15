@@ -1,0 +1,14 @@
+Scene,Ambience,Cues,Tested
+Facility walkthrough — overview,Silence (rooms fade out),—,Verified in your dev build
+Warehouse,plant_room_tone_loop.wav @0.10 (ventilation hum),"Evidence open: paper_settle; finding recorded: paper_dossier; forklift drive / forks up / forks down cues wired, no asset yet",Verified
+Production Floor,plant_room_tone_loop.wav @0.22,Evidence cues as above; conveyor / machinery: no asset yet,Verified
+Quality Laboratory,room_quiet_loop.wav @0.13 (sealed-room tone),"Evidence cues as above (verified); dissolution head / fume-hood sash cues wired, no asset yet",Verified
+Room change,"Previous bed fades out 1.2 s, new bed fades in 1.6 s; one bed at a time",—,Verified (no leftover elements)
+Recovery Meeting — dialogue,room_quiet_loop.wav @0.30,"Dialogue advance: wired, no asset yet",Verified
+Recovery strategy,room tone @0.30,Panel appears: paper_settle @0.12; choice: paper_dossier @0.15,Verified
+Incoming call,room tone ducked to 0.06,teams-call.mp3 ringtone (unchanged),Verified
+On call / sponsor reply,room tone @0.06,"mike-sponsor-checkin.mp3, choice: paper_dossier, mike-reply-*.mp3 (unchanged)",Verified
+Call ended,room tone ramps to 0 with the fade to black,hang-up tone (unchanged),Verified
+Recovery montage,"Per shot: warehouse 0.10 / production 0.22 / lab room tone 0.13, crossfaded through black","Shutter, forklift, filtration work, lab instruments: no assets yet",Not verified (3D scenes can't render in my test environment)
+Readiness recommendation,"plant_room_tone_loop.wav @0.06, no music","Choice: paper_settle @0.20, 1.5 s hold, bed fades with the exit",Verified
+The Morning of the Inspection →,"Unchanged (car_arrival, facility_activity, …)",Unchanged,Verified

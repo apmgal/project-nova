@@ -8,6 +8,9 @@ interface EmailInboxPanelProps {
   flags: Flags;
   onAsk: (question: RiskInvestigationQuestion) => void;
   onContinue: () => void;
+  /** Optional overrides for reuse outside the risk investigation (e.g. the Act 6 "No News" inbox). */
+  continueLabel?: string;
+  dates?: Record<string, string>;
 }
 
 // Cosmetic-only: the date shown next to each message in the list, and the
@@ -31,7 +34,7 @@ const EMAIL_DATES: Record<string, string> = {
  * gated behind maxQuestions — these are optional colour, not a quiz, so
  * Continue is always available.
  */
-export default function EmailInboxPanel({ bank, flags, onAsk, onContinue }: EmailInboxPanelProps) {
+export default function EmailInboxPanel({ bank, flags, onAsk, onContinue, continueLabel, dates }: EmailInboxPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(bank.questions[0]?.id ?? null);
   const selected = bank.questions.find((q) => q.id === selectedId) ?? null;
 
@@ -67,7 +70,7 @@ export default function EmailInboxPanel({ bank, flags, onAsk, onContinue }: Emai
                       {question.dimension}
                     </span>
                     <span className="shrink-0 text-[10px] text-[#605e5c]">
-                      {EMAIL_DATES[question.id] ?? ""}
+                      {dates?.[question.id] ?? EMAIL_DATES[question.id] ?? ""}
                     </span>
                   </span>
                   <span className="truncate text-[12px] text-[#201f1e]">{question.questionText}</span>
@@ -97,7 +100,7 @@ export default function EmailInboxPanel({ bank, flags, onAsk, onContinue }: Emai
           onClick={onContinue}
           className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
         >
-          Continue ▸
+          {continueLabel ?? "Continue ▸"}
         </button>
       </div>
     </div>

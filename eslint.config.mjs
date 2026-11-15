@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Archived (inactive) code — see archive/legacy-act5-act6/README.md.
+    "archive/**",
   ]),
 ]);
 

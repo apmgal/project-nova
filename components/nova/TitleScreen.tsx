@@ -21,7 +21,9 @@ interface TitleScreenProps {
 // gets unlocked and torn down in the same event, audible for a blip if
 // at all. Holding the screen mounted for HOLD_MS after the click gives
 // the now-unlocked track real time to fade in and be heard before the
-// scene actually swaps to Reception Intro.
+// scene actually swaps to Reception Intro. (Update: the title theme now
+// fades out as soon as either button is clicked — see the SceneAudio src
+// below — so HOLD_MS only keeps the "Starting…" state on screen briefly.)
 const HOLD_MS = 1000;
 
 /**
@@ -90,7 +92,9 @@ export default function TitleScreen({ hasSave, onNewGame, onContinue }: TitleScr
       className="relative flex flex-1 items-center overflow-hidden"
       style={{ backgroundColor: "var(--nova-cream-photo)" }}
     >
-      <SceneAudio src="/assets/music/main_title_loop_v2.mp3" volume={0.4} loop fadeInMs={1500} fadeOutMs={2000} />
+      {/* The title theme stops as soon as Begin Mission / Continue Mission is clicked: dropping
+          the src fades it out right away (0.8 s) instead of playing on through the hand-off. */}
+      <SceneAudio src={pending ? null : "/assets/music/main_title_loop_v2.mp3"} volume={0.4} loop fadeInMs={1500} fadeOutMs={800} />
 
       {/* Mission team — sticker-outlined cutout, anchored bottom-left */}
       <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-[62%] w-[72%] sm:h-[80%] sm:w-[48%] md:w-[42%]">

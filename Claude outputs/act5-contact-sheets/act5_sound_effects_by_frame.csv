@@ -1,0 +1,53 @@
+Frame,Sheet,Scene,Beat,Sound
+01,1,Facility Walkthrough,Act 5 opens: intro card,Silence
+02,1,Facility walkthrough rooms,Warehouse / Production Floor / Quality Lab (3D),None in code (the 3D scenes carry no audio track)
+03,1,Recovery Meeting,"Vaughn, Camille, Priya",Silence
+04,1,Recovery strategy,Decision: A / B / C,Silence
+05,1,Team reaction,Camille responds to the choice,Silence
+06,1,Incoming call,Mike E. calls,"Teams ringtone (teams-call.mp3, Web Audio) — loops until answered"
+07,1,On call,Mike's check-in,Mike voice line (mike-sponsor-checkin.mp3)
+08,1,Sponsor response,Decision: reassure / transparent / delay,Silence
+09,1,Mike replies,Voiced reply to your choice,Mike voice reply (mike-reply-reassure / -transparent / -delay.mp3); hang-up tone on End call (teams-call.mp3)
+10,1,Recovery montage 1/3,"Warehouse — materials arrive (3D, earlier capture)",None in code
+11,1,Recovery montage 2/3,"Production floor — filtration rework (3D, earlier capture)",None in code
+12,1,Recovery montage 3/3,"Quality lab — testing (3D, earlier capture)",None in code
+13,1,Readiness recommendation,"""What do you recommend?""",Silence (music removed)
+14,1,Recommendation chosen,"Panel holds, fade to black",Silence
+15,1,The Morning of the Inspection,Facility at dawn — car arrives,"car_arrival.wav (approach, engine off)"
+16,1,Facility at dawn,Push towards the entrance,"facility_activity.wav (through the glass) + car_door.wav (open, slam)"
+17,2,Inspection room,"Empty room, door opens",facility_activity.wav + door_open.wav
+18,2,Whitfield enters,"Footsteps, door shut",footsteps.wav + door_close.wav; activity drops to sealed-room level
+19,2,The dossier,"""Commissioning Readiness""",paper_dossier.wav over faint room activity
+20,2,Title,THE INSPECTION,title_impact.wav (impact on the title)
+21,2,Whitfield's opening,"""Walk me through your recommendation""",room_quiet_loop.wav (room tone)
+22,2,Your account,"Your recommendation, in your words",room_quiet_loop.wav
+23,2,Round 1 — present,Choose a document from the dossier,room_quiet_loop.wav; paper_settle.wav when a document is presented
+24,2,Round 1 — follow-up,"""How was that verified?""",room_quiet_loop.wav
+25,2,Round 2 — risks,"""How were they being tracked?""",room_quiet_loop.wav; paper_settle.wav on presenting
+26,2,Round 2 — authority,"""Who had the authority?""",room_quiet_loop.wav
+27,2,Neutral close,"""I'll consider the documentation…""","room_quiet_loop.wav, fading out"
+28,2,Three Weeks Later,Title card,Silence
+29,2,No News — the desk,Ordinary working day,"office_bau_loop.wav (office ambience, fades in to 0.7)"
+30,2,Teams — Priya,Reply to Priya,"office ambience + teams_ping.wav (message in, and on her reply)"
+31,2,Inbox,Determination: pending,office ambience
+32,2,The email,Final Determination arrives,office ambience + mail_notify.wav (on arrival); ambience fades on Open
+33,2,Final Determination report,The report opens,paper_dossier.wav + main_menu_theme.mp3 fading in
+34,2,Determination viewed,"Outcome revealed, Continue","main_menu_theme.mp3 (dips to near-silence on View, then returns); fades out on Continue"
+35,3,Not Satisfactory — office,"Dark office, late evening",room_quiet_loop.wav + plant_room_tone_loop.wav; music: main_menu_theme.mp3 (quiet)
+36,3,Not Satisfactory — Mike,"Teams message, player-paced",teams_ping.wav; music ducked under the message
+37,3,Not Satisfactory — departure,"Facility at blue hour, camera pulls back",plant_room_tone_loop.wav (faint); music rises to its peak
+38,3,Closing card,Not Satisfactory,music fades to silence over ~10 s
+39,3,Subject to Conditions — office,Office at sunset,room tone + building hum; music: cold_conclusion_august_wilhelmsson.mp3 (quiet opening)
+40,3,Subject to Conditions — Mike,"Teams message, player-paced",teams_ping.wav; music ducked (circles a quiet 4-bar loop while reading)
+41,3,Subject to Conditions — approach,"Sunset, camera moves towards the entrance",faint building hum; the track's own build swells
+42,3,Closing card,Subject to Conditions,music fades to silence
+43,3,Satisfactory — office,Morning office,room tone + building hum; music: yoda_experia.mp3 (gentle)
+44,3,Satisfactory — Mike,"Teams message, player-paced",teams_ping.wav; music ducked
+45,3,Satisfactory — reveal,"Golden hour, camera rises and widens",faint building hum; music at its peak
+46,3,Closing card,Satisfactory,music fades to silence
+47,3,Decision Analysis 1/5,Project Overview,Silence
+48,3,Decision Analysis 2/5,Performance Breakdown,Silence
+49,3,Decision Analysis 3/5,Your Decision Journey,Silence
+50,3,Decision Analysis 4/5,APM Knowledge Mapping,Silence
+51,3,Decision Analysis 5/5,What You Take Forward,Silence
+52,3,Back to Title,Title screen,main_title_loop_v2.mp3 (title music)

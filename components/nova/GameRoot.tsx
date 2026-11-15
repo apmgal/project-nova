@@ -2,6 +2,8 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { Pause, Volume2, VolumeX } from "lucide-react";
+import WarehouseInterlude from "@/components/prototype/warehouse/WarehouseInterlude";
+import { backupSaveBeforeFirstJump, restoreDevJumpBackup } from "@/lib/nova/devActJump";
 import {
   getScene,
   getDialogue,
@@ -114,6 +116,31 @@ import ArtefactsDrawer from "./ArtefactsDrawer";
 import PauseOverlay from "./PauseOverlay";
 import EndOfContent from "./EndOfContent";
 import ProjectReflectionEnding from "./ProjectReflectionEnding";
+import RecoverySequence from "./act5/RecoverySequence";
+import RecoveryMontage from "./act5/RecoveryMontage";
+import ReadinessRecommendation from "./act5/ReadinessRecommendation";
+import InspectorArrival from "./act5/InspectorArrival";
+import InspectionFilm from "./act5/InspectionFilm";
+import {
+  INSPECTION_FILM_SCENE_ID,
+  LEGACY_ACT5_ENTRY_SCENE_ID,
+  backupLegacyAct5Act6Save,
+  beginInspectionSession,
+  clearInspectionFilmProgress,
+  isLegacyAct5Act6Scene,
+  migrateLegacyAct5Act6Save,
+} from "@/lib/nova/inspectionFilm";
+import { INSPECTOR_ARRIVAL_SEEN_FLAG } from "@/lib/nova/inspectorArrival";
+import {
+  READINESS_RECOMMENDATION_KEY,
+  RECOVERY_MONTAGE_SEEN_FLAG,
+  RECOVERY_OUTCOME_KEY,
+  RECOVERY_STRATEGY_KEY,
+  SPONSOR_UPDATE_KEY,
+  evaluateRecovery,
+  recoveryConditionFlags,
+  recoveryStrategyEffects,
+} from "@/lib/nova/act5Recovery";
 import NarrativeScene from "./narrative/NarrativeScene";
 import SceneBackground from "./narrative/SceneBackground";
 import PanoramaBackground from "./narrative/PanoramaBackground";
@@ -301,7 +328,7 @@ function resolveInitialLineIndex(state: GameState, sceneId: string): number {
  * resume-time fast-forward in resolveInitialLineIndex never disagree with
  * each other about how many lines a scene has. */
 function dialogueFlagsFor(state: GameState) {
-  return { ...effectiveDialogueFlags(state), ...endingConditionFlags(state) };
+  return { ...effectiveDialogueFlags(state), ...endingConditionFlags(state), ...recoveryConditionFlags(state) };
 }
 
 export default function GameRoot() {
@@ -340,6 +367,19 @@ export default function GameRoot() {
   // presentational scaffolding in front of the save-backed engine, not
   // part of it.
   const [showReceptionIntro, setShowReceptionIntro] = useState(false);
+  // Act 5 recovery montage: the hands-off 3D sequence between Mike E.'s call and ACT5_SCENE01.
+  // Presentational, like the interludes; nothing is saved while it plays.
+  const [recoveryMontage, setRecoveryMontage] = useState(false);
+  // Act 5 readiness recommendation: the cinematic decision screen after the montage, before ACT5_SCENE01.
+  const [readinessScreen, setReadinessScreen] = useState(false);
+  // Warehouse interlude: the 3D Spline warehouse shown between the end of
+  // Act 4 and ACT5_SCENE01. Same idea as showReceptionIntro — presentational
+  // scaffolding in front of the save-backed engine. Holds the pending
+  // transition so Continue can finish it exactly as it would have run.
+  const [warehouseInterlude, setWarehouseInterlude] = useState<{
+    baseState: GameState;
+    nextSceneId: string;
+  } | null>(null);
   // Pause: a visual freeze + Resume button, plus pausing (not muting —
   // see SceneAudio's own `paused` prop) whatever ambient/footsteps audio
   // is currently playing. Progress already autosaves on every state
@@ -455,11 +495,20 @@ export default function GameRoot() {
   }
 
   function handleContinue() {
-    const state = loadGame();
-    if (!state) {
+    setRecoveryMontage(false);
+    setReadinessScreen(false);
+    const loaded = loadGame();
+    if (!loaded) {
       handleNewGame();
       return;
     }
+    // A save from the archived Act 5–6 storyline continues on the active path (a copy of it is kept first).
+    const migrated = migrateLegacyAct5Act6Save(loaded);
+    if (migrated) {
+      backupLegacyAct5Act6Save(loaded);
+      saveGame(migrated);
+    }
+    const state = migrated ?? loaded;
     setGameState(state);
     setLineIndex(resolveInitialLineIndex(state, state.currentScene));
     setReactionText(null);
@@ -469,7 +518,33 @@ export default function GameRoot() {
     devHistory.reset();
   }
 
+  /** Dev-only act jump (DevPlaytestNav, `next dev` only): keeps all
+   * progress and moves to the act's first scene through the normal
+   * transition, after backing up the real save once. Any half-finished
+   * event wave is cleared so the jump can't land inside a stale queue. */
+  function handleDevJumpToScene(sceneId: string) {
+    if (!gameState) return;
+    backupSaveBeforeFirstJump();
+    setWarehouseInterlude(null);
+    // A deliberate developer reset: jumping back to any act before the film replays the story from there, so
+    // the film's progress from the earlier pass is cleared. Jumping to the film itself keeps it (resumes).
+    const base = sceneId === INSPECTION_FILM_SCENE_ID ? gameState : clearInspectionFilmProgress(gameState);
+    goToRealScene(
+      { ...base, eventQueue: null, eventQueueIndex: 0, eventQueueExitScene: null },
+      sceneId,
+    );
+  }
+
+  function handleDevRestoreSave() {
+    if (restoreDevJumpBackup()) {
+      setWarehouseInterlude(null);
+      handleContinue();
+    }
+  }
+
   function handleRestart() {
+    setRecoveryMontage(false);
+    setReadinessScreen(false);
     clearSavedGame();
     setGameState(null);
     setEndInfo(null);
@@ -563,7 +638,38 @@ export default function GameRoot() {
    * destination (a wave's first event, each subsequent queued event, the
    * wave's exit scene once the queue empties, and every ordinary scene
    * transition outside a wave entirely) ends up here exactly once. */
-  function goToRealScene(baseState: GameState, nextSceneId: string | null) {
+  function goToRealScene(
+    baseState: GameState,
+    nextSceneId: string | null,
+    skipWarehouseInterlude = false,
+  ) {
+    setRecoveryMontage(false); // presentational; never carried into another scene visit
+    setReadinessScreen(false);
+
+    // Insert the warehouse interlude immediately before Act 5 (the data's
+    // Act 4 → Act 5 hand-off still names ACT5_SCENE01). Progress is saved
+    // as-is first (still on the outgoing scene), so a reload mid-interlude
+    // resumes safely from the last real scene. Not when we're leaving the
+    // Recovery Meeting (which sits after the interlude) — otherwise the rooms
+    // would replay.
+    if (
+      nextSceneId === LEGACY_ACT5_ENTRY_SCENE_ID &&
+      !skipWarehouseInterlude &&
+      baseState.currentScene !== "ACT5_SCENE00_RECOVERY"
+    ) {
+      saveGame(baseState);
+      setGameState(baseState);
+      setWarehouseInterlude({ baseState, nextSceneId });
+      return;
+    }
+    // The original Act 5–6 storyline is archived: anything still pointing
+    // into it (the Recovery Meeting's own nextScenes, after the readiness
+    // recommendation) continues into the Inspection Film, the final chapter.
+    if (isLegacyAct5Act6Scene(nextSceneId)) nextSceneId = INSPECTION_FILM_SCENE_ID;
+    // Entering the film: the first time, an inspection session begins; with progress already saved, the
+    // save is left exactly as it is and the film resumes from it.
+    if (nextSceneId === INSPECTION_FILM_SCENE_ID) baseState = beginInspectionSession(baseState);
+
     if (!nextSceneId || !isSceneAvailable(nextSceneId)) {
       // Save progress at the last valid (built) scene before showing the
       // end-of-content screen, so a reload resumes here rather than at a
@@ -616,11 +722,42 @@ export default function GameRoot() {
     );
   }
 
+  if (warehouseInterlude) {
+    return (
+      <WarehouseInterlude
+        muted={muted}
+        onContinue={() => {
+          const { baseState } = warehouseInterlude;
+          setWarehouseInterlude(null);
+          // Recovery Meeting first; its nextScenes continues to ACT5_SCENE01.
+          // Arriving from the facility visit always starts the meeting fresh: answers saved by an
+          // earlier pass (e.g. replayed via a dev jump) would otherwise make RecoverySequence resume
+          // past the meeting and the call, straight into the montage. Both are chosen again there.
+          const {
+            [RECOVERY_STRATEGY_KEY]: _strategy,
+            [SPONSOR_UPDATE_KEY]: _sponsor,
+            [RECOVERY_OUTCOME_KEY]: _outcome,
+            [READINESS_RECOMMENDATION_KEY]: _recommendation,
+            ...decisions
+          } = baseState.decisions ?? {};
+          void _strategy; void _sponsor; void _outcome; void _recommendation;
+          const flags = { ...baseState.flags, [RECOVERY_MONTAGE_SEEN_FLAG]: false, [INSPECTOR_ARRIVAL_SEEN_FLAG]: false };
+          goToRealScene({ ...baseState, decisions, flags }, "ACT5_SCENE00_RECOVERY", true);
+        }}
+      />
+    );
+  }
+
   if (endInfo) {
     return (
       <>
         {DEV_MODE && (
-          <DevPlaytestNav gameState={gameState} history={devHistory} />
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
         )}
         {endInfo.reason === "story-complete" ? (
           <ProjectReflectionEnding gameState={gameState} onRestart={handleRestart} />
@@ -645,6 +782,168 @@ export default function GameRoot() {
         targetScene={gameState.currentScene}
         onRestart={handleRestart}
       />
+    );
+  }
+
+  // The final chapter: the Inspection Film (morning → inspection → No News →
+  // Final Determination → the outcome's epilogue → Decision Analysis). Full
+  // screen, on the same save: every step's progress is saved as it happens,
+  // so a refresh resumes inside the film. Back to Title keeps the save — Continue
+  // then reopens the Decision Analysis.
+  if (scene.sceneId === INSPECTION_FILM_SCENE_ID) {
+    return (
+      <>
+        {DEV_MODE && (
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
+        )}
+        <InspectionFilm
+          key={scene.sceneId}
+          state={gameState}
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+          onChange={(next) => {
+            saveGame(next);
+            setGameState(next);
+          }}
+          onExit={() => {
+            setGameState(null);
+            setEndInfo(null);
+            devHistory.reset();
+          }}
+        />
+      </>
+    );
+  }
+
+  // Act 5 Recovery Meeting → strategy decision → sponsor call: a scene-specific
+  // layout (components/nova/act5/RecoverySequence.tsx) on top of the same state,
+  // save and portrait systems. Choices land in GameState.decisions.
+  if (scene.sceneId === "ACT5_SCENE00_RECOVERY" && readinessScreen) {
+    return (
+      <>
+        {DEV_MODE && (
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
+        )}
+        <ReadinessRecommendation
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+          // Recorded once, together with the move on to this scene's next scene (ACT5_SCENE01).
+          onChoose={(id) => {
+            const next = applyDecisions(gameState, { [READINESS_RECOMMENDATION_KEY]: id });
+            setReadinessScreen(false);
+            goToScene(next, scene.nextScenes?.[0] ?? null);
+          }}
+        />
+      </>
+    );
+  }
+
+  if (scene.sceneId === "ACT5_SCENE00_RECOVERY" && recoveryMontage) {
+    return (
+      <>
+        {DEV_MODE && (
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
+        )}
+        <RecoveryMontage
+          muted={muted}
+          introText="In the days that followed..."
+          // Ends on black, then the story continues to this scene's nextScenes (ACT5_SCENE01).
+          // Ends on black, then the readiness recommendation. Remembered in the save, so a refresh on
+          // the decision screen returns to it rather than replaying the montage.
+          onComplete={() => {
+            const next = applyFlags(gameState, { [RECOVERY_MONTAGE_SEEN_FLAG]: true });
+            saveGame(next);
+            setGameState(next);
+            setRecoveryMontage(false);
+            setReadinessScreen(true);
+          }}
+        />
+      </>
+    );
+  }
+
+  if (scene.sceneId === "ACT5_SCENE00_RECOVERY") {
+    return (
+      <>
+        {DEV_MODE && (
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
+        )}
+        <RecoverySequence
+          key={scene.sceneId}
+          gameState={gameState}
+          muted={muted}
+          onToggleMute={() => setMuted((m) => !m)}
+          onDecision={(key, value) => {
+            let next = applyDecisions(gameState, { [key]: value });
+            // The recovery strategy's effects apply once — only when it's first chosen in this pass
+            // (a resumed meeting never re-asks it) — and the outcome is classified on the metrics
+            // straight after, for the Final Readiness Review.
+            if (key === RECOVERY_STRATEGY_KEY && !gameState.decisions?.[RECOVERY_STRATEGY_KEY]) {
+              next = applyEffects(next, recoveryStrategyEffects(value));
+              next = applyDecisions(next, { [RECOVERY_OUTCOME_KEY]: evaluateRecovery(next) });
+            }
+            saveGame(next);
+            setGameState(next);
+          }}
+          // After the call (or straight away when resuming past it): the recovery montage — or, if it has
+          // already played in this pass, straight to the readiness recommendation.
+          onComplete={() =>
+            gameState.flags?.[RECOVERY_MONTAGE_SEEN_FLAG] ? setReadinessScreen(true) : setRecoveryMontage(true)
+          }
+        />
+      </>
+    );
+  }
+
+  // Act 5 inspector arrival: a short cinematic right after the readiness recommendation, before
+  // ACT5_SCENE01's own dialogue starts. Plays once per pass (a saved flag); a refresh during it replays
+  // only the cinematic. Purely presentational — no metrics or decisions change here.
+  if (
+    scene.sceneId === "ACT5_SCENE01" &&
+    gameState.decisions?.[READINESS_RECOMMENDATION_KEY] &&
+    !gameState.flags?.[INSPECTOR_ARRIVAL_SEEN_FLAG] &&
+    lineIndex === 0
+  ) {
+    return (
+      <>
+        {DEV_MODE && (
+          <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
+        )}
+        <InspectorArrival
+          key="inspector-arrival"
+          muted={muted}
+          onComplete={() => {
+            const next = applyFlags(gameState, { [INSPECTOR_ARRIVAL_SEEN_FLAG]: true });
+            saveGame(next);
+            setGameState(next);
+          }}
+        />
+      </>
     );
   }
 
@@ -1558,7 +1857,12 @@ export default function GameRoot() {
       />
       <PauseOverlay open={paused} onResume={() => setPaused(false)} />
       {DEV_MODE && (
-        <DevPlaytestNav gameState={gameState} history={devHistory} />
+        <DevPlaytestNav
+            gameState={gameState}
+            history={devHistory}
+            onJumpToScene={handleDevJumpToScene}
+            onRestoreSave={handleDevRestoreSave}
+          />
       )}
       <header className="relative z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/70 px-4 py-2">
         {isAnnouncement ? (

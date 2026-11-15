@@ -1119,7 +1119,62 @@
       {
         "speaker": "vaughn",
         "emotion": "warm",
-        "text": "Both lines are physically ready. Whether they're actually ready is your department now, not mine."
+        "text": "The replacement assembly is in and holding. Engineering has nothing left open on the critical path.",
+        "condition": "recovery_strong"
+      },
+      {
+        "speaker": "camille",
+        "emotion": "neutral",
+        "text": "Qualification runs came back clean. I'm comfortable putting this facility in front of an inspector.",
+        "condition": "recovery_strong"
+      },
+      {
+        "speaker": "priya",
+        "emotion": "warm",
+        "text": "The team is stretched, but the recovery plan held. We're ready for inspection.",
+        "condition": "recovery_strong"
+      },
+      {
+        "speaker": "vaughn",
+        "emotion": "neutral",
+        "text": "The replacement assembly is installed. A few engineering items are still being closed out.",
+        "condition": "recovery_partial"
+      },
+      {
+        "speaker": "camille",
+        "emotion": "serious",
+        "text": "Qualification has moved forward, but verification and some corrective actions are still outstanding.",
+        "condition": "recovery_partial"
+      },
+      {
+        "speaker": "priya",
+        "emotion": "neutral",
+        "text": "We've made real progress. There's still a tail of work to finish before an inspector walks in.",
+        "condition": "recovery_partial"
+      },
+      {
+        "speaker": "vaughn",
+        "emotion": "frustrated",
+        "text": "We're behind. The filtration work isn't finished, and I won't pretend otherwise.",
+        "condition": "recovery_failed"
+      },
+      {
+        "speaker": "camille",
+        "emotion": "concerned",
+        "text": "Qualification can't be completed on what we have. There are significant gaps in the evidence.",
+        "condition": "recovery_failed"
+      },
+      {
+        "speaker": "priya",
+        "emotion": "frustrated",
+        "text": "The team has given everything, but this facility is not ready for inspection.",
+        "condition": "recovery_failed"
+      },
+      {
+        "speaker": "vaughn",
+        "emotion": "warm",
+        "text": "Both lines are physically ready. Whether they're actually ready is your department now, not mine.",
+        "condition": "not_recovery_failed"
       },
       {
         "speaker": "narrator",
@@ -2589,5 +2644,27 @@
     ],
     "needsWriting": false,
     "engineNote": "HUD activates here for the first time, showing Est. finish Week X/24 (derived from scheduleHealth, see scene note), plus Budget/Delivery Pace/Risk/Quality/Benefits and a Current Objective line (derived from the Milestone Gantt built in ACT3_SCENE04). HUD retires once Act 5 begins. The badge line above is deliberately NOT phrased as 'Week 1/24' \u2014 scheduleHealth (and therefore the HUD's own Est. finish figure) can already have drifted from its 100 baseline by this point via earlier Act 2 choices, so a literal 'Week 1' claim here could contradict the HUD's own number on the very next screen. The two closing sublines (added per the Act 5 attainability audit \u2014 see DESIGN_NOTES.md) are this game's one deliberately explicit, HUD-tutorial-adjacent moment: they establish that Delivery Pace/Quality have hard floors worth protecting, without stating the actual numbers (40 / 70 \u2014 those live in the HUD's own colour bands, not in prose) so they age gracefully if the thresholds are ever recalibrated. Risk is deliberately NOT covered here \u2014 already legible from its own HUD band, and made sufficiently explicit later in the game on its own terms. Later scene-level choice copy (e.g. Act 5's readiness interventions) stays narrative-only on top of this \u2014 players are expected to combine a choice's plain-English framing with what they already know from here and the HUD, not be shown raw +/- deltas a second time."
+  },
+  "DIALOGUE_ACT5_SCENE00_RECOVERY": {
+    "dialogueId": "DIALOGUE_ACT5_SCENE00_RECOVERY",
+    "sourceScene": "ACT5_SCENE00_RECOVERY",
+    "lines": [
+      {
+        "speaker": "vaughn",
+        "emotion": "neutral",
+        "text": "The wrong filtration component is holding up installation. We can expedite the replacement, but it's going to cost us."
+      },
+      {
+        "speaker": "camille",
+        "emotion": "serious",
+        "text": "Even after installation, we still need to complete qualification and document the results. We can't shortcut that."
+      },
+      {
+        "speaker": "priya",
+        "emotion": "neutral",
+        "text": "So we've got a cost problem, a schedule problem and a readiness problem. We need a recovery plan."
+      }
+    ],
+    "needsWriting": false
   }
 }

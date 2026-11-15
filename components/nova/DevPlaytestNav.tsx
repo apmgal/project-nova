@@ -4,10 +4,14 @@ import { useState } from "react";
 import { evaluateEnding } from "@/lib/nova/endings";
 import type { GameState } from "@/lib/nova/types";
 import type { DevPlaytestHistory } from "@/lib/nova/devHistory";
+import { availableActJumps, hasDevJumpBackup } from "@/lib/nova/devActJump";
 
 interface DevPlaytestNavProps {
   gameState: GameState;
   history: DevPlaytestHistory;
+  /** Dev-only act jump (see lib/nova/devActJump.ts). Optional: the bar works without it. */
+  onJumpToScene?: (sceneId: string) => void;
+  onRestoreSave?: () => void;
 }
 
 /**
@@ -18,7 +22,7 @@ interface DevPlaytestNavProps {
  * mistaken for real player UI. Read-only: shows state, doesn't edit it —
  * no state-editing controls here by design.
  */
-export default function DevPlaytestNav({ gameState, history }: DevPlaytestNavProps) {
+export default function DevPlaytestNav({ gameState, history, onJumpToScene, onRestoreSave }: DevPlaytestNavProps) {
   const [expanded, setExpanded] = useState(false);
   const m = gameState.projectMetrics;
   // Pure function, cheap to call on every render — shown as a live
@@ -53,6 +57,36 @@ export default function DevPlaytestNav({ gameState, history }: DevPlaytestNavPro
         <span className="truncate">
           {gameState.currentScene} &middot; {history.position.index}/{history.position.total}
         </span>
+        {onJumpToScene && (
+          <span className="flex flex-wrap items-center gap-1">
+            <span className="font-bold">Jump:</span>
+            {availableActJumps().map((a) => (
+              <button
+                key={a.sceneId}
+                type="button"
+                onClick={() => onJumpToScene(a.sceneId)}
+                title={`Go to ${a.sceneId} (keeps current progress)`}
+                className={`rounded px-2 py-0.5 font-semibold ${
+                  gameState.currentScene.startsWith(a.sceneId.split("_")[0] + "_")
+                    ? "bg-white text-black"
+                    : "bg-black/85 text-white"
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+            {onRestoreSave && hasDevJumpBackup() && (
+              <button
+                type="button"
+                onClick={onRestoreSave}
+                title="Put back the save from before your first jump"
+                className="rounded border border-black bg-amber-200 px-2 py-0.5 font-semibold"
+              >
+                Restore save
+              </button>
+            )}
+          </span>
+        )}
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}

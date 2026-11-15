@@ -1,0 +1,21 @@
+Act 5 inspector-arrival cinematic — asset credits
+
+executive_car.glb
+  "Car Concept" from the Khronos glTF Sample Assets
+  https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept
+  © 2024 Darmstadt Graphics Group GmbH — model and textures by Eric Chadwick, based on a public-domain
+  (CC0) model by Unity Fan. Licensed CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+  Changes: textures resized to 1024 px and converted to WebP, meshes compressed (meshopt). At runtime the
+  paint, interior and tyre sidewalls are re-materialled, the front wheels straightened, and the licence
+  plate and steering-wheel emblem (Khronos marks) hidden.
+
+leather_normal.webp
+  Leather normal map from "Sheen Wood Leather Sofa", Khronos glTF Sample Assets
+  https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa
+  © 2024 Darmstadt Graphics Group GmbH (Eric Chadwick), CC BY 4.0. Extracted unchanged.
+
+facility_backdrop_blur.jpg
+  Blurred, darkened version of the project's own facility image (bg_facility_dusk.jpg).
+
+sfx/arrival/*.wav
+  Synthesised for Project Nova (no third-party audio).

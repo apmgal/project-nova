@@ -66,7 +66,23 @@ export default function SceneAudio({
   // element once a fade-out reaches zero. Volume is clamped to the valid
   // [0, 1] range as a defensive backstop: HTMLMediaElement.volume throws
   // (rather than clamping) if it's ever assigned a value outside it.
-  function fadeTo(audio: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void) {
+  //
+  // `detached`: a fade-out of an element that is being released runs on its own loop, not rafRef — the
+  // next track's fade-in (a src change, or React's dev-mode remount) would otherwise cancel it half-way
+  // and leave the old element playing on at whatever volume it had reached.
+  function fadeTo(audio: HTMLAudioElement, target: number, durationMs: number, onDone?: () => void, detached = false) {
+    if (detached) {
+      const from = audio.volume;
+      const t0 = performance.now();
+      const run = (now: number) => {
+        const k = durationMs <= 0 ? 1 : Math.max(0, Math.min(1, (now - t0) / durationMs));
+        audio.volume = Math.min(1, Math.max(0, from + (target - from) * k));
+        if (k < 1) requestAnimationFrame(run);
+        else onDone?.();
+      };
+      requestAnimationFrame(run);
+      return;
+    }
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     const start = audio.volume;
     const startTime = performance.now();
@@ -119,7 +135,7 @@ export default function SceneAudio({
       fadeTo(audio, 0, fadeOutMs, () => {
         audio.pause();
         audio.src = "";
-      });
+      }, true);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);

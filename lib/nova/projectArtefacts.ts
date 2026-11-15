@@ -406,7 +406,7 @@ function computePivotalDecisions(state: GameState): PivotalDecision[] {
  * endingConditionFlags elsewhere in this codebase — there is no
  * GameState.reflection field.
  */
-function computeProjectReflectionScorecard(state: GameState): ReflectionScorecard {
+export function computeProjectReflectionScorecard(state: GameState): ReflectionScorecard {
   const reconciliation = computeBudgetReconciliation(state);
   const contingencyRatio =
     reconciliation.originalContingency > 0

@@ -32,8 +32,12 @@ import type { GameState } from "./types";
  * without deliberate extra action — `next build` sets
  * NODE_ENV=production automatically; `next dev` (how this project is
  * actually played during development, per DESIGN_NOTES.md) sets
- * NODE_ENV=development. */
-export const DEV_MODE = process.env.NODE_ENV !== "production";
+ * NODE_ENV=development.
+ * The deliberate extra action: set NEXT_PUBLIC_DEV_TOOLS=1 for a build (e.g. a
+ * Vercel environment variable) to show the DEV / PLAYTEST bar — act jumps,
+ * Previous / Next — in that deployment. Read at build time, so redeploy after
+ * changing it. */
+export const DEV_MODE = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_DEV_TOOLS === "1";
 
 export interface DevHistoryEntry {
   sceneId: string;

@@ -101,7 +101,8 @@ function evaluateContractGate(state: GameState): { result: ContractGateResult; d
   };
 }
 
-function evaluateQualityGate(
+/** Exported (unchanged) for the inspection's formal determination, which is this gate. */
+export function evaluateQualityGate(
   state: GameState,
 ): { batchResult: BatchResult; family: "PYRRHIC_VICTORY" | "BATCH_REJECTED" | null; diagnostic: string } {
   const cfg = gates.qualityGate;

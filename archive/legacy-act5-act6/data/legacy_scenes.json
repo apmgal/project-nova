@@ -1,0 +1,177 @@
+{
+  "ACT5_SCENE01": {
+    "sceneId": "ACT5_SCENE01",
+    "title": "Commissioning & Training",
+    "act": "Act 5",
+    "screenRange": "107–109",
+    "screenType": "Checklist / Choice",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Commissioning / handover readiness",
+    "contentSummary": "Equipment commissioning and training for both product lines.",
+    "worldMemoryBeat": "facility_shot_6",
+    "variablesTouched": [
+      "Regulatory Readiness",
+      "Schedule Health"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE01",
+    "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE01_READINESS",
+    "trigger": {
+      "previousScene": "ACT4_SCENE06"
+    },
+    "nextScenes": [
+      "ACT5_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE02": {
+    "sceneId": "ACT5_SCENE02",
+    "title": "Validation & Documentation Sweep",
+    "act": "Act 5",
+    "screenRange": "110–112",
+    "screenType": "Investigation",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Documentation & audit trail",
+    "contentSummary": "Player assembles the audit trail across both product lines.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE02",
+    "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE02_AUDIT_TRAIL",
+    "trigger": {
+      "previousScene": "ACT5_SCENE01"
+    },
+    "nextScenes": [
+      "ACT5_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE03": {
+    "sceneId": "ACT5_SCENE03",
+    "title": "MHRA Inspection (Final Boss)",
+    "act": "Act 5",
+    "screenRange": "113–121",
+    "screenType": "Open-Question Dialogue",
+    "location": null,
+    "charactersInvolved": [
+      "whitfield"
+    ],
+    "pmConcept": "Regulatory inspection / governance evidence",
+    "contentSummary": "Inspector Whitfield asks direct questions answered only with evidence the player actually generated — now explicitly referencing the player's own historical decisions and Reputation tag.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Regulatory Readiness",
+      "Board Confidence"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE03",
+    "choicesId": null,
+    "toolId": "TOOL_ACT5_SCENE03_EVIDENCE_EXHIBIT",
+    "trigger": {
+      "previousScene": "ACT5_SCENE02"
+    },
+    "nextScenes": [
+      "ACT5_SCENE04"
+    ],
+    "needsWriting": false
+  },
+  "ACT5_SCENE04": {
+    "sceneId": "ACT5_SCENE04",
+    "title": "The Waiting",
+    "act": "Act 5",
+    "screenRange": "122–124",
+    "screenType": "Scripted Cinematic (no interaction)",
+    "location": null,
+    "charactersInvolved": [
+      "marcus"
+    ],
+    "pmConcept": "Delayed consequence — deliberate structural change from v1",
+    "contentSummary": "Inspectors leave. Nobody knows the result. The office waits in silence. The phone rings. Mike E. answers, doesn't speak, slowly smiles. Fade to black.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "None — this scene deliberately withholds all variables from the player"
+    ],
+    "dialogueId": "DIALOGUE_ACT5_SCENE04",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT5_SCENE03"
+    },
+    "nextScenes": [
+      "ACT6_SCENE01"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE01": {
+    "sceneId": "ACT6_SCENE01",
+    "title": "\"Three Weeks Later\"",
+    "act": "Act 6",
+    "screenRange": "125",
+    "screenType": "Title Card + Cinematic",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Project closure framing",
+    "contentSummary": "Hard cut forward. Consequences of the inspection are now shown for the first time.",
+    "worldMemoryBeat": "facility_shot_final_reel",
+    "variablesTouched": [],
+    "dialogueId": "DIALOGUE_ACT6_SCENE01",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": null
+    },
+    "nextScenes": [
+      "ACT6_SCENE02"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE02": {
+    "sceneId": "ACT6_SCENE02",
+    "title": "The Control Room / Batch Result",
+    "act": "Act 6",
+    "screenRange": "126–128",
+    "screenType": "Cinematic / Branching",
+    "location": null,
+    "charactersInvolved": [],
+    "pmConcept": "Quality outcome / closure",
+    "contentSummary": "Team gathers; batch released or rejected across one or both product lines depending on Regulatory Readiness/Risk Exposure.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "Team Morale"
+    ],
+    "dialogueId": "DIALOGUE_ACT6_SCENE02",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT6_SCENE01"
+    },
+    "nextScenes": [
+      "ACT6_SCENE03"
+    ],
+    "needsWriting": false
+  },
+  "ACT6_SCENE03": {
+    "sceneId": "ACT6_SCENE03",
+    "title": "Personalised Ending + Ellis Grant Epilogue",
+    "act": "Act 6",
+    "screenRange": "129–132",
+    "screenType": "Ending Scene",
+    "location": null,
+    "charactersInvolved": [
+      "ellis"
+    ],
+    "pmConcept": "Project evaluation & reflective practice",
+    "contentSummary": "One of 8 endings (Tab 7) plays, followed by the Ellis Grant reveal if all fragments were found.",
+    "worldMemoryBeat": null,
+    "variablesTouched": [
+      "All — read-only"
+    ],
+    "dialogueId": "DIALOGUE_ACT6_SCENE03",
+    "choicesId": null,
+    "trigger": {
+      "previousScene": "ACT6_SCENE02"
+    },
+    "nextScenes": [],
+    "needsWriting": false
+  }
+}
